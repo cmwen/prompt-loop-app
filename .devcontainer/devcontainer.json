@@ -7,13 +7,14 @@
       "version": "17",
       "jdkDistro": "tem"
     },
-    "ghcr.io/devcontainers/features/android-sdk:1": {
+    "ghcr.io/NordcomInc/devcontainer-features/android-sdk:1": {
       "version": "latest"
     },
-    "ghcr.io/devcontainers/features/gradle:1": {
-      "version": "latest"
-    },
-    "ghcr.io/devcontainers/features/git:1": {}
+    // "ghcr.io/devcontainers/features/gradle:1": {
+    //   "version": "latest"
+    // },
+    "ghcr.io/devcontainers/features/git:1": {},
+    "ghcr.io/devcontainers/features/node:1": {}
   },
 
   "customizations": {
