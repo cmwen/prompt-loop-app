@@ -1,0 +1,18 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro'
+---
+<BaseLayout title="About">
+  <section>
+    <h2>About this site</h2>
+    <p>This small site is a lightweight static landing for the <code>min-android-app-template</code> Flutter repository. It's built with Astro and a Startlight-inspired theme so it's fast and easy to maintain.</p>
+
+    <div class="card">
+      <h3>How it works</h3>
+      <ul>
+        <li>Source in <code>/astro</code></li>
+        <li>Build uses <code>npm run build</code> to generate a static <code>dist/</code> folder</li>
+        <li>CI workflow deploys <code>dist/</code> to GitHub Pages when a GitHub Release is published (or on manual dispatch)</li>
+      </ul>
+    </div>
+  </section>
+</BaseLayout>

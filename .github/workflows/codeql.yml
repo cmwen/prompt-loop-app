@@ -1,0 +1,90 @@
+name: CodeQL Analysis
+
+on:
+  schedule:
+    # Run weekly on Sundays at 2:00 AM UTC
+    - cron: '0 2 * * 0'
+  # Allow manual triggering
+  workflow_dispatch:
+
+jobs:
+  analyze:
+    name: Analyze
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+
+    permissions:
+      actions: read
+      contents: read
+      security-events: write
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # Kotlin/Java analysis for Android native code
+          - language: 'java-kotlin'
+            build-mode: 'manual'
+          # GitHub Actions workflow security analysis
+          - language: 'actions'
+            build-mode: 'none'
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v6
+
+    # Java/Kotlin specific setup
+    - name: Setup Java
+      if: matrix.language == 'java-kotlin'
+      uses: actions/setup-java@v5
+      with:
+        distribution: 'temurin'
+        java-version: '17'
+        cache: 'gradle'
+
+    - name: Setup Gradle for CI
+      if: matrix.language == 'java-kotlin'
+      run: cp android/gradle-ci.properties android/gradle.properties
+
+    - name: Setup Flutter
+      if: matrix.language == 'java-kotlin'
+      uses: subosito/flutter-action@v2
+      with:
+        flutter-version: '3.38.3'
+        channel: 'stable'
+        cache: true
+
+    - name: Cache Flutter packages
+      if: matrix.language == 'java-kotlin'
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/.pub-cache
+          ${{ github.workspace }}/.dart_tool
+        key: ${{ runner.os }}-pub-${{ hashFiles('**/pubspec.lock') }}
+        restore-keys: |
+          ${{ runner.os }}-pub-
+
+    - name: Get dependencies
+      if: matrix.language == 'java-kotlin'
+      run: flutter pub get
+
+    - name: Initialize CodeQL
+      uses: github/codeql-action/init@v3
+      with:
+        languages: ${{ matrix.language }}
+        build-mode: ${{ matrix.build-mode }}
+        # Use security-extended query suite for comprehensive analysis
+        queries: security-extended
+
+    # Build the Android project to enable CodeQL analysis of Kotlin code
+    - name: Build Android for CodeQL analysis
+      if: matrix.language == 'java-kotlin'
+      run: |
+        cd android
+        ./gradlew assembleDebug --no-daemon
+
+    - name: Perform CodeQL Analysis
+      uses: github/codeql-action/analyze@v3
+      with:
+        category: "/language:${{ matrix.language }}"

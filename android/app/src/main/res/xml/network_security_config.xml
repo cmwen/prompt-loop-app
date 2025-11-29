@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Network Security Configuration
+    
+    This configuration defines the app's network security policy.
+    By default, cleartext (HTTP) traffic is disabled for security.
+    
+    Development exceptions:
+    - localhost: For local development servers
+    - 10.0.2.2: Android emulator's host machine address
+    
+    For production, remove or restrict the debug-overrides section.
+    
+    Documentation: https://developer.android.com/training/articles/security-config
+-->
+<network-security-config>
+    <!-- Base configuration for all connections -->
+    <base-config cleartextTrafficPermitted="false">
+        <trust-anchors>
+            <!-- Trust system CAs -->
+            <certificates src="system"/>
+        </trust-anchors>
+    </base-config>
+
+    <!-- Development-only exceptions for local testing -->
+    <!-- Remove or modify for production builds if needed -->
+    <domain-config cleartextTrafficPermitted="true">
+        <!-- Local development server -->
+        <domain includeSubdomains="true">localhost</domain>
+        <!-- Android emulator host (maps to your computer's localhost) -->
+        <domain includeSubdomains="true">10.0.2.2</domain>
+        <!-- 
+            For physical device testing on local network, add your 
+            development server's IP address or hostname here, e.g.:
+            <domain includeSubdomains="true">192.168.1.100</domain>
+        -->
+    </domain-config>
+
+    <!-- 
+        To allow cleartext for specific domains (not recommended):
+        <domain-config cleartextTrafficPermitted="true">
+            <domain includeSubdomains="true">example.com</domain>
+        </domain-config>
+    -->
+</network-security-config>

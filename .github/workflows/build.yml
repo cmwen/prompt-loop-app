@@ -1,0 +1,113 @@
+name: Flutter Build
+
+on:
+  push:
+    branches: [ main, develop, flutter-migration ]
+  pull_request:
+    branches: [ main, develop ]
+
+# Cancel in-progress runs for the same workflow and ref
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    
+    steps:
+    - uses: actions/checkout@v6
+      with:
+        ref: ${{ github.head_ref || github.ref_name }}
+        token: ${{ secrets.GITHUB_TOKEN }}
+    
+    - name: Setup Java
+      uses: actions/setup-java@v5
+      with:
+        distribution: 'temurin'
+        java-version: '17'
+        cache: 'gradle'
+    
+    # Use CI-optimized Gradle properties
+    - name: Setup Gradle for CI
+      run: cp android/gradle-ci.properties android/gradle.properties
+    
+    - name: Setup Flutter
+      uses: subosito/flutter-action@v2
+      with:
+        flutter-version: '3.38.3'
+        channel: 'stable'
+        cache: true
+    
+    # Cache pub dependencies for faster builds
+    - name: Cache Flutter packages
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/.pub-cache
+          ${{ github.workspace }}/.dart_tool
+        key: ${{ runner.os }}-pub-${{ hashFiles('**/pubspec.lock') }}
+        restore-keys: |
+          ${{ runner.os }}-pub-
+
+    - name: Get dependencies
+      run: flutter pub get
+    
+    # Auto-fix formatting and linting issues (AI-friendly workflow)
+    - name: Format and fix code
+      run: |
+        dart format .
+        dart fix --apply
+    
+    # Commit formatting changes if any (only on PRs from the same repo)
+    - name: Commit formatting changes
+      if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
+      run: |
+        git config user.name "github-actions[bot]"
+        git config user.email "github-actions[bot]@users.noreply.github.com"
+        git add .
+        if git diff --staged --quiet; then
+          echo "No formatting changes to commit"
+        else
+          git commit -m "style: auto-format code [skip ci]"
+          git push
+        fi
+    
+    # Report linter issues but only fail on errors (not warnings)
+    - name: Analyze code
+      run: flutter analyze
+    
+    - name: Run tests with coverage
+      run: flutter test --coverage --concurrency=$(nproc)
+    
+    - name: Build APK
+      run: flutter build apk --release
+    
+    - name: Build App Bundle
+      run: flutter build appbundle --release
+    
+    - name: Upload APK
+      uses: actions/upload-artifact@v5
+      with:
+        name: android-apk
+        path: build/app/outputs/flutter-apk/app-release.apk
+        retention-days: 7
+    
+    - name: Upload App Bundle
+      uses: actions/upload-artifact@v5
+      with:
+        name: android-bundle
+        path: build/app/outputs/bundle/release/app-release.aab
+        retention-days: 7
+    
+    - name: Upload Coverage
+      uses: codecov/codecov-action@v5
+      if: always()
+      with:
+        files: coverage/lcov.info
+        fail_ci_if_error: false
+        token: ${{ secrets.CODECOV_TOKEN }}

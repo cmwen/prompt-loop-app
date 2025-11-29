@@ -1,0 +1,68 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro'
+---
+
+<BaseLayout title="Install / Getting Started">
+  <section>
+    <h2>Install & build guide</h2>
+
+    <p class="lead">This quick guide shows how to get the Flutter template running locally and how to build release artifacts.</p>
+
+    <div class="card">
+      <h3>Prerequisites</h3>
+      <ul>
+        <li>Flutter SDK 3.10.1 or higher</li>
+        <li>Dart 3.10.1 or higher</li>
+        <li>For Android: Android Studio or Android SDK</li>
+        <li>For iOS: Xcode (macOS only)</li>
+        <li>Node 18+ (for the website, not required for the app)</li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <h3>Clone the repository</h3>
+      <pre style="background:rgba(255,255,255,0.02);padding:10px;border-radius:8px;overflow:auto">git clone https://github.com/cmwen/min-android-app-template.git
+cd min-android-app-template</pre>
+    </div>
+
+    <div class="card">
+      <h3>Run locally</h3>
+      <ol>
+        <li>Get dependencies: <code>flutter pub get</code></li>
+        <li>Run on any platform: <code>flutter run</code></li>
+        <li>Or specify a device:</li>
+      </ol>
+      <pre style="background:rgba(255,255,255,0.02);padding:10px;border-radius:8px;overflow:auto">flutter run -d chrome    # Web
+flutter run -d macos     # macOS
+flutter run -d android   # Android
+flutter run -d ios       # iOS</pre>
+    </div>
+
+    <div class="card">
+      <h3>Build release artifacts</h3>
+      <pre style="background:rgba(255,255,255,0.02);padding:10px;border-radius:8px;overflow:auto">flutter build apk         # Android APK
+flutter build appbundle   # Play Store
+flutter build ios         # iOS
+flutter build web         # Web</pre>
+    </div>
+
+    <div class="card">
+      <h3>Run tests</h3>
+      <pre style="background:rgba(255,255,255,0.02);padding:10px;border-radius:8px;overflow:auto">flutter test              # Run all tests
+flutter test --coverage   # With coverage</pre>
+    </div>
+
+    <div class="card">
+      <h3>Website (optional)</h3>
+      <p>If you need to work on the repository website, switch to the <code>astro/</code> directory and run:</p>
+      <pre style="background:rgba(255,255,255,0.02);padding:10px;border-radius:8px;overflow:auto">cd astro
+npm install
+npm run dev</pre>
+    </div>
+
+    <div class="card">
+      <h3>Need more help?</h3>
+      <p>Open an issue or pull request on the <a href="https://github.com/cmwen/min-android-app-template" target="_blank" rel="noopener" style="color:var(--accent)">GitHub repository</a>. For CI or release problems check <code>.github/workflows/</code>.</p>
+    </div>
+  </section>
+</BaseLayout>

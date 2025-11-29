@@ -1,0 +1,24 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro'
+---
+
+<BaseLayout title="Releases">
+  <section>
+    <h2>Releases & Downloads</h2>
+
+    <div class="card">
+      <p class="lead">Download the project artifacts (APK / AAB / Web) from GitHub Releases.</p>
+      <p><a href="https://github.com/cmwen/min-android-app-template/releases/latest" target="_blank" rel="noopener" style="color:var(--accent);text-decoration:none">Open latest release on GitHub →</a></p>
+    </div>
+
+    <div class="card">
+      <h3>If you built from source</h3>
+      <ul>
+        <li>Android APK: <code>flutter build apk</code></li>
+        <li>Android App Bundle: <code>flutter build appbundle</code></li>
+        <li>iOS: <code>flutter build ios</code></li>
+        <li>Web: <code>flutter build web</code></li>
+      </ul>
+    </div>
+  </section>
+</BaseLayout>

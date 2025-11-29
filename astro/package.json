@@ -1,0 +1,16 @@
+{
+  "name": "min-android-template-website",
+  "private": true,
+  "version": "0.1.0",
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview --port 3000"
+  },
+  "devDependencies": {
+    "astro": "^5.16.1"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

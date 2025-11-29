@@ -1,0 +1,49 @@
+version: 2
+updates:
+  # Pub dependencies
+  - package-ecosystem: "pub"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    open-pull-requests-limit: 5
+    groups:
+      dependencies:
+        patterns:
+          - "*"
+        exclude-patterns:
+          - "flutter_lints"
+          - "flutter_test"
+      dev-dependencies:
+        patterns:
+          - "flutter_lints"
+          - "flutter_test"
+  
+  # GitHub Actions
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    open-pull-requests-limit: 5
+    groups:
+      github-actions:
+        patterns:
+          - "*"
+  
+  # Astro documentation website
+  - package-ecosystem: "npm"
+    directory: "/astro"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    open-pull-requests-limit: 5
+    groups:
+      astro-dependencies:
+        patterns:
+          - "*"
+        exclude-patterns:
+          - "@astrojs/*"
+      astro-core:
+        patterns:
+          - "@astrojs/*"
