@@ -296,7 +296,11 @@ Please respond with JSON in this format:
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Response processed successfully!')),
         );
-        context.pop();
+        if (context.canPop()) {
+          context.pop();
+        } else {
+          context.go(AppPaths.home);
+        }
       }
     } catch (e) {
       setState(() => _errorMessage = 'Error processing response: $e');
