@@ -10,6 +10,7 @@ import 'package:prompt_loop/data/services/copy_paste_llm_service.dart';
 import 'package:prompt_loop/domain/services/llm_service.dart';
 import 'package:prompt_loop/domain/entities/task.dart';
 import 'package:prompt_loop/domain/entities/skill.dart';
+import 'package:prompt_loop/domain/entities/sub_skill.dart';
 import 'package:prompt_loop/features/skills/providers/skills_provider.dart';
 import 'package:prompt_loop/features/tasks/providers/tasks_provider.dart';
 import 'package:prompt_loop/features/purpose/providers/purpose_provider.dart';
@@ -312,8 +313,60 @@ Please respond with JSON in this format:
   }
 
   Future<void> _processSkillAnalysis() async {
-    // TODO: Parse JSON and create skill/sub-skills
-    // For now, just show success
+    final response = _responseController.text.trim();
+    if (response.isEmpty) {
+      throw Exception('No response to parse');
+    }
+
+    final service = CopyPasteLlmService(
+      onPromptReady: (_) async {},
+      onResponseReceived: () async => response,
+    );
+
+    final request = SkillAnalysisRequest(
+      skillDescription: _skillNameController.text.trim(),
+      currentLevel: _currentLevelController.text.trim().isEmpty
+          ? null
+          : _currentLevelController.text.trim(),
+      goals: _goalsController.text.trim().isEmpty
+          ? null
+          : _goalsController.text.trim(),
+    );
+
+    final result = await service.analyzeSkill(request);
+
+    if (!result.isSuccess) {
+      throw Exception(result.error);
+    }
+
+    final analysis = result.data;
+    if (analysis == null) {
+      throw Exception('No analysis data returned');
+    }
+
+    // Create the skill
+    final skill = Skill(
+      name: analysis.skillName,
+      description: analysis.skillDescription,
+      currentLevel: analysis.suggestedLevel,
+      createdAt: DateTime.now(),
+    );
+
+    final skillId = await ref.read(skillsProvider.notifier).createSkill(skill);
+
+    // Create sub-skills
+    for (final subSkillSuggestion in analysis.subSkills) {
+      final subSkill = SubSkill(
+        skillId: skillId,
+        name: subSkillSuggestion.name,
+        description: subSkillSuggestion.description,
+        priority: subSkillSuggestion.priority,
+        isLlmGenerated: true,
+        createdAt: DateTime.now(),
+      );
+
+      await ref.read(skillsProvider.notifier).createSubSkill(subSkill);
+    }
   }
 
   Future<void> _processTaskGeneration() async {

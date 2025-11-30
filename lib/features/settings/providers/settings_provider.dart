@@ -73,16 +73,22 @@ class SettingsNotifier extends StateNotifier<AsyncValue<AppSettings>> {
   }
 
   Future<void> completeOnboarding() async {
-    final current = state.valueOrNull;
-    if (current != null) {
-      await updateSettings(current.copyWith(onboardingCompleted: true));
+    try {
+      final repository = await _ref.read(settingsRepositoryProvider.future);
+      await repository.completeOnboarding();
+      await _loadSettings();
+    } catch (e, st) {
+      state = AsyncValue.error(e, st);
     }
   }
 
   Future<void> resetOnboarding() async {
-    final current = state.valueOrNull;
-    if (current != null) {
-      await updateSettings(current.copyWith(onboardingCompleted: false));
+    try {
+      final repository = await _ref.read(settingsRepositoryProvider.future);
+      await repository.resetOnboarding();
+      await _loadSettings();
+    } catch (e, st) {
+      state = AsyncValue.error(e, st);
     }
   }
 

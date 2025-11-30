@@ -17,6 +17,9 @@ abstract class SettingsRepository {
   /// Mark onboarding as completed
   Future<void> completeOnboarding();
 
+  /// Reset onboarding status
+  Future<void> resetOnboarding();
+
   /// Reset all settings to defaults
   Future<void> resetSettings();
 }

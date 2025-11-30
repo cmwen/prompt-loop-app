@@ -85,6 +85,13 @@ class SettingsRepositoryImpl implements SettingsRepository {
   }
 
   @override
+  Future<void> resetOnboarding() async {
+    await _db.update(DbConstants.tableUsers, {
+      DbConstants.colOnboardingCompleted: 0,
+    });
+  }
+
+  @override
   Future<void> resetSettings() async {
     await _db.delete(DbConstants.tableSettings);
 

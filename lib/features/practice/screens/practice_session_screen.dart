@@ -94,7 +94,7 @@ class _PracticeSessionScreenState extends ConsumerState<PracticeSessionScreen> {
     showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (context) => AlertDialog(
+      builder: (dialogContext) => AlertDialog(
         icon: const Icon(Icons.celebration, size: 48, color: AppColors.success),
         title: const Text('Great Practice!'),
         content: Column(
@@ -108,8 +108,10 @@ class _PracticeSessionScreenState extends ConsumerState<PracticeSessionScreen> {
         actions: [
           FilledButton(
             onPressed: () {
-              Navigator.pop(context);
-              context.pop();
+              Navigator.pop(dialogContext);
+              if (mounted && context.canPop()) {
+                context.pop();
+              }
             },
             child: const Text('Done'),
           ),
@@ -131,15 +133,21 @@ class _PracticeSessionScreenState extends ConsumerState<PracticeSessionScreen> {
               )
         : null;
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Practice Session'),
-        leading: IconButton(
-          icon: const Icon(Icons.close),
-          onPressed: () => _showExitConfirmation(),
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, result) async {
+        if (didPop) return;
+        _showExitConfirmation();
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text('Practice Session'),
+          leading: IconButton(
+            icon: const Icon(Icons.close),
+            onPressed: () => _showExitConfirmation(),
+          ),
         ),
-      ),
-      body: skill.when(
+        body: skill.when(
         data: (skillData) {
           if (skillData == null) {
             return const Center(child: Text('Skill not found'));
@@ -264,24 +272,27 @@ class _PracticeSessionScreenState extends ConsumerState<PracticeSessionScreen> {
         loading: () => const LoadingIndicator(message: 'Loading...'),
         error: (e, _) => Center(child: Text('Error: $e')),
       ),
+      ),
     );
   }
 
   void _showExitConfirmation() {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
+      builder: (dialogContext) => AlertDialog(
         title: const Text('Exit Practice?'),
         content: const Text('Your progress will not be saved.'),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(context),
+            onPressed: () => Navigator.pop(dialogContext),
             child: const Text('Continue Practicing'),
           ),
           TextButton(
             onPressed: () {
-              Navigator.pop(context);
-              this.context.pop();
+              Navigator.pop(dialogContext);
+              if (mounted && context.canPop()) {
+                context.pop();
+              }
             },
             child: const Text('Exit'),
           ),
