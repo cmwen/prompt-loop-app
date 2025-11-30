@@ -12,11 +12,15 @@ import 'package:prompt_loop/features/progress/screens/progress_screen.dart';
 import 'package:prompt_loop/features/settings/screens/settings_screen.dart';
 import 'package:prompt_loop/features/onboarding/screens/onboarding_screen.dart';
 import 'package:prompt_loop/features/onboarding/screens/purpose_setup_screen.dart';
+import 'package:prompt_loop/features/onboarding/screens/splash_screen.dart';
 import 'package:prompt_loop/features/llm_workflow/screens/copy_paste_workflow_screen.dart';
+import 'package:prompt_loop/features/purpose/screens/purposes_list_screen.dart';
+import 'package:prompt_loop/features/purpose/screens/purpose_edit_screen.dart';
 import 'package:prompt_loop/shared/widgets/shell_scaffold.dart';
 
 /// Route names for navigation.
 class AppRoutes {
+  static const String splash = 'splash';
   static const String onboarding = 'onboarding';
   static const String purposeSetup = 'purpose-setup';
   static const String home = 'home';
@@ -28,10 +32,13 @@ class AppRoutes {
   static const String progress = 'progress';
   static const String settings = 'settings';
   static const String copyPasteWorkflow = 'copy-paste-workflow';
+  static const String purposesList = 'purposes-list';
+  static const String purposeEdit = 'purpose-edit';
 }
 
 /// Route paths.
 class AppPaths {
+  static const String splash = '/splash';
   static const String onboarding = '/onboarding';
   static const String purposeSetup = '/purpose-setup';
   static const String home = '/';
@@ -43,6 +50,8 @@ class AppPaths {
   static const String progress = '/progress';
   static const String settings = '/settings';
   static const String copyPasteWorkflow = '/llm/copy-paste';
+  static const String purposesList = '/purposes';
+  static const String purposeEdit = '/purposes/edit';
 }
 
 /// The main router provider.
@@ -50,29 +59,48 @@ final routerProvider = Provider<GoRouter>((ref) {
   final onboardingCompleted = ref.watch(onboardingCompletedProvider);
 
   return GoRouter(
-    initialLocation: AppPaths.home,
+    initialLocation: AppPaths.splash,
     debugLogDiagnostics: true,
     redirect: (context, state) {
-      // Check if onboarding is completed
-      final isOnboardingRoute =
-          state.matchedLocation == AppPaths.onboarding ||
-          state.matchedLocation == AppPaths.purposeSetup;
+      final currentPath = state.matchedLocation;
+      final isSplash = currentPath == AppPaths.splash;
+      final isOnboardingRoute = currentPath == AppPaths.onboarding ||
+          currentPath == AppPaths.purposeSetup;
 
       return onboardingCompleted.when(
         data: (completed) {
+          // If on splash and data loaded, redirect appropriately
+          if (isSplash) {
+            return completed ? AppPaths.home : AppPaths.onboarding;
+          }
+          // If not completed and not on onboarding, redirect to onboarding
           if (!completed && !isOnboardingRoute) {
             return AppPaths.onboarding;
           }
+          // If completed and on onboarding, redirect to home
           if (completed && isOnboardingRoute) {
             return AppPaths.home;
           }
           return null;
         },
-        loading: () => null,
-        error: (_, __) => null,
+        loading: () {
+          // While loading, stay on splash or go to splash if not there
+          return isSplash ? null : AppPaths.splash;
+        },
+        error: (_, __) {
+          // On error, go to onboarding to be safe
+          return isSplash ? AppPaths.onboarding : null;
+        },
       );
     },
     routes: [
+      // Splash screen route
+      GoRoute(
+        name: AppRoutes.splash,
+        path: AppPaths.splash,
+        builder: (context, state) => const SplashScreen(),
+      ),
+
       // Onboarding routes
       GoRoute(
         name: AppRoutes.onboarding,
@@ -156,6 +184,25 @@ final routerProvider = Provider<GoRouter>((ref) {
           final workflowType = state.extra as CopyPasteWorkflowType?;
           return CopyPasteWorkflowScreen(
             workflowType: workflowType ?? CopyPasteWorkflowType.skillAnalysis,
+          );
+        },
+      ),
+
+      // Purpose management screens (full screen, outside shell)
+      GoRoute(
+        name: AppRoutes.purposesList,
+        path: AppPaths.purposesList,
+        builder: (context, state) => const PurposesListScreen(),
+      ),
+      GoRoute(
+        name: AppRoutes.purposeEdit,
+        path: AppPaths.purposeEdit,
+        builder: (context, state) {
+          final params = state.extra as Map<String, dynamic>?;
+          final skillId = params?['skillId'] as int? ?? 0;
+          return PurposeEditScreen(
+            skillId: skillId,
+            purposeId: params?['purposeId'] as int?,
           );
         },
       ),

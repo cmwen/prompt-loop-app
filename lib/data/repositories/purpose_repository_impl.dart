@@ -12,6 +12,15 @@ class PurposeRepositoryImpl implements PurposeRepository {
   PurposeRepositoryImpl(this._db);
 
   @override
+  Future<List<Purpose>> getAllPurposes() async {
+    final maps = await _db.query(
+      DbConstants.tablePurposes,
+      orderBy: '${DbConstants.colCreatedAt} DESC',
+    );
+    return maps.map(_mapToPurpose).toList();
+  }
+
+  @override
   Future<Purpose?> getPurposeForSkill(int skillId) async {
     final maps = await _db.query(
       DbConstants.tablePurposes,

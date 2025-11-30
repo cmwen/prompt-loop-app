@@ -57,7 +57,9 @@ class PurposesNotifier extends StateNotifier<AsyncValue<List<Purpose>>> {
   Future<void> loadPurposes() async {
     try {
       state = const AsyncValue.loading();
-      state = const AsyncValue.data([]);
+      final repository = await _ref.read(purposeRepositoryProvider.future);
+      final purposes = await repository.getAllPurposes();
+      state = AsyncValue.data(purposes);
     } catch (e, st) {
       state = AsyncValue.error(e, st);
     }

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+import 'package:prompt_loop/core/router/app_router.dart';
 import 'package:prompt_loop/domain/entities/app_settings.dart';
 import 'package:prompt_loop/features/settings/providers/settings_provider.dart';
 import 'package:prompt_loop/shared/widgets/app_card.dart';
@@ -185,6 +187,26 @@ class SettingsScreen extends ConsumerWidget {
                       onChanged: (value) {
                         ref.read(settingsProvider.notifier).setDarkMode(value);
                       },
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+
+                  // Content Management section
+                  _SectionHeader(title: 'Content'),
+                  const SizedBox(height: 8),
+                  AppCard(
+                    child: Column(
+                      children: [
+                        ListTile(
+                          leading: const Icon(Icons.flag_outlined),
+                          title: const Text('My Purposes'),
+                          subtitle: const Text(
+                            'Manage learning goals for your skills',
+                          ),
+                          trailing: const Icon(Icons.chevron_right),
+                          onTap: () => context.push(AppPaths.purposesList),
+                        ),
+                      ],
                     ),
                   ),
                   const SizedBox(height: 24),

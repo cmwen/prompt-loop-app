@@ -47,6 +47,10 @@ dependencies:
   # HTTP
   http: ^1.6.0
 
+  # Sharing
+  share_plus: ^10.1.4
+  receive_sharing_intent: ^1.8.1
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

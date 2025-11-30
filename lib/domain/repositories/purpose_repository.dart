@@ -2,6 +2,9 @@ import '../entities/purpose.dart';
 
 /// Purpose repository interface (Duckworth: connecting practice to meaning)
 abstract class PurposeRepository {
+  /// Get all purposes
+  Future<List<Purpose>> getAllPurposes();
+
   /// Get purpose for a skill
   Future<Purpose?> getPurposeForSkill(int skillId);
 

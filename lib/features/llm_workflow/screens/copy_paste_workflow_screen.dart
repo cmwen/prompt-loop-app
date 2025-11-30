@@ -2,11 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:prompt_loop/core/router/app_router.dart';
 import 'package:prompt_loop/core/theme/app_colors.dart';
+import 'package:prompt_loop/core/constants/llm_constants.dart';
 import 'package:prompt_loop/data/services/copy_paste_llm_service.dart';
 import 'package:prompt_loop/domain/services/llm_service.dart';
 import 'package:prompt_loop/features/skills/providers/skills_provider.dart';
+import 'package:prompt_loop/features/tasks/providers/tasks_provider.dart';
+import 'package:prompt_loop/features/purpose/providers/purpose_provider.dart';
 import 'package:prompt_loop/shared/widgets/loading_indicator.dart';
 import 'package:prompt_loop/shared/widgets/app_card.dart';
 
@@ -96,26 +100,118 @@ class _CopyPasteWorkflowScreenState
     service.analyzeSkill(request);
   }
 
-  void _generateTaskPrompt() {
-    // TODO: Implement task generation prompt
-    setState(() {
-      _currentPrompt =
-          '''Generate deliberate practice tasks for the selected skill.
+  void _generateTaskPrompt() async {
+    if (_selectedSkillId == null) return;
 
-Please respond with JSON in this format:
-{
+    setState(() {
+      _errorMessage = null;
+    });
+
+    try {
+      // Get skill data
+      final skills = ref.read(skillsProvider).valueOrNull ?? [];
+      final skill = skills.firstWhere(
+        (s) => s.id == _selectedSkillId,
+        orElse: () => throw Exception('Skill not found'),
+      );
+
+      // Get sub-skills
+      final subSkills = await ref.read(subSkillsProvider(_selectedSkillId!).future);
+
+      // Get purpose (if any)
+      final purpose = await ref.read(purposeBySkillProvider(_selectedSkillId!).future);
+
+      // Get recent tasks for this skill
+      final tasks = await ref.read(tasksBySkillProvider(_selectedSkillId!).future);
+      final recentTasks = tasks.take(5).toList();
+
+      // Build context-enriched prompt
+      final contextBuffer = StringBuffer();
+      contextBuffer.writeln('You are a deliberate practice coach. Generate specific, measurable practice tasks.');
+      contextBuffer.writeln();
+      contextBuffer.writeln('═══════════════════════════════════════════════════════════════');
+      contextBuffer.writeln('USER CONTEXT');
+      contextBuffer.writeln('═══════════════════════════════════════════════════════════════');
+      contextBuffer.writeln();
+      contextBuffer.writeln('SKILL: ${skill.name}');
+      contextBuffer.writeln('LEVEL: ${skill.currentLevel.name}');
+
+      if (purpose != null) {
+        contextBuffer.writeln();
+        contextBuffer.writeln('PURPOSE: "${purpose.statement}"');
+        contextBuffer.writeln('(Category: ${_getCategoryLabel(purpose.category)})');
+      }
+
+      if (subSkills.isNotEmpty) {
+        contextBuffer.writeln();
+        contextBuffer.writeln('SUB-SKILLS IN PROGRESS:');
+        for (final subSkill in subSkills) {
+          contextBuffer.writeln('  • ${subSkill.name} (${subSkill.priority.name} priority) - ${subSkill.progressPercent}% complete');
+        }
+      }
+
+      if (recentTasks.isNotEmpty) {
+        contextBuffer.writeln();
+        contextBuffer.writeln('RECENT TASKS:');
+        for (final task in recentTasks) {
+          final status = task.isCompleted ? '✓' : '○';
+          contextBuffer.writeln('  $status ${task.title}');
+        }
+      }
+
+      contextBuffer.writeln();
+      contextBuffer.writeln('═══════════════════════════════════════════════════════════════');
+      contextBuffer.writeln();
+      contextBuffer.writeln('Generate 3-5 practice tasks that:');
+      contextBuffer.writeln('• Build on current progress shown above');
+      contextBuffer.writeln('• Target the sub-skills marked as high priority');
+      if (purpose != null) {
+        contextBuffer.writeln('• Connect to the user\'s purpose: "${purpose.statement}"');
+      }
+      contextBuffer.writeln('• Are specific, measurable, and achievable in 10-30 minutes');
+      contextBuffer.writeln();
+      contextBuffer.writeln('${LlmConstants.jsonInstructions}');
+      contextBuffer.writeln();
+      contextBuffer.writeln('''{
   "tasks": [
     {
       "title": "Task title",
-      "description": "Detailed description",
-      "estimated_minutes": 30,
+      "description": "Detailed description with specific instructions",
+      "estimated_minutes": 20,
       "difficulty": 5,
       "frequency": "daily",
+      "target_sub_skill": "sub-skill name this task targets",
       "success_criteria": ["Criterion 1", "Criterion 2"]
     }
   ]
-}''';
-    });
+}''');
+
+      setState(() {
+        _currentPrompt = contextBuffer.toString();
+      });
+    } catch (e) {
+      setState(() {
+        _errorMessage = 'Error building prompt: $e';
+      });
+    }
+  }
+
+  String _getCategoryLabel(dynamic category) {
+    final categoryStr = category.toString().split('.').last;
+    switch (categoryStr) {
+      case 'personalExpression':
+        return 'Personal Expression';
+      case 'connectingWithOthers':
+        return 'Connecting with Others';
+      case 'careerGrowth':
+        return 'Career Growth';
+      case 'selfImprovement':
+        return 'Self Improvement';
+      case 'contributingBeyondSelf':
+        return 'Contributing Beyond Self';
+      default:
+        return 'Other';
+    }
   }
 
   void _generateStrugglePrompt() {
@@ -143,6 +239,24 @@ Please respond with JSON in this format:
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Prompt copied to clipboard!')),
       );
+    }
+  }
+
+  Future<void> _sharePrompt() async {
+    if (_currentPrompt == null) return;
+
+    try {
+      await Share.share(
+        _currentPrompt!,
+        subject: 'Practice Task Prompt',
+      );
+      setState(() => _isPromptCopied = true);
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error sharing: $e')),
+        );
+      }
     }
   }
 
@@ -204,11 +318,72 @@ Please respond with JSON in this format:
     // TODO: Parse JSON and show feedback
   }
 
+  /// Handle back button press with confirmation if there's unsaved work
+  Future<bool> _onWillPop() async {
+    // If we have a generated prompt but haven't processed it, confirm exit
+    if (_currentPrompt != null && !_isProcessing) {
+      final shouldPop = await showDialog<bool>(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text('Discard progress?'),
+          content: const Text(
+            'You have a generated prompt that hasn\'t been processed yet. '
+            'If you go back, you\'ll lose this progress.',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(false),
+              child: const Text('Stay'),
+            ),
+            FilledButton(
+              onPressed: () => Navigator.of(context).pop(true),
+              child: const Text('Discard & Go Back'),
+            ),
+          ],
+        ),
+      );
+      return shouldPop ?? false;
+    }
+    return true;
+  }
+
+  void _handleBack() async {
+    if (await _onWillPop()) {
+      if (mounted) {
+        if (context.canPop()) {
+          context.pop();
+        } else {
+          context.go(AppPaths.home);
+        }
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: Text(_title)),
-      body: SingleChildScrollView(
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, result) async {
+        if (didPop) return;
+        if (await _onWillPop()) {
+          if (mounted) {
+            if (context.canPop()) {
+              context.pop();
+            } else {
+              context.go(AppPaths.home);
+            }
+          }
+        }
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back),
+            onPressed: _handleBack,
+          ),
+          title: Text(_title),
+        ),
+        body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -228,7 +403,7 @@ Please respond with JSON in this format:
             // Step 2: Copy prompt
             _StepHeader(
               step: 2,
-              title: 'Copy prompt to AI',
+              title: 'Share or copy prompt',
               isActive: _currentPrompt != null && !_isPromptCopied,
             ),
             if (_currentPrompt != null) ...[
@@ -245,6 +420,14 @@ Please respond with JSON in this format:
                             style: TextStyle(fontWeight: FontWeight.w600),
                           ),
                         ),
+                        // Share button (recommended for Android)
+                        OutlinedButton.icon(
+                          onPressed: _sharePrompt,
+                          icon: const Icon(Icons.share),
+                          label: const Text('Share'),
+                        ),
+                        const SizedBox(width: 8),
+                        // Copy button (fallback)
                         FilledButton.icon(
                           onPressed: _copyPrompt,
                           icon: Icon(
@@ -254,7 +437,36 @@ Please respond with JSON in this format:
                         ),
                       ],
                     ),
+                    const SizedBox(height: 12),
+                    // Tip about sharing
+                    Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: Theme.of(context).colorScheme.primary.withAlpha(25),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Row(
+                        children: [
+                          Icon(
+                            Icons.lightbulb_outline,
+                            size: 20,
+                            color: Theme.of(context).colorScheme.primary,
+                          ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              'Tip: Use "Share" to send directly to ChatGPT or Claude. '
+                              'After getting a response, share it back to import.',
+                              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                color: Theme.of(context).colorScheme.primary,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
                     const SizedBox(height: 8),
+                    // Prompt preview
                     Container(
                       padding: const EdgeInsets.all(12),
                       decoration: BoxDecoration(
@@ -264,19 +476,12 @@ Please respond with JSON in this format:
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: Text(
-                        _currentPrompt!.length > 200
-                            ? '${_currentPrompt!.substring(0, 200)}...'
+                        _currentPrompt!.length > 300
+                            ? '${_currentPrompt!.substring(0, 300)}...'
                             : _currentPrompt!,
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
                           fontFamily: 'monospace',
                         ),
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      'Copy this prompt and paste it into ChatGPT, Claude, or your preferred AI assistant.',
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: Theme.of(context).colorScheme.onSurfaceVariant,
                       ),
                     ),
                   ],
@@ -362,6 +567,7 @@ Please respond with JSON in this format:
           ],
         ),
       ),
+    ),
     );
   }
 
