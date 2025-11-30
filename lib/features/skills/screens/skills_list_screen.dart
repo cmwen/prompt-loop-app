@@ -10,11 +10,11 @@ import 'package:deliberate_practice_app/shared/widgets/loading_indicator.dart';
 /// Skills list screen showing all user skills.
 class SkillsListScreen extends ConsumerWidget {
   const SkillsListScreen({super.key});
-  
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final skills = ref.watch(skillsProvider);
-    
+
     return Scaffold(
       body: CustomScrollView(
         slivers: [
@@ -38,48 +38,44 @@ class SkillsListScreen extends ConsumerWidget {
                   ),
                 );
               }
-              
+
               return SliverPadding(
                 padding: const EdgeInsets.all(16),
                 sliver: SliverList(
-                  delegate: SliverChildBuilderDelegate(
-                    (context, index) {
-                      final skill = skillList[index];
-                      return Padding(
-                        padding: const EdgeInsets.only(bottom: 8),
-                        child: SkillCard(
-                          name: skill.name,
-                          level: skill.currentLevel.displayName,
-                          progress: 0.0, // TODO: Calculate progress
-                          onTap: () {
+                  delegate: SliverChildBuilderDelegate((context, index) {
+                    final skill = skillList[index];
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: 8),
+                      child: SkillCard(
+                        name: skill.name,
+                        level: skill.currentLevel.displayName,
+                        progress: 0.0, // TODO: Calculate progress
+                        onTap: () {
+                          context.goNamed(
+                            AppRoutes.skillDetail,
+                            pathParameters: {'id': skill.id.toString()},
+                          );
+                        },
+                        trailing: IconButton(
+                          icon: const Icon(Icons.play_circle_outline),
+                          onPressed: () {
                             context.goNamed(
-                              AppRoutes.skillDetail,
-                              pathParameters: {'id': skill.id.toString()},
+                              AppRoutes.practiceSession,
+                              pathParameters: {'skillId': skill.id.toString()},
                             );
                           },
-                          trailing: IconButton(
-                            icon: const Icon(Icons.play_circle_outline),
-                            onPressed: () {
-                              context.goNamed(
-                                AppRoutes.practiceSession,
-                                pathParameters: {'skillId': skill.id.toString()},
-                              );
-                            },
-                          ),
                         ),
-                      );
-                    },
-                    childCount: skillList.length,
-                  ),
+                      ),
+                    );
+                  }, childCount: skillList.length),
                 ),
               );
             },
             loading: () => const SliverFillRemaining(
               child: LoadingIndicator(message: 'Loading skills...'),
             ),
-            error: (e, _) => SliverFillRemaining(
-              child: Center(child: Text('Error: $e')),
-            ),
+            error: (e, _) =>
+                SliverFillRemaining(child: Center(child: Text('Error: $e'))),
           ),
         ],
       ),

@@ -9,7 +9,7 @@ class AppCard extends StatelessWidget {
   final VoidCallback? onTap;
   final Color? backgroundColor;
   final double? elevation;
-  
+
   const AppCard({
     super.key,
     required this.child,
@@ -19,22 +19,21 @@ class AppCard extends StatelessWidget {
     this.backgroundColor,
     this.elevation,
   });
-  
+
   @override
   Widget build(BuildContext context) {
     final card = Card(
       elevation: elevation ?? 0,
-      color: backgroundColor ?? Theme.of(context).colorScheme.surfaceContainerLow,
+      color:
+          backgroundColor ?? Theme.of(context).colorScheme.surfaceContainerLow,
       margin: margin ?? const EdgeInsets.symmetric(vertical: 4),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: Padding(
         padding: padding ?? const EdgeInsets.all(16),
         child: child,
       ),
     );
-    
+
     if (onTap != null) {
       return InkWell(
         onTap: onTap,
@@ -42,7 +41,7 @@ class AppCard extends StatelessWidget {
         child: card,
       );
     }
-    
+
     return card;
   }
 }
@@ -54,7 +53,7 @@ class SkillCard extends StatelessWidget {
   final double progress;
   final VoidCallback? onTap;
   final Widget? trailing;
-  
+
   const SkillCard({
     super.key,
     required this.name,
@@ -63,7 +62,7 @@ class SkillCard extends StatelessWidget {
     this.onTap,
     this.trailing,
   });
-  
+
   @override
   Widget build(BuildContext context) {
     return AppCard(
@@ -97,9 +96,13 @@ class SkillCard extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 12),
-          ProgressBar(
+          LinearProgressIndicator(
             value: progress,
-            height: 8,
+            minHeight: 8,
+            backgroundColor: Theme.of(
+              context,
+            ).colorScheme.surfaceContainerHighest,
+            borderRadius: BorderRadius.circular(4),
           ),
           const SizedBox(height: 4),
           Text(
@@ -122,7 +125,7 @@ class TaskCard extends StatelessWidget {
   final bool isCompleted;
   final VoidCallback? onTap;
   final VoidCallback? onComplete;
-  
+
   const TaskCard({
     super.key,
     required this.title,
@@ -132,7 +135,7 @@ class TaskCard extends StatelessWidget {
     this.onTap,
     this.onComplete,
   });
-  
+
   @override
   Widget build(BuildContext context) {
     return AppCard(
@@ -153,7 +156,7 @@ class TaskCard extends StatelessWidget {
                   title,
                   style: Theme.of(context).textTheme.titleSmall?.copyWith(
                     decoration: isCompleted ? TextDecoration.lineThrough : null,
-                    color: isCompleted 
+                    color: isCompleted
                         ? Theme.of(context).colorScheme.onSurfaceVariant
                         : null,
                   ),
@@ -184,18 +187,21 @@ class TaskCard extends StatelessWidget {
 class DifficultyIndicator extends StatelessWidget {
   final int difficulty;
   final int maxDifficulty;
-  
+
   const DifficultyIndicator({
     super.key,
     required this.difficulty,
     this.maxDifficulty = 10,
   });
-  
+
   @override
   Widget build(BuildContext context) {
-    final normalizedDifficulty = (difficulty / maxDifficulty * 5).round().clamp(1, 5);
+    final normalizedDifficulty = (difficulty / maxDifficulty * 5).round().clamp(
+      1,
+      5,
+    );
     final color = _getDifficultyColor(normalizedDifficulty);
-    
+
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: List.generate(5, (index) {
@@ -206,13 +212,13 @@ class DifficultyIndicator extends StatelessWidget {
           margin: const EdgeInsets.symmetric(horizontal: 1),
           decoration: BoxDecoration(
             shape: BoxShape.circle,
-            color: isFilled ? color : color.withOpacity(0.2),
+            color: isFilled ? color : color.withAlpha(51),
           ),
         );
       }),
     );
   }
-  
+
   Color _getDifficultyColor(int normalized) {
     if (normalized <= 2) return AppColors.success;
     if (normalized <= 4) return AppColors.warning;

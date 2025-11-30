@@ -13,15 +13,11 @@ import 'package:deliberate_practice_app/app.dart';
 void main() {
   testWidgets('App renders without crashing', (WidgetTester tester) async {
     // Build our app and trigger a frame.
-    await tester.pumpWidget(
-      const ProviderScope(
-        child: PromptLoopApp(),
-      ),
-    );
+    await tester.pumpWidget(const ProviderScope(child: PromptLoopApp()));
 
     // Verify that the app initializes
     await tester.pumpAndSettle();
-    
+
     // Basic smoke test - app should render without errors
     expect(find.byType(MaterialApp), findsOneWidget);
   });

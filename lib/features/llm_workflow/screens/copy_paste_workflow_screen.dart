@@ -6,7 +6,6 @@ import 'package:deliberate_practice_app/core/router/app_router.dart';
 import 'package:deliberate_practice_app/core/theme/app_colors.dart';
 import 'package:deliberate_practice_app/data/services/copy_paste_llm_service.dart';
 import 'package:deliberate_practice_app/domain/services/llm_service.dart';
-import 'package:deliberate_practice_app/features/llm_workflow/providers/llm_provider.dart';
 import 'package:deliberate_practice_app/features/skills/providers/skills_provider.dart';
 import 'package:deliberate_practice_app/shared/widgets/loading_indicator.dart';
 import 'package:deliberate_practice_app/shared/widgets/app_card.dart';
@@ -14,31 +13,30 @@ import 'package:deliberate_practice_app/shared/widgets/app_card.dart';
 /// Copy-paste LLM workflow screen.
 class CopyPasteWorkflowScreen extends ConsumerStatefulWidget {
   final CopyPasteWorkflowType workflowType;
-  
-  const CopyPasteWorkflowScreen({
-    super.key,
-    required this.workflowType,
-  });
-  
+
+  const CopyPasteWorkflowScreen({super.key, required this.workflowType});
+
   @override
-  ConsumerState<CopyPasteWorkflowScreen> createState() => _CopyPasteWorkflowScreenState();
+  ConsumerState<CopyPasteWorkflowScreen> createState() =>
+      _CopyPasteWorkflowScreenState();
 }
 
-class _CopyPasteWorkflowScreenState extends ConsumerState<CopyPasteWorkflowScreen> {
+class _CopyPasteWorkflowScreenState
+    extends ConsumerState<CopyPasteWorkflowScreen> {
   final _responseController = TextEditingController();
   String? _currentPrompt;
   bool _isPromptCopied = false;
   bool _isProcessing = false;
   String? _errorMessage;
-  
+
   // For skill analysis
   final _skillNameController = TextEditingController();
   final _currentLevelController = TextEditingController();
   final _goalsController = TextEditingController();
-  
+
   // Selected skill for task generation
   int? _selectedSkillId;
-  
+
   @override
   void dispose() {
     _responseController.dispose();
@@ -47,7 +45,7 @@ class _CopyPasteWorkflowScreenState extends ConsumerState<CopyPasteWorkflowScree
     _goalsController.dispose();
     super.dispose();
   }
-  
+
   String get _title {
     switch (widget.workflowType) {
       case CopyPasteWorkflowType.skillAnalysis:
@@ -58,13 +56,13 @@ class _CopyPasteWorkflowScreenState extends ConsumerState<CopyPasteWorkflowScree
         return 'Get Feedback';
     }
   }
-  
+
   void _generatePrompt() {
     setState(() {
       _isPromptCopied = false;
       _errorMessage = null;
     });
-    
+
     switch (widget.workflowType) {
       case CopyPasteWorkflowType.skillAnalysis:
         _generateSkillAnalysisPrompt();
@@ -77,31 +75,32 @@ class _CopyPasteWorkflowScreenState extends ConsumerState<CopyPasteWorkflowScree
         break;
     }
   }
-  
+
   void _generateSkillAnalysisPrompt() {
     final request = SkillAnalysisRequest(
       skillDescription: _skillNameController.text.trim(),
-      currentLevel: _currentLevelController.text.trim().isEmpty 
-          ? null 
+      currentLevel: _currentLevelController.text.trim().isEmpty
+          ? null
           : _currentLevelController.text.trim(),
-      goals: _goalsController.text.trim().isEmpty 
-          ? null 
+      goals: _goalsController.text.trim().isEmpty
+          ? null
           : _goalsController.text.trim(),
     );
-    
+
     final service = CopyPasteLlmService(
       onPromptReady: (prompt) async => setState(() => _currentPrompt = prompt),
       onResponseReceived: () async => _responseController.text,
     );
-    
+
     // This generates the prompt but doesn't wait for response
     service.analyzeSkill(request);
   }
-  
+
   void _generateTaskPrompt() {
     // TODO: Implement task generation prompt
     setState(() {
-      _currentPrompt = '''Generate deliberate practice tasks for the selected skill.
+      _currentPrompt =
+          '''Generate deliberate practice tasks for the selected skill.
 
 Please respond with JSON in this format:
 {
@@ -118,7 +117,7 @@ Please respond with JSON in this format:
 }''';
     });
   }
-  
+
   void _generateStrugglePrompt() {
     // TODO: Implement struggle analysis prompt
     setState(() {
@@ -133,38 +132,38 @@ Please respond with JSON in this format:
 }''';
     });
   }
-  
+
   Future<void> _copyPrompt() async {
     if (_currentPrompt == null) return;
-    
+
     await Clipboard.setData(ClipboardData(text: _currentPrompt!));
     setState(() => _isPromptCopied = true);
-    
+
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Prompt copied to clipboard!')),
       );
     }
   }
-  
+
   Future<void> _pasteResponse() async {
     final clipboardData = await Clipboard.getData(Clipboard.kTextPlain);
     if (clipboardData?.text != null) {
       _responseController.text = clipboardData!.text!;
     }
   }
-  
+
   Future<void> _processResponse() async {
     if (_responseController.text.trim().isEmpty) {
       setState(() => _errorMessage = 'Please paste the AI response first');
       return;
     }
-    
+
     setState(() {
       _isProcessing = true;
       _errorMessage = null;
     });
-    
+
     try {
       // Parse and save the response based on workflow type
       switch (widget.workflowType) {
@@ -178,7 +177,7 @@ Please respond with JSON in this format:
           await _processStruggleAnalysis();
           break;
       }
-      
+
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Response processed successfully!')),
@@ -191,26 +190,24 @@ Please respond with JSON in this format:
       setState(() => _isProcessing = false);
     }
   }
-  
+
   Future<void> _processSkillAnalysis() async {
     // TODO: Parse JSON and create skill/sub-skills
     // For now, just show success
   }
-  
+
   Future<void> _processTaskGeneration() async {
     // TODO: Parse JSON and create tasks
   }
-  
+
   Future<void> _processStruggleAnalysis() async {
     // TODO: Parse JSON and show feedback
   }
-  
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(_title),
-      ),
+      appBar: AppBar(title: Text(_title)),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -227,7 +224,7 @@ Please respond with JSON in this format:
               _buildInputForm(),
             ],
             const SizedBox(height: 24),
-            
+
             // Step 2: Copy prompt
             _StepHeader(
               step: 2,
@@ -250,7 +247,9 @@ Please respond with JSON in this format:
                         ),
                         FilledButton.icon(
                           onPressed: _copyPrompt,
-                          icon: Icon(_isPromptCopied ? Icons.check : Icons.copy),
+                          icon: Icon(
+                            _isPromptCopied ? Icons.check : Icons.copy,
+                          ),
                           label: Text(_isPromptCopied ? 'Copied!' : 'Copy'),
                         ),
                       ],
@@ -259,11 +258,13 @@ Please respond with JSON in this format:
                     Container(
                       padding: const EdgeInsets.all(12),
                       decoration: BoxDecoration(
-                        color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                        color: Theme.of(
+                          context,
+                        ).colorScheme.surfaceContainerHighest,
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: Text(
-                        _currentPrompt!.length > 200 
+                        _currentPrompt!.length > 200
                             ? '${_currentPrompt!.substring(0, 200)}...'
                             : _currentPrompt!,
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
@@ -283,7 +284,7 @@ Please respond with JSON in this format:
               ),
             ],
             const SizedBox(height: 24),
-            
+
             // Step 3: Paste response
             _StepHeader(
               step: 3,
@@ -299,7 +300,8 @@ Please respond with JSON in this format:
                       controller: _responseController,
                       decoration: const InputDecoration(
                         labelText: 'AI Response (JSON)',
-                        hintText: 'Paste the response from ChatGPT/Claude here...',
+                        hintText:
+                            'Paste the response from ChatGPT/Claude here...',
                         border: OutlineInputBorder(),
                       ),
                       maxLines: 8,
@@ -323,7 +325,7 @@ Please respond with JSON in this format:
                 Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: AppColors.error.withOpacity(0.1),
+                    color: AppColors.error.withAlpha(25),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Row(
@@ -341,7 +343,7 @@ Please respond with JSON in this format:
                 ),
               ],
               const SizedBox(height: 24),
-              
+
               // Process button
               SizedBox(
                 width: double.infinity,
@@ -362,7 +364,7 @@ Please respond with JSON in this format:
       ),
     );
   }
-  
+
   Widget _buildInputForm() {
     switch (widget.workflowType) {
       case CopyPasteWorkflowType.skillAnalysis:
@@ -373,7 +375,7 @@ Please respond with JSON in this format:
         return _buildStruggleForm();
     }
   }
-  
+
   Widget _buildSkillAnalysisForm() {
     return Column(
       children: [
@@ -410,8 +412,8 @@ Please respond with JSON in this format:
         SizedBox(
           width: double.infinity,
           child: FilledButton(
-            onPressed: _skillNameController.text.trim().isEmpty 
-                ? null 
+            onPressed: _skillNameController.text.trim().isEmpty
+                ? null
                 : _generatePrompt,
             child: const Text('Generate Prompt'),
           ),
@@ -419,10 +421,10 @@ Please respond with JSON in this format:
       ],
     );
   }
-  
+
   Widget _buildTaskGenerationForm() {
     final skills = ref.watch(skillsProvider);
-    
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -436,26 +438,33 @@ Please respond with JSON in this format:
             if (skillList.isEmpty) {
               return const Text('No skills yet. Add a skill first.');
             }
-            
+
             return Column(
               children: [
                 DropdownButtonFormField<int>(
-                  value: _selectedSkillId,
+                  initialValue: _selectedSkillId,
                   decoration: const InputDecoration(
                     labelText: 'Select Skill',
                     border: OutlineInputBorder(),
                   ),
-                  items: skillList.map((skill) => DropdownMenuItem(
-                    value: skill.id,
-                    child: Text(skill.name),
-                  )).toList(),
-                  onChanged: (value) => setState(() => _selectedSkillId = value),
+                  items: skillList
+                      .map(
+                        (skill) => DropdownMenuItem(
+                          value: skill.id,
+                          child: Text(skill.name),
+                        ),
+                      )
+                      .toList(),
+                  onChanged: (value) =>
+                      setState(() => _selectedSkillId = value),
                 ),
                 const SizedBox(height: 16),
                 SizedBox(
                   width: double.infinity,
                   child: FilledButton(
-                    onPressed: _selectedSkillId == null ? null : _generatePrompt,
+                    onPressed: _selectedSkillId == null
+                        ? null
+                        : _generatePrompt,
                     child: const Text('Generate Prompt'),
                   ),
                 ),
@@ -468,7 +477,7 @@ Please respond with JSON in this format:
       ],
     );
   }
-  
+
   Widget _buildStruggleForm() {
     return Column(
       children: [
@@ -501,13 +510,13 @@ class _StepHeader extends StatelessWidget {
   final int step;
   final String title;
   final bool isActive;
-  
+
   const _StepHeader({
     required this.step,
     required this.title,
     required this.isActive,
   });
-  
+
   @override
   Widget build(BuildContext context) {
     return Row(
@@ -516,7 +525,9 @@ class _StepHeader extends StatelessWidget {
           width: 28,
           height: 28,
           decoration: BoxDecoration(
-            color: isActive ? Theme.of(context).colorScheme.primary : Theme.of(context).colorScheme.onSurface.withOpacity(0.4),
+            color: isActive
+                ? Theme.of(context).colorScheme.primary
+                : Theme.of(context).colorScheme.onSurface.withAlpha(102),
             shape: BoxShape.circle,
           ),
           child: Center(
@@ -534,7 +545,9 @@ class _StepHeader extends StatelessWidget {
           title,
           style: Theme.of(context).textTheme.titleMedium?.copyWith(
             fontWeight: isActive ? FontWeight.w600 : FontWeight.normal,
-            color: isActive ? null : Theme.of(context).colorScheme.onSurface.withOpacity(0.4),
+            color: isActive
+                ? null
+                : Theme.of(context).colorScheme.onSurface.withAlpha(102),
           ),
         ),
       ],

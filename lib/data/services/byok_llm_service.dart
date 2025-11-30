@@ -18,14 +18,10 @@ class ByokLlmService implements LlmService {
   final String apiKey;
   final LlmProvider provider;
   final String? model;
-  
+
   late final ChatOpenAI? _openAiClient;
-  
-  ByokLlmService({
-    required this.apiKey,
-    required this.provider,
-    this.model,
-  }) {
+
+  ByokLlmService({required this.apiKey, required this.provider, this.model}) {
     _initializeClient();
   }
 
@@ -66,27 +62,19 @@ class ByokLlmService implements LlmService {
     if (!isAvailable) {
       return LlmResult.failure('BYOK service not configured');
     }
-    
+
     try {
-      final systemPrompt = '''
-${LlmConstants.skillAnalysisSystemPrompt}
+      final prompt = PromptTemplates.skillAnalysis(
+        skillName: request.skillDescription,
+        userContext: request.toPromptContext(),
+        purposeStatement: request.goals,
+      );
 
-${LlmConstants.jsonInstructions}
+      final messages = [ChatMessage.humanText(prompt)];
 
-You must respond with valid JSON matching this schema:
-${LlmConstants.skillAnalysisSchema}
-''';
-
-      final userPrompt = request.toPromptContext();
-      
-      final messages = [
-        ChatMessage.system(systemPrompt),
-        ChatMessage.humanText(userPrompt),
-      ];
-      
       final response = await _openAiClient!.invoke(PromptValue.chat(messages));
       final content = response.output.content;
-      
+
       return _parseSkillAnalysisResponse(content);
     } catch (e) {
       return LlmResult.failure('API error: $e');
@@ -100,27 +88,20 @@ ${LlmConstants.skillAnalysisSchema}
     if (!isAvailable) {
       return LlmResult.failure('BYOK service not configured');
     }
-    
+
     try {
-      final systemPrompt = '''
-${LlmConstants.taskGenerationSystemPrompt}
+      final prompt = PromptTemplates.taskGeneration(
+        skillName: request.skill.name,
+        subSkillName: request.subSkills.firstOrNull?.name ?? '',
+        currentLevel: request.skill.currentLevel.name,
+        recentStruggle: null,
+      );
 
-${LlmConstants.jsonInstructions}
+      final messages = [ChatMessage.humanText(prompt)];
 
-You must respond with valid JSON matching this schema:
-${LlmConstants.taskGenerationSchema}
-''';
-
-      final userPrompt = request.toPromptContext();
-      
-      final messages = [
-        ChatMessage.system(systemPrompt),
-        ChatMessage.humanText(userPrompt),
-      ];
-      
       final response = await _openAiClient!.invoke(PromptValue.chat(messages));
       final content = response.output.content;
-      
+
       return _parseTaskGenerationResponse(content);
     } catch (e) {
       return LlmResult.failure('API error: $e');
@@ -134,27 +115,19 @@ ${LlmConstants.taskGenerationSchema}
     if (!isAvailable) {
       return LlmResult.failure('BYOK service not configured');
     }
-    
+
     try {
-      final systemPrompt = '''
-${LlmConstants.struggleAnalysisSystemPrompt}
+      final prompt = PromptTemplates.wiseFeedback(
+        skillName: request.skillName,
+        struggleDescription: request.struggleDescription,
+        taskTitle: '',
+      );
 
-${LlmConstants.jsonInstructions}
+      final messages = [ChatMessage.humanText(prompt)];
 
-You must respond with valid JSON matching this schema:
-${LlmConstants.wiseFeedbackSchema}
-''';
-
-      final userPrompt = request.toPromptContext();
-      
-      final messages = [
-        ChatMessage.system(systemPrompt),
-        ChatMessage.humanText(userPrompt),
-      ];
-      
       final response = await _openAiClient!.invoke(PromptValue.chat(messages));
       final content = response.output.content;
-      
+
       return _parseWiseFeedbackResponse(content);
     } catch (e) {
       return LlmResult.failure('API error: $e');
@@ -166,16 +139,9 @@ ${LlmConstants.wiseFeedbackSchema}
   LlmResult<SkillAnalysisResult> _parseSkillAnalysisResponse(String response) {
     try {
       final cleanedJson = JsonValidator.cleanLlmResponse(response);
-      
-      if (cleanedJson == null) {
-        return LlmResult.failure(
-          'Could not find valid JSON in response',
-          rawResponse: response,
-        );
-      }
-      
+
       final json = jsonDecode(cleanedJson) as Map<String, dynamic>;
-      
+
       if (!json.containsKey('skill_name') ||
           !json.containsKey('skill_description') ||
           !json.containsKey('sub_skills')) {
@@ -184,7 +150,7 @@ ${LlmConstants.wiseFeedbackSchema}
           rawResponse: response,
         );
       }
-      
+
       final subSkillsJson = json['sub_skills'] as List<dynamic>;
       final subSkills = subSkillsJson.map((s) {
         final subSkillMap = s as Map<String, dynamic>;
@@ -195,10 +161,10 @@ ${LlmConstants.wiseFeedbackSchema}
           estimatedHours: subSkillMap['estimated_hours'] as int? ?? 10,
         );
       }).toList();
-      
+
       final learningPathJson = json['learning_path'] as List<dynamic>? ?? [];
       final learningPath = learningPathJson.cast<String>();
-      
+
       final result = SkillAnalysisResult(
         skillName: json['skill_name'] as String,
         skillDescription: json['skill_description'] as String,
@@ -206,7 +172,7 @@ ${LlmConstants.wiseFeedbackSchema}
         subSkills: subSkills,
         learningPath: learningPath,
       );
-      
+
       return LlmResult.success(result, rawResponse: response);
     } catch (e) {
       return LlmResult.failure(
@@ -216,31 +182,27 @@ ${LlmConstants.wiseFeedbackSchema}
     }
   }
 
-  LlmResult<List<TaskSuggestion>> _parseTaskGenerationResponse(String response) {
+  LlmResult<List<TaskSuggestion>> _parseTaskGenerationResponse(
+    String response,
+  ) {
     try {
       final cleanedJson = JsonValidator.cleanLlmResponse(response);
-      
-      if (cleanedJson == null) {
-        return LlmResult.failure(
-          'Could not find valid JSON in response',
-          rawResponse: response,
-        );
-      }
-      
+
       final json = jsonDecode(cleanedJson) as Map<String, dynamic>;
-      
+
       if (!json.containsKey('tasks')) {
         return LlmResult.failure(
           'Missing "tasks" field in response',
           rawResponse: response,
         );
       }
-      
+
       final tasksJson = json['tasks'] as List<dynamic>;
       final tasks = tasksJson.map((t) {
         final taskMap = t as Map<String, dynamic>;
-        final successCriteriaJson = taskMap['success_criteria'] as List<dynamic>? ?? [];
-        
+        final successCriteriaJson =
+            taskMap['success_criteria'] as List<dynamic>? ?? [];
+
         return TaskSuggestion(
           title: taskMap['title'] as String,
           description: taskMap['description'] as String,
@@ -251,7 +213,7 @@ ${LlmConstants.wiseFeedbackSchema}
           targetSubSkillName: taskMap['target_sub_skill'] as String?,
         );
       }).toList();
-      
+
       return LlmResult.success(tasks, rawResponse: response);
     } catch (e) {
       return LlmResult.failure(
@@ -264,16 +226,9 @@ ${LlmConstants.wiseFeedbackSchema}
   LlmResult<WiseFeedbackResult> _parseWiseFeedbackResponse(String response) {
     try {
       final cleanedJson = JsonValidator.cleanLlmResponse(response);
-      
-      if (cleanedJson == null) {
-        return LlmResult.failure(
-          'Could not find valid JSON in response',
-          rawResponse: response,
-        );
-      }
-      
+
       final json = jsonDecode(cleanedJson) as Map<String, dynamic>;
-      
+
       if (!json.containsKey('high_standards_message') ||
           !json.containsKey('belief_message')) {
         return LlmResult.failure(
@@ -281,16 +236,17 @@ ${LlmConstants.wiseFeedbackSchema}
           rawResponse: response,
         );
       }
-      
-      final suggestionsJson = json['actionable_suggestions'] as List<dynamic>? ?? [];
-      
+
+      final suggestionsJson =
+          json['actionable_suggestions'] as List<dynamic>? ?? [];
+
       final result = WiseFeedbackResult(
         highStandardsMessage: json['high_standards_message'] as String,
         beliefMessage: json['belief_message'] as String,
         actionableSuggestions: suggestionsJson.cast<String>(),
         encouragement: json['encouragement'] as String? ?? '',
       );
-      
+
       return LlmResult.success(result, rawResponse: response);
     } catch (e) {
       return LlmResult.failure(

@@ -12,15 +12,12 @@ import 'package:deliberate_practice_app/core/theme/app_colors.dart';
 class PracticeSessionScreen extends ConsumerStatefulWidget {
   final int skillId;
   final int? taskId;
-  
-  const PracticeSessionScreen({
-    super.key,
-    required this.skillId,
-    this.taskId,
-  });
-  
+
+  const PracticeSessionScreen({super.key, required this.skillId, this.taskId});
+
   @override
-  ConsumerState<PracticeSessionScreen> createState() => _PracticeSessionScreenState();
+  ConsumerState<PracticeSessionScreen> createState() =>
+      _PracticeSessionScreenState();
 }
 
 class _PracticeSessionScreenState extends ConsumerState<PracticeSessionScreen> {
@@ -28,66 +25,71 @@ class _PracticeSessionScreenState extends ConsumerState<PracticeSessionScreen> {
   bool _isPracticing = false;
   int _rating = 3;
   final _notesController = TextEditingController();
-  
+
   @override
   void initState() {
     super.initState();
     _startPractice();
   }
-  
+
   @override
   void dispose() {
     _notesController.dispose();
     super.dispose();
   }
-  
+
   void _startPractice() {
     setState(() {
       _startTime = DateTime.now();
       _isPracticing = true;
     });
   }
-  
+
   Future<void> _endPractice() async {
     if (_startTime == null) return;
-    
+
     final endTime = DateTime.now();
     final duration = endTime.difference(_startTime!);
-    
+
     final session = PracticeSession(
-      skillId: widget.skillId,
-      taskId: widget.taskId,
-      startTime: _startTime!,
-      endTime: endTime,
-      durationMinutes: duration.inMinutes,
+      taskId: widget.taskId!,
+      startedAt: _startTime!,
+      completedAt: endTime,
+      actualDurationSeconds: duration.inSeconds,
       rating: _rating,
-      notes: _notesController.text.trim().isEmpty ? null : _notesController.text.trim(),
+      notes: _notesController.text.trim().isEmpty
+          ? null
+          : _notesController.text.trim(),
       createdAt: DateTime.now(),
     );
-    
+
     try {
-      await ref.read(practiceSessionsProvider.notifier).createSession(session);
-      
-      // Update streak
-      await ref.read(practiceSessionsProvider.notifier).updateStreak(widget.skillId);
-      
+      await ref
+          .read(practiceSessionsProvider.notifier)
+          .startSession(session.taskId);
+
+      // Record practice for streak
+      await ref
+          .read(practiceSessionsProvider.notifier)
+          .recordPracticeForStreak(widget.skillId);
+
       // Mark task as completed if provided
       if (widget.taskId != null) {
         await ref.read(tasksProvider.notifier).completeTask(widget.taskId!);
       }
-      
+
       if (mounted) {
         _showCompletionDialog(duration);
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error saving session: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Error saving session: $e')));
       }
     }
   }
-  
+
   void _showCompletionDialog(Duration duration) {
     showDialog(
       context: context,
@@ -115,17 +117,20 @@ class _PracticeSessionScreenState extends ConsumerState<PracticeSessionScreen> {
       ),
     );
   }
-  
+
   @override
   Widget build(BuildContext context) {
     final skill = ref.watch(skillByIdProvider(widget.skillId));
-    final task = widget.taskId != null 
-        ? ref.watch(tasksProvider).valueOrNull?.firstWhere(
-            (t) => t.id == widget.taskId,
-            orElse: () => throw Exception('Task not found'),
-          )
+    final task = widget.taskId != null
+        ? ref
+              .watch(tasksProvider)
+              .valueOrNull
+              ?.firstWhere(
+                (t) => t.id == widget.taskId,
+                orElse: () => throw Exception('Task not found'),
+              )
         : null;
-    
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Practice Session'),
@@ -139,7 +144,7 @@ class _PracticeSessionScreenState extends ConsumerState<PracticeSessionScreen> {
           if (skillData == null) {
             return const Center(child: Text('Skill not found'));
           }
-          
+
           return SingleChildScrollView(
             padding: const EdgeInsets.all(16),
             child: Column(
@@ -153,7 +158,7 @@ class _PracticeSessionScreenState extends ConsumerState<PracticeSessionScreen> {
                   ),
                 ),
                 const SizedBox(height: 8),
-                
+
                 // Task info if available
                 if (task != null) ...[
                   Container(
@@ -193,29 +198,31 @@ class _PracticeSessionScreenState extends ConsumerState<PracticeSessionScreen> {
                             'Success Criteria:',
                             style: Theme.of(context).textTheme.labelMedium,
                           ),
-                          ...task.successCriteria.map((c) => Padding(
-                            padding: const EdgeInsets.only(top: 4),
-                            child: Row(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                const Text('• '),
-                                Expanded(child: Text(c)),
-                              ],
+                          ...task.successCriteria.map(
+                            (c) => Padding(
+                              padding: const EdgeInsets.only(top: 4),
+                              child: Row(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  const Text('• '),
+                                  Expanded(child: Text(c)),
+                                ],
+                              ),
                             ),
-                          )),
+                          ),
                         ],
                       ],
                     ),
                   ),
                   const SizedBox(height: 24),
                 ],
-                
+
                 // Timer
                 if (_isPracticing) ...[
                   _PracticeTimer(startTime: _startTime!),
                   const SizedBox(height: 32),
                 ],
-                
+
                 // Rating
                 Text(
                   'How did the practice feel?',
@@ -227,7 +234,7 @@ class _PracticeSessionScreenState extends ConsumerState<PracticeSessionScreen> {
                   onRatingChanged: (r) => setState(() => _rating = r),
                 ),
                 const SizedBox(height: 24),
-                
+
                 // Notes
                 TextField(
                   controller: _notesController,
@@ -240,7 +247,7 @@ class _PracticeSessionScreenState extends ConsumerState<PracticeSessionScreen> {
                   textCapitalization: TextCapitalization.sentences,
                 ),
                 const SizedBox(height: 32),
-                
+
                 // End session button
                 SizedBox(
                   width: double.infinity,
@@ -259,7 +266,7 @@ class _PracticeSessionScreenState extends ConsumerState<PracticeSessionScreen> {
       ),
     );
   }
-  
+
   void _showExitConfirmation() {
     showDialog(
       context: context,
@@ -287,16 +294,16 @@ class _PracticeSessionScreenState extends ConsumerState<PracticeSessionScreen> {
 /// Timer widget for practice session.
 class _PracticeTimer extends StatefulWidget {
   final DateTime startTime;
-  
+
   const _PracticeTimer({required this.startTime});
-  
+
   @override
   State<_PracticeTimer> createState() => _PracticeTimerState();
 }
 
 class _PracticeTimerState extends State<_PracticeTimer> {
   late Stream<Duration> _timerStream;
-  
+
   @override
   void initState() {
     super.initState();
@@ -305,7 +312,7 @@ class _PracticeTimerState extends State<_PracticeTimer> {
       (_) => DateTime.now().difference(widget.startTime),
     );
   }
-  
+
   @override
   Widget build(BuildContext context) {
     return StreamBuilder<Duration>(
@@ -314,7 +321,7 @@ class _PracticeTimerState extends State<_PracticeTimer> {
         final duration = snapshot.data ?? Duration.zero;
         final minutes = duration.inMinutes.toString().padLeft(2, '0');
         final seconds = (duration.inSeconds % 60).toString().padLeft(2, '0');
-        
+
         return Center(
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 24),
@@ -351,12 +358,9 @@ class _PracticeTimerState extends State<_PracticeTimer> {
 class _RatingSelector extends StatelessWidget {
   final int rating;
   final ValueChanged<int> onRatingChanged;
-  
-  const _RatingSelector({
-    required this.rating,
-    required this.onRatingChanged,
-  });
-  
+
+  const _RatingSelector({required this.rating, required this.onRatingChanged});
+
   @override
   Widget build(BuildContext context) {
     return Row(
@@ -371,13 +375,13 @@ class _RatingSelector extends StatelessWidget {
                 width: 48,
                 height: 48,
                 decoration: BoxDecoration(
-                  color: value <= rating 
-                      ? Theme.of(context).colorScheme.primary.withOpacity(0.1) 
+                  color: value <= rating
+                      ? Theme.of(context).colorScheme.primary.withAlpha(25)
                       : Colors.transparent,
                   shape: BoxShape.circle,
                   border: Border.all(
-                    color: value <= rating 
-                        ? Theme.of(context).colorScheme.primary 
+                    color: value <= rating
+                        ? Theme.of(context).colorScheme.primary
                         : Theme.of(context).colorScheme.outline,
                     width: 2,
                   ),
@@ -400,26 +404,38 @@ class _RatingSelector extends StatelessWidget {
       }),
     );
   }
-  
+
   String _getRatingEmoji(int value) {
     switch (value) {
-      case 1: return '😫';
-      case 2: return '😕';
-      case 3: return '😐';
-      case 4: return '🙂';
-      case 5: return '🎉';
-      default: return '😐';
+      case 1:
+        return '😫';
+      case 2:
+        return '😕';
+      case 3:
+        return '😐';
+      case 4:
+        return '🙂';
+      case 5:
+        return '🎉';
+      default:
+        return '😐';
     }
   }
-  
+
   String _getRatingLabel(int value) {
     switch (value) {
-      case 1: return 'Hard';
-      case 2: return 'Tough';
-      case 3: return 'OK';
-      case 4: return 'Good';
-      case 5: return 'Great';
-      default: return '';
+      case 1:
+        return 'Hard';
+      case 2:
+        return 'Tough';
+      case 3:
+        return 'OK';
+      case 4:
+        return 'Good';
+      case 5:
+        return 'Great';
+      default:
+        return '';
     }
   }
 }

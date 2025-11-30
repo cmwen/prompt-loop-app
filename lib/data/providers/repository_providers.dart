@@ -24,19 +24,25 @@ final taskRepositoryProvider = FutureProvider<TaskRepository>((ref) async {
 });
 
 /// Provider for the practice repository.
-final practiceRepositoryProvider = FutureProvider<PracticeRepository>((ref) async {
+final practiceRepositoryProvider = FutureProvider<PracticeRepository>((
+  ref,
+) async {
   final db = await ref.watch(databaseProvider.future);
   return PracticeRepositoryImpl(db);
 });
 
 /// Provider for the purpose repository.
-final purposeRepositoryProvider = FutureProvider<PurposeRepository>((ref) async {
+final purposeRepositoryProvider = FutureProvider<PurposeRepository>((
+  ref,
+) async {
   final db = await ref.watch(databaseProvider.future);
   return PurposeRepositoryImpl(db);
 });
 
 /// Provider for the settings repository.
-final settingsRepositoryProvider = FutureProvider<SettingsRepository>((ref) async {
+final settingsRepositoryProvider = FutureProvider<SettingsRepository>((
+  ref,
+) async {
   final db = await ref.watch(databaseProvider.future);
   return SettingsRepositoryImpl(db);
 });

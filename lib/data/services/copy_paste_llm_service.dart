@@ -21,7 +21,7 @@ typedef ResponseReceivedCallback = Future<String?> Function();
 class CopyPasteLlmService implements LlmService {
   final PromptReadyCallback onPromptReady;
   final ResponseReceivedCallback onResponseReceived;
-  
+
   const CopyPasteLlmService({
     required this.onPromptReady,
     required this.onResponseReceived,
@@ -39,16 +39,16 @@ class CopyPasteLlmService implements LlmService {
   ) async {
     // Generate the prompt
     final prompt = _buildSkillAnalysisPrompt(request);
-    
+
     // Notify that prompt is ready
     await onPromptReady(prompt);
-    
+
     // Wait for response
     final response = await onResponseReceived();
     if (response == null || response.isEmpty) {
       return LlmResult.failure('No response received');
     }
-    
+
     // Parse and validate response
     return _parseSkillAnalysisResponse(response);
   }
@@ -58,14 +58,14 @@ class CopyPasteLlmService implements LlmService {
     TaskGenerationRequest request,
   ) async {
     final prompt = _buildTaskGenerationPrompt(request);
-    
+
     await onPromptReady(prompt);
-    
+
     final response = await onResponseReceived();
     if (response == null || response.isEmpty) {
       return LlmResult.failure('No response received');
     }
-    
+
     return _parseTaskGenerationResponse(response);
   }
 
@@ -74,65 +74,42 @@ class CopyPasteLlmService implements LlmService {
     StruggleAnalysisRequest request,
   ) async {
     final prompt = _buildStruggleAnalysisPrompt(request);
-    
+
     await onPromptReady(prompt);
-    
+
     final response = await onResponseReceived();
     if (response == null || response.isEmpty) {
       return LlmResult.failure('No response received');
     }
-    
+
     return _parseWiseFeedbackResponse(response);
   }
 
   // -- Prompt Builders --
 
   String _buildSkillAnalysisPrompt(SkillAnalysisRequest request) {
-    return '''
-${LlmConstants.skillAnalysisSystemPrompt}
-
-${LlmConstants.jsonInstructions}
-
-## User Context
-${request.toPromptContext()}
-
-## Expected JSON Response Format
-${LlmConstants.skillAnalysisSchema}
-
-Please analyze this skill and provide your response in the exact JSON format above.
-''';
+    return PromptTemplates.skillAnalysis(
+      skillName: request.skillDescription,
+      userContext: request.toPromptContext(),
+      purposeStatement: request.goals,
+    );
   }
 
   String _buildTaskGenerationPrompt(TaskGenerationRequest request) {
-    return '''
-${LlmConstants.taskGenerationSystemPrompt}
-
-${LlmConstants.jsonInstructions}
-
-## User Context
-${request.toPromptContext()}
-
-## Expected JSON Response Format
-${LlmConstants.taskGenerationSchema}
-
-Please generate deliberate practice tasks in the exact JSON format above.
-''';
+    return PromptTemplates.taskGeneration(
+      skillName: request.skill.name,
+      subSkillName: request.subSkills.firstOrNull?.name ?? '',
+      currentLevel: request.skill.currentLevel.name,
+      recentStruggle: null,
+    );
   }
 
   String _buildStruggleAnalysisPrompt(StruggleAnalysisRequest request) {
-    return '''
-${LlmConstants.struggleAnalysisSystemPrompt}
-
-${LlmConstants.jsonInstructions}
-
-## User Context
-${request.toPromptContext()}
-
-## Expected JSON Response Format
-${LlmConstants.wiseFeedbackSchema}
-
-Please provide wise feedback in the exact JSON format above.
-''';
+    return PromptTemplates.wiseFeedback(
+      skillName: request.skillName,
+      struggleDescription: request.struggleDescription,
+      taskTitle: '',
+    );
   }
 
   // -- Response Parsers --
@@ -140,16 +117,9 @@ Please provide wise feedback in the exact JSON format above.
   LlmResult<SkillAnalysisResult> _parseSkillAnalysisResponse(String response) {
     try {
       final cleanedJson = JsonValidator.cleanLlmResponse(response);
-      
-      if (cleanedJson == null) {
-        return LlmResult.failure(
-          'Could not find valid JSON in response',
-          rawResponse: response,
-        );
-      }
-      
+
       final json = jsonDecode(cleanedJson) as Map<String, dynamic>;
-      
+
       // Validate required fields
       if (!json.containsKey('skill_name') ||
           !json.containsKey('skill_description') ||
@@ -159,7 +129,7 @@ Please provide wise feedback in the exact JSON format above.
           rawResponse: response,
         );
       }
-      
+
       // Parse sub-skills
       final subSkillsJson = json['sub_skills'] as List<dynamic>;
       final subSkills = subSkillsJson.map((s) {
@@ -171,11 +141,11 @@ Please provide wise feedback in the exact JSON format above.
           estimatedHours: subSkillMap['estimated_hours'] as int? ?? 10,
         );
       }).toList();
-      
+
       // Parse learning path
       final learningPathJson = json['learning_path'] as List<dynamic>? ?? [];
       final learningPath = learningPathJson.cast<String>();
-      
+
       final result = SkillAnalysisResult(
         skillName: json['skill_name'] as String,
         skillDescription: json['skill_description'] as String,
@@ -183,7 +153,7 @@ Please provide wise feedback in the exact JSON format above.
         subSkills: subSkills,
         learningPath: learningPath,
       );
-      
+
       return LlmResult.success(result, rawResponse: response);
     } catch (e) {
       return LlmResult.failure(
@@ -193,31 +163,27 @@ Please provide wise feedback in the exact JSON format above.
     }
   }
 
-  LlmResult<List<TaskSuggestion>> _parseTaskGenerationResponse(String response) {
+  LlmResult<List<TaskSuggestion>> _parseTaskGenerationResponse(
+    String response,
+  ) {
     try {
       final cleanedJson = JsonValidator.cleanLlmResponse(response);
-      
-      if (cleanedJson == null) {
-        return LlmResult.failure(
-          'Could not find valid JSON in response',
-          rawResponse: response,
-        );
-      }
-      
+
       final json = jsonDecode(cleanedJson) as Map<String, dynamic>;
-      
+
       if (!json.containsKey('tasks')) {
         return LlmResult.failure(
           'Missing "tasks" field in response',
           rawResponse: response,
         );
       }
-      
+
       final tasksJson = json['tasks'] as List<dynamic>;
       final tasks = tasksJson.map((t) {
         final taskMap = t as Map<String, dynamic>;
-        final successCriteriaJson = taskMap['success_criteria'] as List<dynamic>? ?? [];
-        
+        final successCriteriaJson =
+            taskMap['success_criteria'] as List<dynamic>? ?? [];
+
         return TaskSuggestion(
           title: taskMap['title'] as String,
           description: taskMap['description'] as String,
@@ -228,7 +194,7 @@ Please provide wise feedback in the exact JSON format above.
           targetSubSkillName: taskMap['target_sub_skill'] as String?,
         );
       }).toList();
-      
+
       return LlmResult.success(tasks, rawResponse: response);
     } catch (e) {
       return LlmResult.failure(
@@ -241,16 +207,9 @@ Please provide wise feedback in the exact JSON format above.
   LlmResult<WiseFeedbackResult> _parseWiseFeedbackResponse(String response) {
     try {
       final cleanedJson = JsonValidator.cleanLlmResponse(response);
-      
-      if (cleanedJson == null) {
-        return LlmResult.failure(
-          'Could not find valid JSON in response',
-          rawResponse: response,
-        );
-      }
-      
+
       final json = jsonDecode(cleanedJson) as Map<String, dynamic>;
-      
+
       if (!json.containsKey('high_standards_message') ||
           !json.containsKey('belief_message')) {
         return LlmResult.failure(
@@ -258,16 +217,17 @@ Please provide wise feedback in the exact JSON format above.
           rawResponse: response,
         );
       }
-      
-      final suggestionsJson = json['actionable_suggestions'] as List<dynamic>? ?? [];
-      
+
+      final suggestionsJson =
+          json['actionable_suggestions'] as List<dynamic>? ?? [];
+
       final result = WiseFeedbackResult(
         highStandardsMessage: json['high_standards_message'] as String,
         beliefMessage: json['belief_message'] as String,
         actionableSuggestions: suggestionsJson.cast<String>(),
         encouragement: json['encouragement'] as String? ?? '',
       );
-      
+
       return LlmResult.success(result, rawResponse: response);
     } catch (e) {
       return LlmResult.failure(
@@ -342,10 +302,10 @@ class CopyPasteWorkflowState {
   });
 
   const CopyPasteWorkflowState.initial()
-      : currentStep = CopyPasteStep.idle,
-        currentPrompt = null,
-        pastedResponse = null,
-        errorMessage = null;
+    : currentStep = CopyPasteStep.idle,
+      currentPrompt = null,
+      pastedResponse = null,
+      errorMessage = null;
 
   CopyPasteWorkflowState copyWith({
     CopyPasteStep? currentStep,
@@ -366,19 +326,19 @@ class CopyPasteWorkflowState {
 enum CopyPasteStep {
   /// No active operation
   idle,
-  
+
   /// Prompt is ready to be copied
   promptReady,
-  
+
   /// Waiting for user to paste response
   awaitingResponse,
-  
+
   /// Processing the pasted response
   processing,
-  
+
   /// Operation completed successfully
   completed,
-  
+
   /// Error occurred
   error,
 }

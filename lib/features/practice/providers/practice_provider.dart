@@ -5,54 +5,63 @@ import 'package:deliberate_practice_app/domain/entities/streak.dart';
 import 'package:deliberate_practice_app/domain/entities/struggle_entry.dart';
 
 /// Provider for all practice sessions.
-final practiceSessionsProvider = StateNotifierProvider<PracticeSessionsNotifier, AsyncValue<List<PracticeSession>>>((ref) {
-  return PracticeSessionsNotifier(ref);
-});
+final practiceSessionsProvider =
+    StateNotifierProvider<
+      PracticeSessionsNotifier,
+      AsyncValue<List<PracticeSession>>
+    >((ref) {
+      return PracticeSessionsNotifier(ref);
+    });
 
-/// Provider for practice sessions by skill.
-final sessionsBySkillProvider = FutureProvider.family<List<PracticeSession>, int>((ref, skillId) async {
-  final repository = await ref.watch(practiceRepositoryProvider.future);
-  return repository.getSessionsBySkill(skillId);
-});
+/// Provider for practice sessions by task.
+final sessionsByTaskProvider =
+    FutureProvider.family<List<PracticeSession>, int>((ref, taskId) async {
+      final repository = await ref.watch(practiceRepositoryProvider.future);
+      return repository.getSessionsForTask(taskId);
+    });
 
 /// Provider for practice sessions by date range.
-final sessionsByDateRangeProvider = FutureProvider.family<List<PracticeSession>, ({DateTime start, DateTime end})>((ref, range) async {
-  final repository = await ref.watch(practiceRepositoryProvider.future);
-  return repository.getSessionsByDateRange(range.start, range.end);
-});
+final sessionsByDateRangeProvider =
+    FutureProvider.family<
+      List<PracticeSession>,
+      ({DateTime start, DateTime end})
+    >((ref, range) async {
+      final repository = await ref.watch(practiceRepositoryProvider.future);
+      return repository.getSessionsForDateRange(range.start, range.end);
+    });
 
 /// Provider for today's sessions.
-final todaysSessionsProvider = FutureProvider<List<PracticeSession>>((ref) async {
+final todaysSessionsProvider = FutureProvider<List<PracticeSession>>((
+  ref,
+) async {
   final repository = await ref.watch(practiceRepositoryProvider.future);
   final now = DateTime.now();
   final startOfDay = DateTime(now.year, now.month, now.day);
   final endOfDay = startOfDay.add(const Duration(days: 1));
-  return repository.getSessionsByDateRange(startOfDay, endOfDay);
+  return repository.getSessionsForDateRange(startOfDay, endOfDay);
 });
 
-/// Provider for current streak for a skill.
-final currentStreakProvider = FutureProvider.family<Streak?, int>((ref, skillId) async {
+/// Provider for streak for a skill.
+final streakProvider = FutureProvider.family<Streak, int>((ref, skillId) async {
   final repository = await ref.watch(practiceRepositoryProvider.future);
-  return repository.getCurrentStreak(skillId);
+  return repository.getStreak(skillId);
 });
 
-/// Provider for longest streak for a skill.
-final longestStreakProvider = FutureProvider.family<Streak?, int>((ref, skillId) async {
-  final repository = await ref.watch(practiceRepositoryProvider.future);
-  return repository.getLongestStreak(skillId);
-});
-
-/// Provider for struggle entries by skill.
-final struggleEntriesBySkillProvider = FutureProvider.family<List<StruggleEntry>, int>((ref, skillId) async {
-  final repository = await ref.watch(practiceRepositoryProvider.future);
-  return repository.getStruggleEntriesBySkill(skillId);
-});
+/// Provider for struggle entries by session.
+final struggleEntriesBySessionProvider =
+    FutureProvider.family<List<StruggleEntry>, int>((ref, sessionId) async {
+      final repository = await ref.watch(practiceRepositoryProvider.future);
+      return repository.getStruggleEntriesForSession(sessionId);
+    });
 
 /// Provider for total practice time today.
 final todaysPracticeTimeProvider = FutureProvider<Duration>((ref) async {
   final sessions = await ref.watch(todaysSessionsProvider.future);
-  final totalMinutes = sessions.fold<int>(0, (sum, s) => sum + s.durationMinutes);
-  return Duration(minutes: totalMinutes);
+  final totalSeconds = sessions.fold<int>(
+    0,
+    (sum, s) => sum + (s.actualDurationSeconds ?? 0),
+  );
+  return Duration(seconds: totalSeconds);
 });
 
 /// Provider for total practice time this week.
@@ -61,19 +70,23 @@ final weeklyPracticeTimeProvider = FutureProvider<Duration>((ref) async {
   final now = DateTime.now();
   final startOfWeek = now.subtract(Duration(days: now.weekday - 1));
   final start = DateTime(startOfWeek.year, startOfWeek.month, startOfWeek.day);
-  final sessions = await repository.getSessionsByDateRange(start, now);
-  final totalMinutes = sessions.fold<int>(0, (sum, s) => sum + s.durationMinutes);
-  return Duration(minutes: totalMinutes);
+  final sessions = await repository.getSessionsForDateRange(start, now);
+  final totalSeconds = sessions.fold<int>(
+    0,
+    (sum, s) => sum + (s.actualDurationSeconds ?? 0),
+  );
+  return Duration(seconds: totalSeconds);
 });
 
 /// Practice sessions state notifier.
-class PracticeSessionsNotifier extends StateNotifier<AsyncValue<List<PracticeSession>>> {
+class PracticeSessionsNotifier
+    extends StateNotifier<AsyncValue<List<PracticeSession>>> {
   final Ref _ref;
-  
+
   PracticeSessionsNotifier(this._ref) : super(const AsyncValue.loading()) {
     loadSessions();
   }
-  
+
   Future<void> loadSessions() async {
     try {
       state = const AsyncValue.loading();
@@ -81,94 +94,84 @@ class PracticeSessionsNotifier extends StateNotifier<AsyncValue<List<PracticeSes
       // Get sessions from the last 30 days by default
       final now = DateTime.now();
       final thirtyDaysAgo = now.subtract(const Duration(days: 30));
-      final sessions = await repository.getSessionsByDateRange(thirtyDaysAgo, now);
+      final sessions = await repository.getSessionsForDateRange(
+        thirtyDaysAgo,
+        now,
+      );
       state = AsyncValue.data(sessions);
     } catch (e, st) {
       state = AsyncValue.error(e, st);
     }
   }
-  
-  Future<int> createSession(PracticeSession session) async {
+
+  Future<int> startSession(int taskId) async {
     try {
       final repository = await _ref.read(practiceRepositoryProvider.future);
-      final id = await repository.createSession(session);
+      final id = await repository.startSession(taskId);
       await loadSessions();
-      _invalidateRelatedProviders(session.skillId);
+      _invalidateRelatedProviders(taskId);
       return id;
     } catch (e) {
       rethrow;
     }
   }
-  
-  Future<void> updateSession(PracticeSession session) async {
+
+  Future<void> completeSession({
+    required int sessionId,
+    required int durationSeconds,
+    String? notes,
+    int? rating,
+    List<String>? criteriaMet,
+  }) async {
     try {
       final repository = await _ref.read(practiceRepositoryProvider.future);
-      await repository.updateSession(session);
+      await repository.completeSession(
+        sessionId: sessionId,
+        durationSeconds: durationSeconds,
+        notes: notes,
+        rating: rating,
+        criteriaMet: criteriaMet,
+      );
       await loadSessions();
-      _invalidateRelatedProviders(session.skillId);
+      _invalidateRelatedProviders(0);
     } catch (e) {
       rethrow;
     }
   }
-  
-  Future<void> deleteSession(int id, int skillId) async {
+
+  Future<int> createStruggleEntry({
+    required int sessionId,
+    required String content,
+    String? wiseFeedback,
+  }) async {
     try {
       final repository = await _ref.read(practiceRepositoryProvider.future);
-      await repository.deleteSession(id);
-      await loadSessions();
-      _invalidateRelatedProviders(skillId);
-    } catch (e) {
-      rethrow;
-    }
-  }
-  
-  Future<int> createStruggleEntry(StruggleEntry entry) async {
-    try {
-      final repository = await _ref.read(practiceRepositoryProvider.future);
-      final id = await repository.createStruggleEntry(entry);
-      _ref.invalidate(struggleEntriesBySkillProvider(entry.skillId));
+      final id = await repository.saveStruggleEntry(
+        sessionId: sessionId,
+        content: content,
+        wiseFeedback: wiseFeedback,
+      );
+      _ref.invalidate(struggleEntriesBySessionProvider(sessionId));
       return id;
     } catch (e) {
       rethrow;
     }
   }
-  
-  Future<void> updateStruggleEntry(StruggleEntry entry) async {
+
+  Future<void> recordPracticeForStreak(int skillId) async {
     try {
       final repository = await _ref.read(practiceRepositoryProvider.future);
-      await repository.updateStruggleEntry(entry);
-      _ref.invalidate(struggleEntriesBySkillProvider(entry.skillId));
+      await repository.recordPracticeForStreak(skillId);
+      _ref.invalidate(streakProvider(skillId));
     } catch (e) {
       rethrow;
     }
   }
-  
-  Future<void> deleteStruggleEntry(int id, int skillId) async {
-    try {
-      final repository = await _ref.read(practiceRepositoryProvider.future);
-      await repository.deleteStruggleEntry(id);
-      _ref.invalidate(struggleEntriesBySkillProvider(skillId));
-    } catch (e) {
-      rethrow;
-    }
-  }
-  
-  Future<void> updateStreak(int skillId, {bool practiced = true}) async {
-    try {
-      final repository = await _ref.read(practiceRepositoryProvider.future);
-      await repository.updateStreak(skillId, practiced: practiced);
-      _ref.invalidate(currentStreakProvider(skillId));
-      _ref.invalidate(longestStreakProvider(skillId));
-    } catch (e) {
-      rethrow;
-    }
-  }
-  
-  void _invalidateRelatedProviders(int skillId) {
-    _ref.invalidate(sessionsBySkillProvider(skillId));
+
+  void _invalidateRelatedProviders(int taskId) {
+    _ref.invalidate(sessionsByTaskProvider(taskId));
     _ref.invalidate(todaysSessionsProvider);
     _ref.invalidate(todaysPracticeTimeProvider);
     _ref.invalidate(weeklyPracticeTimeProvider);
-    _ref.invalidate(currentStreakProvider(skillId));
   }
 }

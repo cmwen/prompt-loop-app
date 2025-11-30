@@ -104,7 +104,9 @@ class TaskGenerationRequest {
     buffer.writeln('Current level: ${skill.currentLevel.name}');
     buffer.writeln('Sub-skills to focus on:');
     for (final subSkill in subSkills) {
-      buffer.writeln('  - ${subSkill.name} (${subSkill.priority.name} priority)');
+      buffer.writeln(
+        '  - ${subSkill.name} (${subSkill.priority.name} priority)',
+      );
     }
     if (focusArea != null) {
       buffer.writeln('Focus area: $focusArea');

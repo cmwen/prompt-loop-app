@@ -20,30 +20,28 @@ class DatabaseFailure extends Failure {
 class LlmFailure extends Failure {
   const LlmFailure({required super.message, super.code});
 
-  factory LlmFailure.apiError(String details) => LlmFailure(
-        message: 'API error: $details',
-        code: 'LLM_API_ERROR',
-      );
+  factory LlmFailure.apiError(String details) =>
+      LlmFailure(message: 'API error: $details', code: 'LLM_API_ERROR');
 
   factory LlmFailure.parseError(String details) => LlmFailure(
-        message: 'Failed to parse response: $details',
-        code: 'LLM_PARSE_ERROR',
-      );
+    message: 'Failed to parse response: $details',
+    code: 'LLM_PARSE_ERROR',
+  );
 
   factory LlmFailure.validationError(List<String> errors) => LlmFailure(
-        message: 'Validation failed: ${errors.join(", ")}',
-        code: 'LLM_VALIDATION_ERROR',
-      );
+    message: 'Validation failed: ${errors.join(", ")}',
+    code: 'LLM_VALIDATION_ERROR',
+  );
 
   factory LlmFailure.networkError() => const LlmFailure(
-        message: 'Network error. Please check your connection.',
-        code: 'LLM_NETWORK_ERROR',
-      );
+    message: 'Network error. Please check your connection.',
+    code: 'LLM_NETWORK_ERROR',
+  );
 
   factory LlmFailure.invalidApiKey() => const LlmFailure(
-        message: 'Invalid API key. Please check your settings.',
-        code: 'LLM_INVALID_API_KEY',
-      );
+    message: 'Invalid API key. Please check your settings.',
+    code: 'LLM_INVALID_API_KEY',
+  );
 }
 
 /// Validation failure

@@ -8,7 +8,7 @@ import 'package:deliberate_practice_app/features/skills/providers/skills_provide
 /// Screen for adding a new skill.
 class AddSkillScreen extends ConsumerStatefulWidget {
   const AddSkillScreen({super.key});
-  
+
   @override
   ConsumerState<AddSkillScreen> createState() => _AddSkillScreenState();
 }
@@ -19,44 +19,43 @@ class _AddSkillScreenState extends ConsumerState<AddSkillScreen> {
   final _descriptionController = TextEditingController();
   SkillLevel _selectedLevel = SkillLevel.beginner;
   bool _isLoading = false;
-  
+
   @override
   void dispose() {
     _nameController.dispose();
     _descriptionController.dispose();
     super.dispose();
   }
-  
+
   Future<void> _saveSkill() async {
     if (!_formKey.currentState!.validate()) return;
-    
+
     setState(() => _isLoading = true);
-    
+
     try {
       final skill = Skill(
         name: _nameController.text.trim(),
-        description: _descriptionController.text.trim().isEmpty 
-            ? null 
+        description: _descriptionController.text.trim().isEmpty
+            ? null
             : _descriptionController.text.trim(),
-        level: _selectedLevel,
+        currentLevel: _selectedLevel,
         createdAt: DateTime.now(),
         updatedAt: DateTime.now(),
       );
-      
-      final skillId = await ref.read(skillsProvider.notifier).createSkill(skill);
-      
+
+      final skillId = await ref
+          .read(skillsProvider.notifier)
+          .createSkill(skill);
+
       if (mounted) {
         // Navigate to purpose setup for the new skill
-        context.goNamed(
-          AppRoutes.purposeSetup,
-          extra: skillId,
-        );
+        context.goNamed(AppRoutes.purposeSetup, extra: skillId);
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error creating skill: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Error creating skill: $e')));
       }
     } finally {
       if (mounted) {
@@ -64,13 +63,11 @@ class _AddSkillScreenState extends ConsumerState<AddSkillScreen> {
       }
     }
   }
-  
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Add Skill'),
-      ),
+      appBar: AppBar(title: const Text('Add Skill')),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Form(
@@ -91,7 +88,7 @@ class _AddSkillScreenState extends ConsumerState<AddSkillScreen> {
                 ),
               ),
               const SizedBox(height: 24),
-              
+
               // Skill name
               TextFormField(
                 controller: _nameController,
@@ -109,7 +106,7 @@ class _AddSkillScreenState extends ConsumerState<AddSkillScreen> {
                 },
               ),
               const SizedBox(height: 16),
-              
+
               // Description
               TextFormField(
                 controller: _descriptionController,
@@ -122,7 +119,7 @@ class _AddSkillScreenState extends ConsumerState<AddSkillScreen> {
                 textCapitalization: TextCapitalization.sentences,
               ),
               const SizedBox(height: 24),
-              
+
               // Current level
               Text(
                 'Your Current Level',
@@ -136,19 +133,21 @@ class _AddSkillScreenState extends ConsumerState<AddSkillScreen> {
                 ),
               ),
               const SizedBox(height: 12),
-              
-              ...SkillLevel.values.map((level) => RadioListTile<SkillLevel>(
-                title: Text(level.displayName),
-                subtitle: Text(_getLevelDescription(level)),
-                value: level,
-                groupValue: _selectedLevel,
-                onChanged: (value) {
-                  setState(() => _selectedLevel = value!);
-                },
-              )),
-              
+
+              ...SkillLevel.values.map(
+                (level) => RadioListTile<SkillLevel>(
+                  title: Text(level.displayName),
+                  subtitle: Text(_getLevelDescription(level)),
+                  value: level,
+                  groupValue: _selectedLevel,
+                  onChanged: (value) {
+                    setState(() => _selectedLevel = value!);
+                  },
+                ),
+              ),
+
               const SizedBox(height: 24),
-              
+
               // AI suggestion hint
               Container(
                 padding: const EdgeInsets.all(16),
@@ -169,15 +168,21 @@ class _AddSkillScreenState extends ConsumerState<AddSkillScreen> {
                         children: [
                           Text(
                             'AI will help next',
-                            style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                              color: Theme.of(context).colorScheme.onPrimaryContainer,
-                            ),
+                            style: Theme.of(context).textTheme.titleSmall
+                                ?.copyWith(
+                                  color: Theme.of(
+                                    context,
+                                  ).colorScheme.onPrimaryContainer,
+                                ),
                           ),
                           Text(
                             'After saving, you can use AI to break down this skill into sub-skills and generate practice tasks.',
-                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              color: Theme.of(context).colorScheme.onPrimaryContainer,
-                            ),
+                            style: Theme.of(context).textTheme.bodySmall
+                                ?.copyWith(
+                                  color: Theme.of(
+                                    context,
+                                  ).colorScheme.onPrimaryContainer,
+                                ),
                           ),
                         ],
                       ),
@@ -186,7 +191,7 @@ class _AddSkillScreenState extends ConsumerState<AddSkillScreen> {
                 ),
               ),
               const SizedBox(height: 32),
-              
+
               // Save button
               SizedBox(
                 width: double.infinity,
@@ -207,15 +212,13 @@ class _AddSkillScreenState extends ConsumerState<AddSkillScreen> {
       ),
     );
   }
-  
+
   String _getLevelDescription(SkillLevel level) {
     switch (level) {
       case SkillLevel.beginner:
         return 'Just starting out, learning the basics';
       case SkillLevel.intermediate:
         return 'Know the basics, building initial competence';
-      case SkillLevel.intermediate:
-        return 'Can work independently, developing proficiency';
       case SkillLevel.advanced:
         return 'Good understanding, can handle complex situations';
       case SkillLevel.expert:

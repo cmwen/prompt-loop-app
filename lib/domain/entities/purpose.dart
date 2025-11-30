@@ -101,11 +101,11 @@ class Purpose extends Equatable {
 
   @override
   List<Object?> get props => [
-        id,
-        skillId,
-        statement,
-        category,
-        createdAt,
-        updatedAt,
-      ];
+    id,
+    skillId,
+    statement,
+    category,
+    createdAt,
+    updatedAt,
+  ];
 }

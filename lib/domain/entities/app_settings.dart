@@ -96,7 +96,7 @@ class AppSettings extends Equatable {
     this.streakRecoveryEnabled = true,
     this.onboardingCompleted = false,
   });
-  
+
   bool get isDarkMode => themeMode == ThemeMode.dark;
 
   /// Create a copy with modified fields
@@ -119,21 +119,22 @@ class AppSettings extends Equatable {
       notificationsEnabled: notificationsEnabled ?? this.notificationsEnabled,
       dailyReminderTime: dailyReminderTime ?? this.dailyReminderTime,
       showPurposeReminder: showPurposeReminder ?? this.showPurposeReminder,
-      streakRecoveryEnabled: streakRecoveryEnabled ?? this.streakRecoveryEnabled,
+      streakRecoveryEnabled:
+          streakRecoveryEnabled ?? this.streakRecoveryEnabled,
       onboardingCompleted: onboardingCompleted ?? this.onboardingCompleted,
     );
   }
 
   @override
   List<Object?> get props => [
-        llmMode,
-        llmProvider,
-        llmModel,
-        themeMode,
-        notificationsEnabled,
-        dailyReminderTime,
-        showPurposeReminder,
-        streakRecoveryEnabled,
-        onboardingCompleted,
-      ];
+    llmMode,
+    llmProvider,
+    llmModel,
+    themeMode,
+    notificationsEnabled,
+    dailyReminderTime,
+    showPurposeReminder,
+    streakRecoveryEnabled,
+    onboardingCompleted,
+  ];
 }

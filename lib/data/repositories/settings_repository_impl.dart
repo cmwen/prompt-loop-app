@@ -23,13 +23,15 @@ class SettingsRepositoryImpl implements SettingsRepository {
 
     // Also check onboarding status from users table
     final users = await _db.query(DbConstants.tableUsers, limit: 1);
-    final onboardingCompleted = users.isNotEmpty &&
+    final onboardingCompleted =
+        users.isNotEmpty &&
         (users.first[DbConstants.colOnboardingCompleted] as int?) == 1;
 
     return AppSettings(
       llmMode: LlmMode.fromString(settingsMap['llm_mode'] ?? 'copy_paste'),
-      llmProvider:
-          LlmProvider.fromString(settingsMap['llm_provider'] ?? 'openai'),
+      llmProvider: LlmProvider.fromString(
+        settingsMap['llm_provider'] ?? 'openai',
+      ),
       themeMode: ThemeMode.fromString(settingsMap['theme_mode'] ?? 'system'),
       notificationsEnabled:
           settingsMap['notification_enabled']?.toLowerCase() == 'true',
@@ -44,30 +46,22 @@ class SettingsRepositoryImpl implements SettingsRepository {
 
   @override
   Future<void> saveSetting(String key, String value) async {
-    await _db.insert(
-      DbConstants.tableSettings,
-      {
-        DbConstants.colKey: key,
-        DbConstants.colValue: value,
-        DbConstants.colUpdatedAt: DateTime.now().toIsoString(),
-      },
-      conflictAlgorithm: ConflictAlgorithm.replace,
-    );
+    await _db.insert(DbConstants.tableSettings, {
+      DbConstants.colKey: key,
+      DbConstants.colValue: value,
+      DbConstants.colUpdatedAt: DateTime.now().toIsoString(),
+    }, conflictAlgorithm: ConflictAlgorithm.replace);
   }
 
   @override
   Future<void> saveSettings(Map<String, String> settings) async {
     await _db.transaction((txn) async {
       for (final entry in settings.entries) {
-        await txn.insert(
-          DbConstants.tableSettings,
-          {
-            DbConstants.colKey: entry.key,
-            DbConstants.colValue: entry.value,
-            DbConstants.colUpdatedAt: DateTime.now().toIsoString(),
-          },
-          conflictAlgorithm: ConflictAlgorithm.replace,
-        );
+        await txn.insert(DbConstants.tableSettings, {
+          DbConstants.colKey: entry.key,
+          DbConstants.colValue: entry.value,
+          DbConstants.colUpdatedAt: DateTime.now().toIsoString(),
+        }, conflictAlgorithm: ConflictAlgorithm.replace);
       }
     });
   }
@@ -85,10 +79,9 @@ class SettingsRepositoryImpl implements SettingsRepository {
 
   @override
   Future<void> completeOnboarding() async {
-    await _db.update(
-      DbConstants.tableUsers,
-      {DbConstants.colOnboardingCompleted: 1},
-    );
+    await _db.update(DbConstants.tableUsers, {
+      DbConstants.colOnboardingCompleted: 1,
+    });
   }
 
   @override

@@ -82,7 +82,8 @@ class PurposeRepositoryImpl implements PurposeRepository {
       category: PurposeCategory.fromString(
         map[DbConstants.colCategory] as String? ?? 'other',
       ),
-      createdAt: (map[DbConstants.colCreatedAt] as String).tryParseDateTime() ??
+      createdAt:
+          (map[DbConstants.colCreatedAt] as String).tryParseDateTime() ??
           DateTime.now(),
       updatedAt: (map[DbConstants.colUpdatedAt] as String?)?.tryParseDateTime(),
     );

@@ -10,12 +10,12 @@ import 'package:deliberate_practice_app/shared/widgets/loading_indicator.dart';
 /// Tasks screen showing all tasks grouped by status.
 class TasksScreen extends ConsumerWidget {
   const TasksScreen({super.key});
-  
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final todaysTasks = ref.watch(todaysTasksProvider);
     final upcomingTasks = ref.watch(upcomingTasksProvider);
-    
+
     return DefaultTabController(
       length: 2,
       child: Scaffold(
@@ -42,7 +42,7 @@ class TasksScreen extends ConsumerWidget {
                   if (tasks.isEmpty) {
                     return const AllTasksCompletedState();
                   }
-                  
+
                   return ListView.builder(
                     padding: const EdgeInsets.all(16),
                     itemCount: tasks.length,
@@ -58,22 +58,27 @@ class TasksScreen extends ConsumerWidget {
                           onTap: () {
                             context.goNamed(
                               AppRoutes.practiceSession,
-                              pathParameters: {'skillId': task.skillId.toString()},
+                              pathParameters: {
+                                'skillId': task.skillId.toString(),
+                              },
                               extra: task.id,
                             );
                           },
                           onComplete: () {
-                            ref.read(tasksProvider.notifier).completeTask(task.id!);
+                            ref
+                                .read(tasksProvider.notifier)
+                                .completeTask(task.id!);
                           },
                         ),
                       );
                     },
                   );
                 },
-                loading: () => const LoadingIndicator(message: 'Loading tasks...'),
+                loading: () =>
+                    const LoadingIndicator(message: 'Loading tasks...'),
                 error: (e, _) => Center(child: Text('Error: $e')),
               ),
-              
+
               // All tasks
               upcomingTasks.when(
                 data: (tasks) {
@@ -87,7 +92,7 @@ class TasksScreen extends ConsumerWidget {
                       },
                     );
                   }
-                  
+
                   return ListView.builder(
                     padding: const EdgeInsets.all(16),
                     itemCount: tasks.length,
@@ -97,21 +102,28 @@ class TasksScreen extends ConsumerWidget {
                         padding: const EdgeInsets.only(bottom: 8),
                         child: TaskCard(
                           title: task.title,
-                          subtitle: '${task.frequency.name} • ${task.durationMinutes} min',
+                          subtitle:
+                              '${task.frequency.name} • ${task.durationMinutes} min',
                           difficulty: task.difficulty,
                           isCompleted: task.isCompleted,
                           onTap: () {
                             context.goNamed(
                               AppRoutes.practiceSession,
-                              pathParameters: {'skillId': task.skillId.toString()},
+                              pathParameters: {
+                                'skillId': task.skillId.toString(),
+                              },
                               extra: task.id,
                             );
                           },
                           onComplete: () {
                             if (task.isCompleted) {
-                              ref.read(tasksProvider.notifier).uncompleteTask(task.id!);
+                              ref
+                                  .read(tasksProvider.notifier)
+                                  .uncompleteTask(task.id!);
                             } else {
-                              ref.read(tasksProvider.notifier).completeTask(task.id!);
+                              ref
+                                  .read(tasksProvider.notifier)
+                                  .completeTask(task.id!);
                             }
                           },
                         ),
@@ -119,7 +131,8 @@ class TasksScreen extends ConsumerWidget {
                     },
                   );
                 },
-                loading: () => const LoadingIndicator(message: 'Loading tasks...'),
+                loading: () =>
+                    const LoadingIndicator(message: 'Loading tasks...'),
                 error: (e, _) => Center(child: Text('Error: $e')),
               ),
             ],

@@ -48,15 +48,16 @@ class AppPaths {
 /// The main router provider.
 final routerProvider = Provider<GoRouter>((ref) {
   final onboardingCompleted = ref.watch(onboardingCompletedProvider);
-  
+
   return GoRouter(
     initialLocation: AppPaths.home,
     debugLogDiagnostics: true,
     redirect: (context, state) {
       // Check if onboarding is completed
-      final isOnboardingRoute = state.matchedLocation == AppPaths.onboarding ||
+      final isOnboardingRoute =
+          state.matchedLocation == AppPaths.onboarding ||
           state.matchedLocation == AppPaths.purposeSetup;
-      
+
       return onboardingCompleted.when(
         data: (completed) {
           if (!completed && !isOnboardingRoute) {
@@ -86,7 +87,7 @@ final routerProvider = Provider<GoRouter>((ref) {
           return PurposeSetupScreen(skillId: skillId);
         },
       ),
-      
+
       // Main app shell with bottom navigation
       ShellRoute(
         builder: (context, state, child) {
@@ -135,7 +136,7 @@ final routerProvider = Provider<GoRouter>((ref) {
           ),
         ],
       ),
-      
+
       // Practice session (full screen, outside shell)
       GoRoute(
         name: AppRoutes.practiceSession,
@@ -143,13 +144,10 @@ final routerProvider = Provider<GoRouter>((ref) {
         builder: (context, state) {
           final skillId = int.parse(state.pathParameters['skillId']!);
           final taskId = state.extra as int?;
-          return PracticeSessionScreen(
-            skillId: skillId,
-            taskId: taskId,
-          );
+          return PracticeSessionScreen(skillId: skillId, taskId: taskId);
         },
       ),
-      
+
       // LLM workflow screens (full screen, outside shell)
       GoRoute(
         name: AppRoutes.copyPasteWorkflow,
@@ -188,8 +186,4 @@ final routerProvider = Provider<GoRouter>((ref) {
 });
 
 /// Workflow types for copy-paste LLM.
-enum CopyPasteWorkflowType {
-  skillAnalysis,
-  taskGeneration,
-  struggleAnalysis,
-}
+enum CopyPasteWorkflowType { skillAnalysis, taskGeneration, struggleAnalysis }

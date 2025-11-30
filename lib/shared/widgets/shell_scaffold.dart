@@ -1,17 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:deliberate_practice_app/core/router/app_router.dart';
-import 'package:deliberate_practice_app/core/theme/app_colors.dart';
 
 /// Shell scaffold with bottom navigation for main app screens.
 class ShellScaffold extends StatelessWidget {
   final Widget child;
-  
-  const ShellScaffold({
-    super.key,
-    required this.child,
-  });
-  
+
+  const ShellScaffold({super.key, required this.child});
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -49,7 +45,7 @@ class ShellScaffold extends StatelessWidget {
       ),
     );
   }
-  
+
   int _calculateSelectedIndex(BuildContext context) {
     final location = GoRouterState.of(context).matchedLocation;
     if (location.startsWith(AppPaths.skills)) return 1;
@@ -58,7 +54,7 @@ class ShellScaffold extends StatelessWidget {
     if (location.startsWith(AppPaths.settings)) return 4;
     return 0; // Home
   }
-  
+
   void _onItemTapped(int index, BuildContext context) {
     switch (index) {
       case 0:

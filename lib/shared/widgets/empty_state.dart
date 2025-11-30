@@ -8,7 +8,7 @@ class EmptyState extends StatelessWidget {
   final String? description;
   final String? actionLabel;
   final VoidCallback? onAction;
-  
+
   const EmptyState({
     super.key,
     required this.icon,
@@ -17,7 +17,7 @@ class EmptyState extends StatelessWidget {
     this.actionLabel,
     this.onAction,
   });
-  
+
   @override
   Widget build(BuildContext context) {
     return Center(
@@ -65,18 +65,16 @@ class EmptyState extends StatelessWidget {
 /// Empty state specifically for skills.
 class SkillsEmptyState extends StatelessWidget {
   final VoidCallback? onAddSkill;
-  
-  const SkillsEmptyState({
-    super.key,
-    this.onAddSkill,
-  });
-  
+
+  const SkillsEmptyState({super.key, this.onAddSkill});
+
   @override
   Widget build(BuildContext context) {
     return EmptyState(
       icon: Icons.psychology_outlined,
       title: 'No skills yet',
-      description: 'Start your learning journey by adding a skill you want to master.',
+      description:
+          'Start your learning journey by adding a skill you want to master.',
       actionLabel: 'Add Skill',
       onAction: onAddSkill,
     );
@@ -86,18 +84,16 @@ class SkillsEmptyState extends StatelessWidget {
 /// Empty state specifically for tasks.
 class TasksEmptyState extends StatelessWidget {
   final VoidCallback? onGenerateTasks;
-  
-  const TasksEmptyState({
-    super.key,
-    this.onGenerateTasks,
-  });
-  
+
+  const TasksEmptyState({super.key, this.onGenerateTasks});
+
   @override
   Widget build(BuildContext context) {
     return EmptyState(
       icon: Icons.task_alt_outlined,
       title: 'No tasks yet',
-      description: 'Use AI to generate deliberate practice tasks for your skills.',
+      description:
+          'Use AI to generate deliberate practice tasks for your skills.',
       actionLabel: 'Generate Tasks',
       onAction: onGenerateTasks,
     );
@@ -107,7 +103,7 @@ class TasksEmptyState extends StatelessWidget {
 /// Empty state for completed all tasks.
 class AllTasksCompletedState extends StatelessWidget {
   const AllTasksCompletedState({super.key});
-  
+
   @override
   Widget build(BuildContext context) {
     return Center(
@@ -120,7 +116,7 @@ class AllTasksCompletedState extends StatelessWidget {
               width: 80,
               height: 80,
               decoration: BoxDecoration(
-                color: AppColors.success.withOpacity(0.1),
+                color: AppColors.success.withAlpha(25),
                 shape: BoxShape.circle,
               ),
               child: const Icon(
@@ -154,13 +150,13 @@ class AllTasksCompletedState extends StatelessWidget {
 class NoPracticeSessionsState extends StatelessWidget {
   final String skillName;
   final VoidCallback? onStartPractice;
-  
+
   const NoPracticeSessionsState({
     super.key,
     required this.skillName,
     this.onStartPractice,
   });
-  
+
   @override
   Widget build(BuildContext context) {
     return EmptyState(

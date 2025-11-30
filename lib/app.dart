@@ -12,7 +12,7 @@ class PromptLoopApp extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final router = ref.watch(routerProvider);
     final settings = ref.watch(settingsProvider);
-    
+
     // Determine theme mode based on settings
     final themeMode = settings.when(
       data: (s) => s.isDarkMode ? ThemeMode.dark : ThemeMode.light,
@@ -23,12 +23,12 @@ class PromptLoopApp extends ConsumerWidget {
     return MaterialApp.router(
       title: 'Prompt Loop',
       debugShowCheckedModeBanner: false,
-      
+
       // Theme configuration
       theme: AppTheme.lightTheme,
       darkTheme: AppTheme.darkTheme,
       themeMode: themeMode,
-      
+
       // Router configuration
       routerConfig: router,
     );

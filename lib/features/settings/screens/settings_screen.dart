@@ -9,17 +9,15 @@ import 'package:deliberate_practice_app/core/theme/app_colors.dart';
 /// Settings screen for app configuration.
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
-  
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final settings = ref.watch(settingsProvider);
-    
+
     return Scaffold(
       body: CustomScrollView(
         slivers: [
-          const SliverAppBar.large(
-            title: Text('Settings'),
-          ),
+          const SliverAppBar.large(title: Text('Settings')),
           settings.when(
             data: (settingsData) => SliverPadding(
               padding: const EdgeInsets.all(16),
@@ -39,30 +37,41 @@ class SettingsScreen extends ConsumerWidget {
                         const SizedBox(height: 4),
                         Text(
                           'Choose how you want to use AI for skill analysis and task generation.',
-                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: Theme.of(context).colorScheme.onSurfaceVariant,
-                          ),
+                          style: Theme.of(context).textTheme.bodySmall
+                              ?.copyWith(
+                                color: Theme.of(
+                                  context,
+                                ).colorScheme.onSurfaceVariant,
+                              ),
                         ),
                         const SizedBox(height: 12),
-                        ...LlmMode.values.map((mode) => RadioListTile<LlmMode>(
-                          title: Text(mode == LlmMode.copyPaste 
-                              ? 'Copy-Paste' 
-                              : 'Bring Your Own Key'),
-                          subtitle: Text(mode == LlmMode.copyPaste 
-                              ? 'Copy prompts to ChatGPT, Claude, etc.' 
-                              : 'Use your own API key for direct integration'),
-                          value: mode,
-                          groupValue: settingsData.llmMode,
-                          onChanged: (value) {
-                            if (value != null) {
-                              ref.read(settingsProvider.notifier).setLlmMode(value);
-                            }
-                          },
-                        )),
+                        ...LlmMode.values.map(
+                          (mode) => RadioListTile<LlmMode>(
+                            title: Text(
+                              mode == LlmMode.copyPaste
+                                  ? 'Copy-Paste'
+                                  : 'Bring Your Own Key',
+                            ),
+                            subtitle: Text(
+                              mode == LlmMode.copyPaste
+                                  ? 'Copy prompts to ChatGPT, Claude, etc.'
+                                  : 'Use your own API key for direct integration',
+                            ),
+                            value: mode,
+                            groupValue: settingsData.llmMode,
+                            onChanged: (value) {
+                              if (value != null) {
+                                ref
+                                    .read(settingsProvider.notifier)
+                                    .setLlmMode(value);
+                              }
+                            },
+                          ),
+                        ),
                       ],
                     ),
                   ),
-                  
+
                   // API Key section (only if BYOK mode)
                   if (settingsData.llmMode == LlmMode.byok) ...[
                     const SizedBox(height: 12),
@@ -79,40 +88,49 @@ class SettingsScreen extends ConsumerWidget {
                                 ),
                               ),
                               TextButton(
-                                onPressed: () => _showApiKeyDialog(context, ref),
+                                onPressed: () =>
+                                    _showApiKeyDialog(context, ref),
                                 child: const Text('Configure'),
                               ),
                             ],
                           ),
                           const SizedBox(height: 4),
                           FutureBuilder<String?>(
-                            future: ref.read(settingsProvider.notifier).getApiKey(),
+                            future: ref
+                                .read(settingsProvider.notifier)
+                                .getApiKey(),
                             builder: (context, snapshot) {
                               if (snapshot.hasData && snapshot.data != null) {
                                 return Row(
                                   children: [
-                                    const Icon(Icons.check_circle, 
-                                        color: AppColors.success, size: 16),
+                                    const Icon(
+                                      Icons.check_circle,
+                                      color: AppColors.success,
+                                      size: 16,
+                                    ),
                                     const SizedBox(width: 4),
                                     Text(
                                       'API key configured',
-                                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                        color: AppColors.success,
-                                      ),
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .bodySmall
+                                          ?.copyWith(color: AppColors.success),
                                     ),
                                   ],
                                 );
                               }
                               return Row(
                                 children: [
-                                  const Icon(Icons.warning, 
-                                      color: AppColors.warning, size: 16),
+                                  const Icon(
+                                    Icons.warning,
+                                    color: AppColors.warning,
+                                    size: 16,
+                                  ),
                                   const SizedBox(width: 4),
                                   Text(
                                     'No API key configured',
-                                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                      color: AppColors.warning,
-                                    ),
+                                    style: Theme.of(context).textTheme.bodySmall
+                                        ?.copyWith(color: AppColors.warning),
                                   ),
                                 ],
                               );
@@ -136,20 +154,26 @@ class SettingsScreen extends ConsumerWidget {
                             isExpanded: true,
                             onChanged: (value) {
                               if (value != null) {
-                                ref.read(settingsProvider.notifier).setLlmProvider(value);
+                                ref
+                                    .read(settingsProvider.notifier)
+                                    .setLlmProvider(value);
                               }
                             },
-                            items: LlmProvider.values.map((provider) => DropdownMenuItem(
-                              value: provider,
-                              child: Text(provider.name.toUpperCase()),
-                            )).toList(),
+                            items: LlmProvider.values
+                                .map(
+                                  (provider) => DropdownMenuItem(
+                                    value: provider,
+                                    child: Text(provider.name.toUpperCase()),
+                                  ),
+                                )
+                                .toList(),
                           ),
                         ],
                       ),
                     ),
                   ],
                   const SizedBox(height: 24),
-                  
+
                   // Appearance section
                   _SectionHeader(title: 'Appearance'),
                   const SizedBox(height: 8),
@@ -164,7 +188,7 @@ class SettingsScreen extends ConsumerWidget {
                     ),
                   ),
                   const SizedBox(height: 24),
-                  
+
                   // Notifications section
                   _SectionHeader(title: 'Notifications'),
                   const SizedBox(height: 8),
@@ -173,26 +197,31 @@ class SettingsScreen extends ConsumerWidget {
                       children: [
                         SwitchListTile(
                           title: const Text('Practice Reminders'),
-                          subtitle: const Text('Get daily reminders to practice'),
+                          subtitle: const Text(
+                            'Get daily reminders to practice',
+                          ),
                           value: settingsData.notificationsEnabled,
                           onChanged: (value) {
-                            ref.read(settingsProvider.notifier).setNotificationsEnabled(value);
+                            ref
+                                .read(settingsProvider.notifier)
+                                .setNotificationsEnabled(value);
                           },
                         ),
                         if (settingsData.notificationsEnabled) ...[
                           const Divider(),
                           ListTile(
                             title: const Text('Reminder Time'),
-                            subtitle: Text(settingsData.dailyReminderTime ?? '9:00 AM'),
+                            subtitle: Text(settingsData.dailyReminderTime),
                             trailing: const Icon(Icons.chevron_right),
-                            onTap: () => _showTimePicker(context, ref, settingsData),
+                            onTap: () =>
+                                _showTimePicker(context, ref, settingsData),
                           ),
                         ],
                       ],
                     ),
                   ),
                   const SizedBox(height: 24),
-                  
+
                   // About section
                   _SectionHeader(title: 'About'),
                   const SizedBox(height: 8),
@@ -232,18 +261,17 @@ class SettingsScreen extends ConsumerWidget {
             loading: () => const SliverFillRemaining(
               child: LoadingIndicator(message: 'Loading settings...'),
             ),
-            error: (e, _) => SliverFillRemaining(
-              child: Center(child: Text('Error: $e')),
-            ),
+            error: (e, _) =>
+                SliverFillRemaining(child: Center(child: Text('Error: $e'))),
           ),
         ],
       ),
     );
   }
-  
+
   void _showApiKeyDialog(BuildContext context, WidgetRef ref) {
     final controller = TextEditingController();
-    
+
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -251,7 +279,9 @@ class SettingsScreen extends ConsumerWidget {
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Text('Enter your OpenAI API key. It will be stored securely.'),
+            const Text(
+              'Enter your OpenAI API key. It will be stored securely.',
+            ),
             const SizedBox(height: 16),
             TextField(
               controller: controller,
@@ -279,7 +309,9 @@ class SettingsScreen extends ConsumerWidget {
           FilledButton(
             onPressed: () async {
               if (controller.text.isNotEmpty) {
-                await ref.read(settingsProvider.notifier).saveApiKey(controller.text);
+                await ref
+                    .read(settingsProvider.notifier)
+                    .saveApiKey(controller.text);
               }
               if (context.mounted) Navigator.pop(context);
             },
@@ -289,15 +321,20 @@ class SettingsScreen extends ConsumerWidget {
       ),
     );
   }
-  
-  void _showTimePicker(BuildContext context, WidgetRef ref, AppSettings settings) async {
+
+  void _showTimePicker(
+    BuildContext context,
+    WidgetRef ref,
+    AppSettings settings,
+  ) async {
     final time = await showTimePicker(
       context: context,
       initialTime: TimeOfDay.now(),
     );
-    
+
     if (time != null) {
-      final formattedTime = '${time.hourOfPeriod}:${time.minute.toString().padLeft(2, '0')} ${time.period == DayPeriod.am ? 'AM' : 'PM'}';
+      final formattedTime =
+          '${time.hourOfPeriod}:${time.minute.toString().padLeft(2, '0')} ${time.period == DayPeriod.am ? 'AM' : 'PM'}';
       ref.read(settingsProvider.notifier).setDailyReminderTime(formattedTime);
     }
   }
@@ -305,9 +342,9 @@ class SettingsScreen extends ConsumerWidget {
 
 class _SectionHeader extends StatelessWidget {
   final String title;
-  
+
   const _SectionHeader({required this.title});
-  
+
   @override
   Widget build(BuildContext context) {
     return Text(

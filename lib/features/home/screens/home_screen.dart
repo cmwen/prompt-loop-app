@@ -8,20 +8,19 @@ import 'package:deliberate_practice_app/features/tasks/providers/tasks_provider.
 import 'package:deliberate_practice_app/features/practice/providers/practice_provider.dart';
 import 'package:deliberate_practice_app/features/purpose/providers/purpose_provider.dart';
 import 'package:deliberate_practice_app/shared/widgets/app_card.dart';
-import 'package:deliberate_practice_app/shared/widgets/progress_indicators.dart';
 import 'package:deliberate_practice_app/shared/widgets/loading_indicator.dart';
 import 'package:deliberate_practice_app/shared/widgets/empty_state.dart';
 
 /// Home screen showing today's overview and quick actions.
 class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
-  
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final skills = ref.watch(skillsProvider);
     final todaysTasks = ref.watch(todaysTasksProvider);
     final todaysPracticeTime = ref.watch(todaysPracticeTimeProvider);
-    
+
     return Scaffold(
       body: CustomScrollView(
         slivers: [
@@ -43,14 +42,14 @@ class HomeScreen extends ConsumerWidget {
                 // Purpose reminder card
                 _PurposeReminderCard(),
                 const SizedBox(height: 16),
-                
+
                 // Today's stats
                 _TodaysStatsCard(
                   practiceTime: todaysPracticeTime,
                   tasksCompleted: todaysTasks,
                 ),
                 const SizedBox(height: 24),
-                
+
                 // Today's tasks section
                 _SectionHeader(
                   title: "Today's Tasks",
@@ -62,35 +61,42 @@ class HomeScreen extends ConsumerWidget {
                     if (tasks.isEmpty) {
                       return const SizedBox(
                         height: 100,
-                        child: Center(
-                          child: Text('No tasks for today! 🎉'),
-                        ),
+                        child: Center(child: Text('No tasks for today! 🎉')),
                       );
                     }
                     return Column(
-                      children: tasks.take(3).map((task) => TaskCard(
-                        title: task.title,
-                        subtitle: '${task.durationMinutes} min',
-                        difficulty: task.difficulty,
-                        isCompleted: task.isCompleted,
-                        onTap: () {
-                          context.goNamed(
-                            AppRoutes.practiceSession,
-                            pathParameters: {'skillId': task.skillId.toString()},
-                            extra: task.id,
-                          );
-                        },
-                        onComplete: () {
-                          ref.read(tasksProvider.notifier).completeTask(task.id!);
-                        },
-                      )).toList(),
+                      children: tasks
+                          .take(3)
+                          .map(
+                            (task) => TaskCard(
+                              title: task.title,
+                              subtitle: '${task.durationMinutes} min',
+                              difficulty: task.difficulty,
+                              isCompleted: task.isCompleted,
+                              onTap: () {
+                                context.goNamed(
+                                  AppRoutes.practiceSession,
+                                  pathParameters: {
+                                    'skillId': task.skillId.toString(),
+                                  },
+                                  extra: task.id,
+                                );
+                              },
+                              onComplete: () {
+                                ref
+                                    .read(tasksProvider.notifier)
+                                    .completeTask(task.id!);
+                              },
+                            ),
+                          )
+                          .toList(),
                     );
                   },
                   loading: () => const LoadingIndicator(),
                   error: (e, _) => Text('Error: $e'),
                 ),
                 const SizedBox(height: 24),
-                
+
                 // Skills section
                 _SectionHeader(
                   title: 'Your Skills',
@@ -105,17 +111,22 @@ class HomeScreen extends ConsumerWidget {
                       );
                     }
                     return Column(
-                      children: skillList.take(3).map((skill) => SkillCard(
-                        name: skill.name,
-                        level: skill.currentLevel.displayName,
-                        progress: 0.0, // TODO: Calculate progress
-                        onTap: () {
-                          context.goNamed(
-                            AppRoutes.skillDetail,
-                            pathParameters: {'id': skill.id.toString()},
-                          );
-                        },
-                      )).toList(),
+                      children: skillList
+                          .take(3)
+                          .map(
+                            (skill) => SkillCard(
+                              name: skill.name,
+                              level: skill.currentLevel.displayName,
+                              progress: 0.0, // TODO: Calculate progress
+                              onTap: () {
+                                context.goNamed(
+                                  AppRoutes.skillDetail,
+                                  pathParameters: {'id': skill.id.toString()},
+                                );
+                              },
+                            ),
+                          )
+                          .toList(),
                     );
                   },
                   loading: () => const LoadingIndicator(),
@@ -136,7 +147,7 @@ class HomeScreen extends ConsumerWidget {
       ),
     );
   }
-  
+
   void _showQuickActionsSheet(BuildContext context, WidgetRef ref) {
     showModalBottomSheet(
       context: context,
@@ -189,34 +200,32 @@ class _PurposeReminderCard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final skills = ref.watch(skillsProvider);
-    
+
     return skills.when(
       data: (skillList) {
         if (skillList.isEmpty) return const SizedBox.shrink();
-        
+
         // Get a random purpose from the first skill
         final firstSkill = skillList.first;
-        final purposes = ref.watch(purposesBySkillProvider(firstSkill.id!));
-        
-        return purposes.when(
-          data: (purposeList) {
-            if (purposeList.isEmpty) return const SizedBox.shrink();
-            
-            final purpose = purposeList.first;
+        final purpose = ref.watch(purposeBySkillProvider(firstSkill.id!));
+
+        return purpose.when(
+          data: (purposeData) {
+            if (purposeData == null) return const SizedBox.shrink();
             return Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
                 gradient: LinearGradient(
                   colors: [
-                    Theme.of(context).colorScheme.primary.withOpacity(0.1),
-                    Theme.of(context).colorScheme.primary.withOpacity(0.05),
+                    Theme.of(context).colorScheme.primary.withAlpha(25),
+                    Theme.of(context).colorScheme.primary.withAlpha(13),
                   ],
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                 ),
                 borderRadius: BorderRadius.circular(16),
                 border: Border.all(
-                  color: Theme.of(context).colorScheme.primary.withOpacity(0.2),
+                  color: Theme.of(context).colorScheme.primary.withAlpha(51),
                 ),
               ),
               child: Column(
@@ -232,16 +241,17 @@ class _PurposeReminderCard extends ConsumerWidget {
                       const SizedBox(width: 8),
                       Text(
                         'Remember your why',
-                        style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                          color: Theme.of(context).colorScheme.primary,
-                          fontWeight: FontWeight.w600,
-                        ),
+                        style: Theme.of(context).textTheme.labelMedium
+                            ?.copyWith(
+                              color: Theme.of(context).colorScheme.primary,
+                              fontWeight: FontWeight.w600,
+                            ),
                       ),
                     ],
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    '"${purpose.statement}"',
+                    '"${purposeData.statement}"',
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                       fontStyle: FontStyle.italic,
                     ),
@@ -271,12 +281,12 @@ class _PurposeReminderCard extends ConsumerWidget {
 class _TodaysStatsCard extends StatelessWidget {
   final AsyncValue<Duration> practiceTime;
   final AsyncValue<List<dynamic>> tasksCompleted;
-  
+
   const _TodaysStatsCard({
     required this.practiceTime,
     required this.tasksCompleted,
   });
-  
+
   @override
   Widget build(BuildContext context) {
     return Row(
@@ -291,7 +301,9 @@ class _TodaysStatsCard extends StatelessWidget {
                     Container(
                       padding: const EdgeInsets.all(8),
                       decoration: BoxDecoration(
-                        color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
+                        color: Theme.of(
+                          context,
+                        ).colorScheme.primary.withOpacity(0.1),
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: Icon(
@@ -336,7 +348,7 @@ class _TodaysStatsCard extends StatelessWidget {
                     Container(
                       padding: const EdgeInsets.all(8),
                       decoration: BoxDecoration(
-                        color: AppColors.success.withOpacity(0.1),
+                        color: AppColors.success.withAlpha(25),
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: const Icon(
@@ -354,9 +366,8 @@ class _TodaysStatsCard extends StatelessWidget {
                     final completed = tasks.where((t) => t.isCompleted).length;
                     return Text(
                       '$completed/${tasks.length}',
-                      style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
+                      style: Theme.of(context).textTheme.headlineSmall
+                          ?.copyWith(fontWeight: FontWeight.bold),
                     );
                   },
                   loading: () => const Text('--'),
@@ -382,12 +393,9 @@ class _TodaysStatsCard extends StatelessWidget {
 class _SectionHeader extends StatelessWidget {
   final String title;
   final VoidCallback? onSeeAll;
-  
-  const _SectionHeader({
-    required this.title,
-    this.onSeeAll,
-  });
-  
+
+  const _SectionHeader({required this.title, this.onSeeAll});
+
   @override
   Widget build(BuildContext context) {
     return Row(
@@ -395,15 +403,12 @@ class _SectionHeader extends StatelessWidget {
       children: [
         Text(
           title,
-          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-            fontWeight: FontWeight.w600,
-          ),
+          style: Theme.of(
+            context,
+          ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
         ),
         if (onSeeAll != null)
-          TextButton(
-            onPressed: onSeeAll,
-            child: const Text('See All'),
-          ),
+          TextButton(onPressed: onSeeAll, child: const Text('See All')),
       ],
     );
   }

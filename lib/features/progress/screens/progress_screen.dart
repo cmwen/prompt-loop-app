@@ -10,19 +10,17 @@ import 'package:deliberate_practice_app/shared/widgets/loading_indicator.dart';
 /// Progress screen showing overall progress and statistics.
 class ProgressScreen extends ConsumerWidget {
   const ProgressScreen({super.key});
-  
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final skills = ref.watch(skillsProvider);
     final weeklyTime = ref.watch(weeklyPracticeTimeProvider);
     final todaysSessions = ref.watch(todaysSessionsProvider);
-    
+
     return Scaffold(
       body: CustomScrollView(
         slivers: [
-          const SliverAppBar.large(
-            title: Text('Progress'),
-          ),
+          const SliverAppBar.large(title: Text('Progress')),
           SliverPadding(
             padding: const EdgeInsets.all(16),
             sliver: SliverList(
@@ -34,9 +32,8 @@ class ProgressScreen extends ConsumerWidget {
                     children: [
                       Text(
                         'This Week',
-                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.w600,
-                        ),
+                        style: Theme.of(context).textTheme.titleMedium
+                            ?.copyWith(fontWeight: FontWeight.w600),
                       ),
                       const SizedBox(height: 16),
                       Row(
@@ -47,7 +44,8 @@ class ProgressScreen extends ConsumerWidget {
                               iconColor: Theme.of(context).colorScheme.primary,
                               label: 'Practice Time',
                               value: weeklyTime.when(
-                                data: (d) => '${d.inHours}h ${d.inMinutes % 60}m',
+                                data: (d) =>
+                                    '${d.inHours}h ${d.inMinutes % 60}m',
                                 loading: () => '--',
                                 error: (_, __) => '--',
                               ),
@@ -71,7 +69,7 @@ class ProgressScreen extends ConsumerWidget {
                   ),
                 ),
                 const SizedBox(height: 24),
-                
+
                 // Skills progress
                 Text(
                   'Skills Progress',
@@ -92,57 +90,75 @@ class ProgressScreen extends ConsumerWidget {
                         ),
                       );
                     }
-                    
+
                     return Column(
-                      children: skillList.map((skill) => AppCard(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
-                              children: [
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+                      children: skillList
+                          .map(
+                            (skill) => AppCard(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Row(
                                     children: [
-                                      Text(
-                                        skill.name,
-                                        style: Theme.of(context).textTheme.titleSmall,
-                                      ),
-                                      const SizedBox(height: 2),
-                                      Text(
-                                        skill.currentLevel.displayName,
-                                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                                      Expanded(
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            Text(
+                                              skill.name,
+                                              style: Theme.of(
+                                                context,
+                                              ).textTheme.titleSmall,
+                                            ),
+                                            const SizedBox(height: 2),
+                                            Text(
+                                              skill.currentLevel.displayName,
+                                              style: Theme.of(context)
+                                                  .textTheme
+                                                  .bodySmall
+                                                  ?.copyWith(
+                                                    color: Theme.of(context)
+                                                        .colorScheme
+                                                        .onSurfaceVariant,
+                                                  ),
+                                            ),
+                                          ],
                                         ),
+                                      ),
+                                      CircularProgressWithLabel(
+                                        value: 0.0, // TODO: Calculate progress
+                                        size: 50,
+                                        strokeWidth: 5,
                                       ),
                                     ],
                                   ),
-                                ),
-                                CircularProgressWithLabel(
-                                  value: 0.0, // TODO: Calculate progress
-                                  size: 50,
-                                  strokeWidth: 5,
-                                ),
-                              ],
+                                  const SizedBox(height: 12),
+                                  _SkillStreakInfo(skillId: skill.id!),
+                                ],
+                              ),
                             ),
-                            const SizedBox(height: 12),
-                            _SkillStreakInfo(skillId: skill.id!),
-                          ],
-                        ),
-                      )).toList(),
+                          )
+                          .toList(),
                     );
                   },
                   loading: () => const LoadingIndicator(),
                   error: (e, _) => Text('Error: $e'),
                 ),
                 const SizedBox(height: 24),
-                
+
                 // Motivation section
                 AppCard(
-                  backgroundColor: Theme.of(context).colorScheme.primary.withOpacity(0.1),
+                  backgroundColor: Theme.of(
+                    context,
+                  ).colorScheme.primary.withAlpha(25),
                   child: Row(
                     children: [
-                      const Icon(Icons.emoji_events, color: AppColors.warning, size: 40),
+                      const Icon(
+                        Icons.emoji_events,
+                        color: AppColors.warning,
+                        size: 40,
+                      ),
                       const SizedBox(width: 16),
                       Expanded(
                         child: Column(
@@ -150,15 +166,17 @@ class ProgressScreen extends ConsumerWidget {
                           children: [
                             Text(
                               'Keep Going!',
-                              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                                fontWeight: FontWeight.w600,
-                              ),
+                              style: Theme.of(context).textTheme.titleMedium
+                                  ?.copyWith(fontWeight: FontWeight.w600),
                             ),
                             Text(
                               'Consistency is more important than intensity. Small daily practices compound over time.',
-                              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                color: Theme.of(context).colorScheme.onSurfaceVariant,
-                              ),
+                              style: Theme.of(context).textTheme.bodySmall
+                                  ?.copyWith(
+                                    color: Theme.of(
+                                      context,
+                                    ).colorScheme.onSurfaceVariant,
+                                  ),
                             ),
                           ],
                         ),
@@ -182,14 +200,14 @@ class _StatItem extends StatelessWidget {
   final Color iconColor;
   final String label;
   final String value;
-  
+
   const _StatItem({
     required this.icon,
     required this.iconColor,
     required this.label,
     required this.value,
   });
-  
+
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -197,7 +215,7 @@ class _StatItem extends StatelessWidget {
         Container(
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
-            color: iconColor.withOpacity(0.1),
+            color: iconColor.withAlpha(25),
             shape: BoxShape.circle,
           ),
           child: Icon(icon, color: iconColor),
@@ -205,9 +223,9 @@ class _StatItem extends StatelessWidget {
         const SizedBox(height: 8),
         Text(
           value,
-          style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-            fontWeight: FontWeight.bold,
-          ),
+          style: Theme.of(
+            context,
+          ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
         ),
         Text(
           label,
@@ -223,24 +241,15 @@ class _StatItem extends StatelessWidget {
 /// Streak information for a skill.
 class _SkillStreakInfo extends ConsumerWidget {
   final int skillId;
-  
+
   const _SkillStreakInfo({required this.skillId});
-  
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final streak = ref.watch(currentStreakProvider(skillId));
-    
+    final streak = ref.watch(streakProvider(skillId));
+
     return streak.when(
       data: (s) {
-        if (s == null) {
-          return Text(
-            'Start your streak today!',
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
-            ),
-          );
-        }
-        
         return StreakIndicator(
           currentStreak: s.currentCount,
           bestStreak: s.longestCount,

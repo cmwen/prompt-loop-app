@@ -2,13 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:deliberate_practice_app/core/router/app_router.dart';
-import 'package:deliberate_practice_app/core/theme/app_colors.dart';
 import 'package:deliberate_practice_app/features/settings/providers/settings_provider.dart';
 
 /// Onboarding screen shown to first-time users.
 class OnboardingScreen extends ConsumerStatefulWidget {
   const OnboardingScreen({super.key});
-  
+
   @override
   ConsumerState<OnboardingScreen> createState() => _OnboardingScreenState();
 }
@@ -16,36 +15,40 @@ class OnboardingScreen extends ConsumerStatefulWidget {
 class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   final _pageController = PageController();
   int _currentPage = 0;
-  
+
   final _pages = const [
     _OnboardingPage(
       icon: Icons.psychology,
       title: 'Master Any Skill',
-      description: 'Use the science of deliberate practice to break down complex skills into manageable sub-skills and focused tasks.',
+      description:
+          'Use the science of deliberate practice to break down complex skills into manageable sub-skills and focused tasks.',
     ),
     _OnboardingPage(
       icon: Icons.auto_awesome,
       title: 'AI-Powered Analysis',
-      description: 'Let AI analyze your skills and generate personalized practice tasks tailored to your level and goals.',
+      description:
+          'Let AI analyze your skills and generate personalized practice tasks tailored to your level and goals.',
     ),
     _OnboardingPage(
       icon: Icons.trending_up,
       title: 'Track Your Progress',
-      description: 'Visualize your improvement over time with streaks, milestones, and detailed progress tracking.',
+      description:
+          'Visualize your improvement over time with streaks, milestones, and detailed progress tracking.',
     ),
     _OnboardingPage(
       icon: Icons.lightbulb,
       title: 'Stay Connected to Purpose',
-      description: 'Remember why you started. Connect each skill to your deeper purpose for lasting motivation.',
+      description:
+          'Remember why you started. Connect each skill to your deeper purpose for lasting motivation.',
     ),
   ];
-  
+
   @override
   void dispose() {
     _pageController.dispose();
     super.dispose();
   }
-  
+
   void _nextPage() {
     if (_currentPage < _pages.length - 1) {
       _pageController.nextPage(
@@ -56,12 +59,12 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
       _completeOnboarding();
     }
   }
-  
+
   void _completeOnboarding() {
     ref.read(settingsProvider.notifier).completeOnboarding();
     context.go(AppPaths.home);
   }
-  
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -81,7 +84,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                 ],
               ),
             ),
-            
+
             // Page content
             Expanded(
               child: PageView.builder(
@@ -91,7 +94,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                 itemBuilder: (context, index) => _pages[index],
               ),
             ),
-            
+
             // Page indicator
             Padding(
               padding: const EdgeInsets.all(24),
@@ -103,16 +106,18 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                     height: 8,
                     margin: const EdgeInsets.symmetric(horizontal: 4),
                     decoration: BoxDecoration(
-                      color: index == _currentPage 
-                          ? Theme.of(context).colorScheme.primary 
-                          : Theme.of(context).colorScheme.primary.withOpacity(0.3),
+                      color: index == _currentPage
+                          ? Theme.of(context).colorScheme.primary
+                          : Theme.of(
+                              context,
+                            ).colorScheme.primary.withOpacity(0.3),
                       borderRadius: BorderRadius.circular(4),
                     ),
                   );
                 }),
               ),
             ),
-            
+
             // Next/Get Started button
             Padding(
               padding: const EdgeInsets.fromLTRB(24, 0, 24, 32),
@@ -120,7 +125,9 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                 width: double.infinity,
                 child: FilledButton(
                   onPressed: _nextPage,
-                  child: Text(_currentPage < _pages.length - 1 ? 'Next' : 'Get Started'),
+                  child: Text(
+                    _currentPage < _pages.length - 1 ? 'Next' : 'Get Started',
+                  ),
                 ),
               ),
             ),
@@ -136,13 +143,13 @@ class _OnboardingPage extends StatelessWidget {
   final IconData icon;
   final String title;
   final String description;
-  
+
   const _OnboardingPage({
     required this.icon,
     required this.title,
     required this.description,
   });
-  
+
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -154,7 +161,7 @@ class _OnboardingPage extends StatelessWidget {
             width: 120,
             height: 120,
             decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
+              color: Theme.of(context).colorScheme.primary.withAlpha(25),
               shape: BoxShape.circle,
             ),
             child: Icon(
@@ -166,9 +173,9 @@ class _OnboardingPage extends StatelessWidget {
           const SizedBox(height: 48),
           Text(
             title,
-            style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-              fontWeight: FontWeight.bold,
-            ),
+            style: Theme.of(
+              context,
+            ).textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.bold),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 16),

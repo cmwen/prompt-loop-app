@@ -36,7 +36,8 @@ class AppConstants {
   static const String purposeConnectingWithOthers = 'connecting_with_others';
   static const String purposeCareerGrowth = 'career_growth';
   static const String purposeSelfImprovement = 'self_improvement';
-  static const String purposeContributingBeyondSelf = 'contributing_beyond_self';
+  static const String purposeContributingBeyondSelf =
+      'contributing_beyond_self';
   static const String purposeOther = 'other';
 
   // Milestone Types

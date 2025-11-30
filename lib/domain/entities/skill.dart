@@ -75,13 +75,13 @@ class Skill extends Equatable {
 
   @override
   List<Object?> get props => [
-        id,
-        name,
-        description,
-        currentLevel,
-        targetLevel,
-        isArchived,
-        createdAt,
-        updatedAt,
-      ];
+    id,
+    name,
+    description,
+    currentLevel,
+    targetLevel,
+    isArchived,
+    createdAt,
+    updatedAt,
+  ];
 }

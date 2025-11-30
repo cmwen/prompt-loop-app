@@ -13,9 +13,12 @@ final llmServiceProvider = Provider<LlmService?>((ref) {
 });
 
 /// Provider for the copy-paste workflow state.
-final copyPasteWorkflowProvider = StateNotifierProvider<CopyPasteWorkflowNotifier, CopyPasteWorkflowState>((ref) {
-  return CopyPasteWorkflowNotifier();
-});
+final copyPasteWorkflowProvider =
+    StateNotifierProvider<CopyPasteWorkflowNotifier, CopyPasteWorkflowState>((
+      ref,
+    ) {
+      return CopyPasteWorkflowNotifier();
+    });
 
 /// Provider to check if BYOK is configured.
 final isByokConfiguredProvider = FutureProvider<bool>((ref) async {
@@ -35,7 +38,7 @@ final isByokConfiguredProvider = FutureProvider<bool>((ref) async {
 /// Notifier for the copy-paste workflow state.
 class CopyPasteWorkflowNotifier extends StateNotifier<CopyPasteWorkflowState> {
   CopyPasteWorkflowNotifier() : super(const CopyPasteWorkflowState.initial());
-  
+
   void setPromptReady(String prompt) {
     state = state.copyWith(
       currentStep: CopyPasteStep.promptReady,
@@ -43,37 +46,33 @@ class CopyPasteWorkflowNotifier extends StateNotifier<CopyPasteWorkflowState> {
       errorMessage: null,
     );
   }
-  
+
   void setAwaitingResponse() {
-    state = state.copyWith(
-      currentStep: CopyPasteStep.awaitingResponse,
-    );
+    state = state.copyWith(currentStep: CopyPasteStep.awaitingResponse);
   }
-  
+
   void setProcessing() {
-    state = state.copyWith(
-      currentStep: CopyPasteStep.processing,
-    );
+    state = state.copyWith(currentStep: CopyPasteStep.processing);
   }
-  
+
   void setCompleted(String response) {
     state = state.copyWith(
       currentStep: CopyPasteStep.completed,
       pastedResponse: response,
     );
   }
-  
+
   void setError(String message) {
     state = state.copyWith(
       currentStep: CopyPasteStep.error,
       errorMessage: message,
     );
   }
-  
+
   void reset() {
     state = const CopyPasteWorkflowState.initial();
   }
-  
+
   /// Create a CopyPasteLlmService with callbacks that update this state.
   CopyPasteLlmService createService({
     required Future<void> Function(String prompt) onShowPrompt,
@@ -100,16 +99,16 @@ class CopyPasteWorkflowNotifier extends StateNotifier<CopyPasteWorkflowState> {
 /// Provider for creating a BYOK service instance.
 final byokServiceProvider = FutureProvider<ByokLlmService?>((ref) async {
   final settings = ref.watch(settingsProvider);
-  
+
   return settings.when(
     data: (s) async {
       if (s.llmMode != LlmMode.byok) return null;
-      
+
       final notifier = ref.read(settingsProvider.notifier);
       final apiKey = await notifier.getApiKey();
-      
+
       if (apiKey == null || apiKey.isEmpty) return null;
-      
+
       return ByokLlmService(
         apiKey: apiKey,
         provider: s.llmProvider,

@@ -34,13 +34,7 @@ class StruggleEntry extends Equatable {
   }
 
   @override
-  List<Object?> get props => [
-        id,
-        sessionId,
-        content,
-        wiseFeedback,
-        createdAt,
-      ];
+  List<Object?> get props => [id, sessionId, content, wiseFeedback, createdAt];
 }
 
 /// Wise feedback structure (Duckworth: high standards + belief in ability)
@@ -96,12 +90,12 @@ $encouragement
 
   @override
   List<Object?> get props => [
-        acknowledgment,
-        normalization,
-        reframe,
-        encouragement,
-        suggestion,
-      ];
+    acknowledgment,
+    normalization,
+    reframe,
+    encouragement,
+    suggestion,
+  ];
 }
 
 /// Pre-defined wise feedback templates
@@ -112,7 +106,8 @@ class WiseFeedbackTemplates {
     acknowledgment: 'Timing is genuinely one of the hardest aspects to master.',
     normalization:
         'Even professional musicians spend years refining their sense of timing.',
-    reframe: 'The fact that you notice timing issues shows your ear is developing.',
+    reframe:
+        'The fact that you notice timing issues shows your ear is developing.',
     encouragement: 'You have what it takes to develop solid timing.',
     suggestion: 'Try practicing with a metronome at a slower tempo.',
   );
@@ -124,7 +119,8 @@ class WiseFeedbackTemplates {
     reframe: 'Your brain is literally rewiring itself right now.',
     encouragement:
         'Persistence through this difficulty is what separates masters from beginners.',
-    suggestion: 'Break the movement into smaller parts and practice each separately.',
+    suggestion:
+        'Break the movement into smaller parts and practice each separately.',
   );
 
   static const WiseFeedback memory = WiseFeedback(
@@ -143,8 +139,10 @@ class WiseFeedbackTemplates {
         "What you're experiencing is a normal part of deliberate practice.",
     normalization:
         "Struggle is not a sign of inadequacy—it's a sign of growth happening.",
-    reframe: "This difficulty means you're working at the edge of your ability.",
-    encouragement: 'I have high standards for you because I believe you can reach them.',
+    reframe:
+        "This difficulty means you're working at the edge of your ability.",
+    encouragement:
+        'I have high standards for you because I believe you can reach them.',
     suggestion: 'Focus on one small improvement at a time.',
   );
 

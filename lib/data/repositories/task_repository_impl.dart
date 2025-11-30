@@ -15,28 +15,34 @@ class TaskRepositoryImpl implements TaskRepository {
 
   @override
   Future<List<Task>> getTasksForSkill(int skillId) async {
-    final maps = await _db.rawQuery('''
+    final maps = await _db.rawQuery(
+      '''
       SELECT t.*, s.${DbConstants.colName} as skill_name, ss.${DbConstants.colName} as sub_skill_name
       FROM ${DbConstants.tableTasks} t
       LEFT JOIN ${DbConstants.tableSkills} s ON t.${DbConstants.colSkillId} = s.${DbConstants.colId}
       LEFT JOIN ${DbConstants.tableSubSkills} ss ON t.${DbConstants.colSubSkillId} = ss.${DbConstants.colId}
       WHERE t.${DbConstants.colSkillId} = ?
       ORDER BY t.${DbConstants.colCreatedAt} DESC
-    ''', [skillId]);
+    ''',
+      [skillId],
+    );
     return maps.map(_mapToTask).toList();
   }
 
   @override
   Future<List<Task>> getTasksForDate(DateTime date) async {
     final dateStr = date.toDateString();
-    final maps = await _db.rawQuery('''
+    final maps = await _db.rawQuery(
+      '''
       SELECT t.*, s.${DbConstants.colName} as skill_name, ss.${DbConstants.colName} as sub_skill_name
       FROM ${DbConstants.tableTasks} t
       LEFT JOIN ${DbConstants.tableSkills} s ON t.${DbConstants.colSkillId} = s.${DbConstants.colId}
       LEFT JOIN ${DbConstants.tableSubSkills} ss ON t.${DbConstants.colSubSkillId} = ss.${DbConstants.colId}
       WHERE t.${DbConstants.colScheduledDate} = ?
       ORDER BY t.${DbConstants.colIsCompleted} ASC, t.${DbConstants.colDifficulty} ASC
-    ''', [dateStr]);
+    ''',
+      [dateStr],
+    );
     return maps.map(_mapToTask).toList();
   }
 
@@ -60,13 +66,16 @@ class TaskRepositoryImpl implements TaskRepository {
 
   @override
   Future<Task?> getTaskById(int id) async {
-    final maps = await _db.rawQuery('''
+    final maps = await _db.rawQuery(
+      '''
       SELECT t.*, s.${DbConstants.colName} as skill_name, ss.${DbConstants.colName} as sub_skill_name
       FROM ${DbConstants.tableTasks} t
       LEFT JOIN ${DbConstants.tableSkills} s ON t.${DbConstants.colSkillId} = s.${DbConstants.colId}
       LEFT JOIN ${DbConstants.tableSubSkills} ss ON t.${DbConstants.colSubSkillId} = ss.${DbConstants.colId}
       WHERE t.${DbConstants.colId} = ?
-    ''', [id]);
+    ''',
+      [id],
+    );
     if (maps.isEmpty) return null;
     return _mapToTask(maps.first);
   }
@@ -191,12 +200,13 @@ class TaskRepositoryImpl implements TaskRepository {
       difficulty: map[DbConstants.colDifficulty] as int? ?? 5,
       successCriteria: successCriteria,
       isCompleted: (map[DbConstants.colIsCompleted] as int?) == 1,
-      scheduledDate:
-          (map[DbConstants.colScheduledDate] as String?)?.tryParseDateTime(),
-      completedAt:
-          (map[DbConstants.colCompletedAt] as String?)?.tryParseDateTime(),
+      scheduledDate: (map[DbConstants.colScheduledDate] as String?)
+          ?.tryParseDateTime(),
+      completedAt: (map[DbConstants.colCompletedAt] as String?)
+          ?.tryParseDateTime(),
       isLlmGenerated: (map[DbConstants.colLlmGenerated] as int?) == 1,
-      createdAt: (map[DbConstants.colCreatedAt] as String).tryParseDateTime() ??
+      createdAt:
+          (map[DbConstants.colCreatedAt] as String).tryParseDateTime() ??
           DateTime.now(),
       skillName: map['skill_name'] as String?,
       subSkillName: map['sub_skill_name'] as String?,

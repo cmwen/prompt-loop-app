@@ -116,7 +116,8 @@ class SkillRepositoryImpl implements SkillRepository {
       DbConstants.tableSubSkills,
       where: '${DbConstants.colSkillId} = ?',
       whereArgs: [skillId],
-      orderBy: '${DbConstants.colPriority} ASC, ${DbConstants.colCreatedAt} ASC',
+      orderBy:
+          '${DbConstants.colPriority} ASC, ${DbConstants.colCreatedAt} ASC',
     );
     return maps.map(_mapToSubSkill).toList();
   }
@@ -217,7 +218,8 @@ class SkillRepositoryImpl implements SkillRepository {
           ? SkillLevel.fromString(map[DbConstants.colTargetLevel] as String)
           : null,
       isArchived: (map[DbConstants.colIsArchived] as int?) == 1,
-      createdAt: (map[DbConstants.colCreatedAt] as String).tryParseDateTime() ??
+      createdAt:
+          (map[DbConstants.colCreatedAt] as String).tryParseDateTime() ??
           DateTime.now(),
       updatedAt: (map[DbConstants.colUpdatedAt] as String?)?.tryParseDateTime(),
     );
@@ -240,7 +242,8 @@ class SkillRepositoryImpl implements SkillRepository {
       ),
       progressPercent: map[DbConstants.colProgressPercent] as int? ?? 0,
       isLlmGenerated: (map[DbConstants.colLlmGenerated] as int?) == 1,
-      createdAt: (map[DbConstants.colCreatedAt] as String).tryParseDateTime() ??
+      createdAt:
+          (map[DbConstants.colCreatedAt] as String).tryParseDateTime() ??
           DateTime.now(),
     );
   }

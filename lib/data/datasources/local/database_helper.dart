@@ -182,17 +182,23 @@ class DatabaseHelper {
 
     // Create indexes
     await db.execute(
-        'CREATE INDEX idx_tasks_skill ON ${DbConstants.tableTasks}(${DbConstants.colSkillId})');
+      'CREATE INDEX idx_tasks_skill ON ${DbConstants.tableTasks}(${DbConstants.colSkillId})',
+    );
     await db.execute(
-        'CREATE INDEX idx_tasks_scheduled ON ${DbConstants.tableTasks}(${DbConstants.colScheduledDate})');
+      'CREATE INDEX idx_tasks_scheduled ON ${DbConstants.tableTasks}(${DbConstants.colScheduledDate})',
+    );
     await db.execute(
-        'CREATE INDEX idx_tasks_completed ON ${DbConstants.tableTasks}(${DbConstants.colIsCompleted})');
+      'CREATE INDEX idx_tasks_completed ON ${DbConstants.tableTasks}(${DbConstants.colIsCompleted})',
+    );
     await db.execute(
-        'CREATE INDEX idx_sessions_task ON ${DbConstants.tablePracticeSessions}(${DbConstants.colTaskId})');
+      'CREATE INDEX idx_sessions_task ON ${DbConstants.tablePracticeSessions}(${DbConstants.colTaskId})',
+    );
     await db.execute(
-        'CREATE INDEX idx_sub_skills_skill ON ${DbConstants.tableSubSkills}(${DbConstants.colSkillId})');
+      'CREATE INDEX idx_sub_skills_skill ON ${DbConstants.tableSubSkills}(${DbConstants.colSkillId})',
+    );
     await db.execute(
-        'CREATE INDEX idx_streaks_skill ON ${DbConstants.tableStreaks}(${DbConstants.colSkillId})');
+      'CREATE INDEX idx_streaks_skill ON ${DbConstants.tableStreaks}(${DbConstants.colSkillId})',
+    );
 
     // Insert default settings
     await _insertDefaultSettings(db);
@@ -225,7 +231,10 @@ class DatabaseHelper {
 
   /// Handle database upgrades
   static Future<void> _onUpgrade(
-      Database db, int oldVersion, int newVersion) async {
+    Database db,
+    int oldVersion,
+    int newVersion,
+  ) async {
     // Future migration logic goes here
     // if (oldVersion < 2) {
     //   // Migration from v1 to v2

@@ -1,17 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:deliberate_practice_app/core/theme/app_colors.dart';
 
 /// A loading indicator widget.
 class LoadingIndicator extends StatelessWidget {
   final String? message;
   final double size;
-  
-  const LoadingIndicator({
-    super.key,
-    this.message,
-    this.size = 40,
-  });
-  
+
+  const LoadingIndicator({super.key, this.message, this.size = 40});
+
   @override
   Widget build(BuildContext context) {
     return Center(
@@ -45,12 +40,9 @@ class LoadingIndicator extends StatelessWidget {
 /// A shimmer loading placeholder.
 class ShimmerLoading extends StatefulWidget {
   final Widget child;
-  
-  const ShimmerLoading({
-    super.key,
-    required this.child,
-  });
-  
+
+  const ShimmerLoading({super.key, required this.child});
+
   @override
   State<ShimmerLoading> createState() => _ShimmerLoadingState();
 }
@@ -59,7 +51,7 @@ class _ShimmerLoadingState extends State<ShimmerLoading>
     with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _animation;
-  
+
   @override
   void initState() {
     super.initState();
@@ -71,13 +63,13 @@ class _ShimmerLoadingState extends State<ShimmerLoading>
       CurvedAnimation(parent: _controller, curve: Curves.easeInOutSine),
     );
   }
-  
+
   @override
   void dispose() {
     _controller.dispose();
     super.dispose();
   }
-  
+
   @override
   Widget build(BuildContext context) {
     return AnimatedBuilder(
@@ -93,11 +85,7 @@ class _ShimmerLoadingState extends State<ShimmerLoading>
                 Theme.of(context).colorScheme.surfaceContainerLow,
                 Theme.of(context).colorScheme.surfaceContainerHighest,
               ],
-              stops: [
-                0.0,
-                0.5,
-                1.0,
-              ],
+              stops: [0.0, 0.5, 1.0],
               transform: _SlidingGradientTransform(_animation.value),
             ).createShader(bounds);
           },
@@ -112,9 +100,9 @@ class _ShimmerLoadingState extends State<ShimmerLoading>
 
 class _SlidingGradientTransform extends GradientTransform {
   final double slidePercent;
-  
+
   const _SlidingGradientTransform(this.slidePercent);
-  
+
   @override
   Matrix4? transform(Rect bounds, {TextDirection? textDirection}) {
     return Matrix4.translationValues(bounds.width * slidePercent, 0, 0);
@@ -124,12 +112,9 @@ class _SlidingGradientTransform extends GradientTransform {
 /// A skeleton loading placeholder for a card.
 class SkeletonCard extends StatelessWidget {
   final double height;
-  
-  const SkeletonCard({
-    super.key,
-    this.height = 100,
-  });
-  
+
+  const SkeletonCard({super.key, this.height = 100});
+
   @override
   Widget build(BuildContext context) {
     return ShimmerLoading(
@@ -149,13 +134,9 @@ class SkeletonCard extends StatelessWidget {
 class SkeletonList extends StatelessWidget {
   final int itemCount;
   final double itemHeight;
-  
-  const SkeletonList({
-    super.key,
-    this.itemCount = 5,
-    this.itemHeight = 100,
-  });
-  
+
+  const SkeletonList({super.key, this.itemCount = 5, this.itemHeight = 100});
+
   @override
   Widget build(BuildContext context) {
     return ListView.builder(

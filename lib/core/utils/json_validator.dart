@@ -12,16 +12,11 @@ class ValidationResult {
     this.parsedJson,
   });
 
-  factory ValidationResult.success(Map<String, dynamic> json) => ValidationResult._(
-        isValid: true,
-        errors: [],
-        parsedJson: json,
-      );
+  factory ValidationResult.success(Map<String, dynamic> json) =>
+      ValidationResult._(isValid: true, errors: [], parsedJson: json);
 
-  factory ValidationResult.failure(List<String> errors) => ValidationResult._(
-        isValid: false,
-        errors: errors,
-      );
+  factory ValidationResult.failure(List<String> errors) =>
+      ValidationResult._(isValid: false, errors: errors);
 }
 
 /// JSON validator for LLM responses
@@ -133,7 +128,7 @@ class JsonValidator {
       'normalization',
       'reframe',
       'encouragement',
-      'suggestion'
+      'suggestion',
     ];
     for (final field in requiredFields) {
       if (data[field] == null || (data[field] as String).isEmpty) {
@@ -149,7 +144,10 @@ class JsonValidator {
   }
 
   /// Validate base JSON structure
-  ValidationResult _validateBaseStructure(String jsonString, String expectedType) {
+  ValidationResult _validateBaseStructure(
+    String jsonString,
+    String expectedType,
+  ) {
     final errors = <String>[];
 
     // Try to parse JSON
@@ -195,20 +193,22 @@ class JsonValidator {
 
     return text.substring(firstBrace, lastBrace + 1);
   }
-  
+
   /// Clean LLM response to extract valid JSON
   static String cleanLlmResponse(String response) {
     // Remove markdown code blocks
-    String cleaned = response.replaceAll(RegExp(r'```json\s*'), '').replaceAll(RegExp(r'```\s*$'), '');
-    
+    String cleaned = response
+        .replaceAll(RegExp(r'```json\s*'), '')
+        .replaceAll(RegExp(r'```\s*$'), '');
+
     // Find JSON object boundaries
     final firstBrace = cleaned.indexOf('{');
     final lastBrace = cleaned.lastIndexOf('}');
-    
+
     if (firstBrace != -1 && lastBrace != -1 && lastBrace > firstBrace) {
       cleaned = cleaned.substring(firstBrace, lastBrace + 1);
     }
-    
+
     return cleaned.trim();
   }
 }

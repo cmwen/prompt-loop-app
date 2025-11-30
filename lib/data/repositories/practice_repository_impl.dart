@@ -41,8 +41,9 @@ class PracticeRepositoryImpl implements PracticeRepository {
         DbConstants.colActualDurationSeconds: durationSeconds,
         DbConstants.colNotes: notes,
         DbConstants.colRating: rating,
-        DbConstants.colCriteriaMet:
-            criteriaMet != null ? jsonEncode(criteriaMet) : null,
+        DbConstants.colCriteriaMet: criteriaMet != null
+            ? jsonEncode(criteriaMet)
+            : null,
       },
       where: '${DbConstants.colId} = ?',
       whereArgs: [sessionId],
@@ -78,7 +79,8 @@ class PracticeRepositoryImpl implements PracticeRepository {
   ) async {
     final maps = await _db.query(
       DbConstants.tablePracticeSessions,
-      where: '${DbConstants.colStartedAt} >= ? AND ${DbConstants.colStartedAt} <= ?',
+      where:
+          '${DbConstants.colStartedAt} >= ? AND ${DbConstants.colStartedAt} <= ?',
       whereArgs: [start.toIsoString(), end.toIsoString()],
       orderBy: '${DbConstants.colStartedAt} DESC',
     );
@@ -87,13 +89,16 @@ class PracticeRepositoryImpl implements PracticeRepository {
 
   @override
   Future<int> getTotalPracticeTime(int skillId) async {
-    final result = await _db.rawQuery('''
+    final result = await _db.rawQuery(
+      '''
       SELECT SUM(ps.${DbConstants.colActualDurationSeconds}) as total
       FROM ${DbConstants.tablePracticeSessions} ps
       JOIN ${DbConstants.tableTasks} t ON ps.${DbConstants.colTaskId} = t.${DbConstants.colId}
       WHERE t.${DbConstants.colSkillId} = ?
       AND ps.${DbConstants.colCompletedAt} IS NOT NULL
-    ''', [skillId]);
+    ''',
+      [skillId],
+    );
 
     if (result.isEmpty) return 0;
     return (result.first['total'] as int?) ?? 0;
@@ -114,7 +119,9 @@ class PracticeRepositoryImpl implements PracticeRepository {
   }
 
   @override
-  Future<List<StruggleEntry>> getStruggleEntriesForSession(int sessionId) async {
+  Future<List<StruggleEntry>> getStruggleEntriesForSession(
+    int sessionId,
+  ) async {
     final maps = await _db.query(
       DbConstants.tableStruggleEntries,
       where: '${DbConstants.colSessionId} = ?',
@@ -204,15 +211,17 @@ class PracticeRepositoryImpl implements PracticeRepository {
     return PracticeSession(
       id: map[DbConstants.colId] as int,
       taskId: map[DbConstants.colTaskId] as int,
-      startedAt: (map[DbConstants.colStartedAt] as String).tryParseDateTime() ??
+      startedAt:
+          (map[DbConstants.colStartedAt] as String).tryParseDateTime() ??
           DateTime.now(),
-      completedAt:
-          (map[DbConstants.colCompletedAt] as String?)?.tryParseDateTime(),
+      completedAt: (map[DbConstants.colCompletedAt] as String?)
+          ?.tryParseDateTime(),
       actualDurationSeconds: map[DbConstants.colActualDurationSeconds] as int?,
       notes: map[DbConstants.colNotes] as String?,
       rating: map[DbConstants.colRating] as int?,
       criteriaMet: criteriaMet,
-      createdAt: (map[DbConstants.colCreatedAt] as String).tryParseDateTime() ??
+      createdAt:
+          (map[DbConstants.colCreatedAt] as String).tryParseDateTime() ??
           DateTime.now(),
     );
   }
@@ -223,7 +232,8 @@ class PracticeRepositoryImpl implements PracticeRepository {
       sessionId: map[DbConstants.colSessionId] as int,
       content: map[DbConstants.colContent] as String,
       wiseFeedback: map[DbConstants.colWiseFeedback] as String?,
-      createdAt: (map[DbConstants.colCreatedAt] as String).tryParseDateTime() ??
+      createdAt:
+          (map[DbConstants.colCreatedAt] as String).tryParseDateTime() ??
           DateTime.now(),
     );
   }
@@ -234,9 +244,10 @@ class PracticeRepositoryImpl implements PracticeRepository {
       skillId: map[DbConstants.colSkillId] as int,
       currentCount: map[DbConstants.colCurrentCount] as int? ?? 0,
       longestCount: map[DbConstants.colLongestCount] as int? ?? 0,
-      lastPracticeDate:
-          (map[DbConstants.colLastPracticeDate] as String?)?.tryParseDateTime(),
-      updatedAt: (map[DbConstants.colUpdatedAt] as String).tryParseDateTime() ??
+      lastPracticeDate: (map[DbConstants.colLastPracticeDate] as String?)
+          ?.tryParseDateTime(),
+      updatedAt:
+          (map[DbConstants.colUpdatedAt] as String).tryParseDateTime() ??
           DateTime.now(),
     );
   }

@@ -108,14 +108,14 @@ class Milestone extends Equatable {
 
   @override
   List<Object?> get props => [
-        id,
-        skillId,
-        title,
-        description,
-        type,
-        targetValue,
-        currentValue,
-        achievedAt,
-        createdAt,
-      ];
+    id,
+    skillId,
+    title,
+    description,
+    type,
+    targetValue,
+    currentValue,
+    achievedAt,
+    createdAt,
+  ];
 }

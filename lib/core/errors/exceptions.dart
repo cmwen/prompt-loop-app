@@ -23,22 +23,14 @@ class CacheException extends AppException {
 class ApiException extends AppException {
   final int? statusCode;
 
-  const ApiException({
-    required super.message,
-    super.code,
-    this.statusCode,
-  });
+  const ApiException({required super.message, super.code, this.statusCode});
 }
 
 /// JSON parsing exception
 class JsonParseException extends AppException {
   final String? rawJson;
 
-  const JsonParseException({
-    required super.message,
-    this.rawJson,
-    super.code,
-  });
+  const JsonParseException({required super.message, this.rawJson, super.code});
 }
 
 /// Validation exception

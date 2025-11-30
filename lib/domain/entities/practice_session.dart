@@ -47,7 +47,8 @@ class PracticeSession extends Equatable {
       taskId: taskId ?? this.taskId,
       startedAt: startedAt ?? this.startedAt,
       completedAt: completedAt ?? this.completedAt,
-      actualDurationSeconds: actualDurationSeconds ?? this.actualDurationSeconds,
+      actualDurationSeconds:
+          actualDurationSeconds ?? this.actualDurationSeconds,
       notes: notes ?? this.notes,
       rating: rating ?? this.rating,
       criteriaMet: criteriaMet ?? this.criteriaMet,
@@ -57,14 +58,14 @@ class PracticeSession extends Equatable {
 
   @override
   List<Object?> get props => [
-        id,
-        taskId,
-        startedAt,
-        completedAt,
-        actualDurationSeconds,
-        notes,
-        rating,
-        criteriaMet,
-        createdAt,
-      ];
+    id,
+    taskId,
+    startedAt,
+    completedAt,
+    actualDurationSeconds,
+    notes,
+    rating,
+    criteriaMet,
+    createdAt,
+  ];
 }

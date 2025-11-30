@@ -9,7 +9,7 @@ class ErrorView extends StatelessWidget {
   final String? details;
   final VoidCallback? onRetry;
   final IconData icon;
-  
+
   const ErrorView({
     super.key,
     required this.message,
@@ -17,7 +17,7 @@ class ErrorView extends StatelessWidget {
     this.onRetry,
     this.icon = Icons.error_outline,
   });
-  
+
   @override
   Widget build(BuildContext context) {
     return Center(
@@ -26,11 +26,7 @@ class ErrorView extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              icon,
-              size: 64,
-              color: AppColors.error,
-            ),
+            Icon(icon, size: 64, color: AppColors.error),
             const SizedBox(height: 16),
             Text(
               message,
@@ -65,12 +61,9 @@ class ErrorView extends StatelessWidget {
 /// A network error view.
 class NetworkErrorView extends StatelessWidget {
   final VoidCallback? onRetry;
-  
-  const NetworkErrorView({
-    super.key,
-    this.onRetry,
-  });
-  
+
+  const NetworkErrorView({super.key, this.onRetry});
+
   @override
   Widget build(BuildContext context) {
     return ErrorView(
@@ -86,18 +79,15 @@ class NetworkErrorView extends StatelessWidget {
 class FailureView extends StatelessWidget {
   final String? failureMessage;
   final VoidCallback? onRetry;
-  
-  const FailureView({
-    super.key,
-    this.failureMessage,
-    this.onRetry,
-  });
-  
+
+  const FailureView({super.key, this.failureMessage, this.onRetry});
+
   @override
   Widget build(BuildContext context) {
     return ErrorView(
       message: 'Something went wrong',
-      details: failureMessage ?? 'An unexpected error occurred. Please try again.',
+      details:
+          failureMessage ?? 'An unexpected error occurred. Please try again.',
       onRetry: onRetry,
     );
   }
@@ -107,36 +97,28 @@ class FailureView extends StatelessWidget {
 class InlineError extends StatelessWidget {
   final String message;
   final VoidCallback? onRetry;
-  
-  const InlineError({
-    super.key,
-    required this.message,
-    this.onRetry,
-  });
-  
+
+  const InlineError({super.key, required this.message, this.onRetry});
+
   @override
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: AppColors.error.withOpacity(0.1),
+        color: AppColors.error.withAlpha(25),
         borderRadius: BorderRadius.circular(8),
         border: Border.all(color: AppColors.error.withOpacity(0.3)),
       ),
       child: Row(
         children: [
-          const Icon(
-            Icons.error_outline,
-            color: AppColors.error,
-            size: 20,
-          ),
+          const Icon(Icons.error_outline, color: AppColors.error, size: 20),
           const SizedBox(width: 8),
           Expanded(
             child: Text(
               message,
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: AppColors.error,
-              ),
+              style: Theme.of(
+                context,
+              ).textTheme.bodySmall?.copyWith(color: AppColors.error),
             ),
           ),
           if (onRetry != null) ...[
@@ -160,7 +142,7 @@ class AsyncValueWidget<T> extends StatelessWidget {
   final Widget Function(T data) data;
   final Widget Function()? loading;
   final Widget Function(Object error, StackTrace stackTrace)? error;
-  
+
   const AsyncValueWidget({
     super.key,
     required this.value,
@@ -168,7 +150,7 @@ class AsyncValueWidget<T> extends StatelessWidget {
     this.loading,
     this.error,
   });
-  
+
   @override
   Widget build(BuildContext context) {
     return value.when(

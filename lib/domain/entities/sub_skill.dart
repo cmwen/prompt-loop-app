@@ -82,15 +82,15 @@ class SubSkill extends Equatable {
 
   @override
   List<Object?> get props => [
-        id,
-        skillId,
-        name,
-        description,
-        currentLevel,
-        targetLevel,
-        priority,
-        progressPercent,
-        isLlmGenerated,
-        createdAt,
-      ];
+    id,
+    skillId,
+    name,
+    description,
+    currentLevel,
+    targetLevel,
+    priority,
+    progressPercent,
+    isLlmGenerated,
+    createdAt,
+  ];
 }

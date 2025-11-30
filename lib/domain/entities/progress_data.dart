@@ -15,7 +15,12 @@ class ProgressData extends Equatable {
   });
 
   @override
-  List<Object?> get props => [date, practiceMinutes, tasksCompleted, sessionsCount];
+  List<Object?> get props => [
+    date,
+    practiceMinutes,
+    tasksCompleted,
+    sessionsCount,
+  ];
 }
 
 /// Skill progress summary
@@ -46,15 +51,15 @@ class SkillProgressSummary extends Equatable {
 
   @override
   List<Object?> get props => [
-        skillId,
-        skillName,
-        totalPracticeMinutes,
-        totalTasksCompleted,
-        totalSessions,
-        overallProgress,
-        currentStreak,
-        longestStreak,
-        dailyProgress,
-        subSkillProgress,
-      ];
+    skillId,
+    skillName,
+    totalPracticeMinutes,
+    totalTasksCompleted,
+    totalSessions,
+    overallProgress,
+    currentStreak,
+    longestStreak,
+    dailyProgress,
+    subSkillProgress,
+  ];
 }
