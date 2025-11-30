@@ -1,4 +1,4 @@
-package com.cmwen.min_flutter_template
+package com.cmwen.prompt_loop
 
 import io.flutter.embedding.android.FlutterActivity
 
