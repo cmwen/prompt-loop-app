@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:deliberate_practice_app/domain/entities/app_settings.dart';
-import 'package:deliberate_practice_app/features/settings/providers/settings_provider.dart';
-import 'package:deliberate_practice_app/shared/widgets/app_card.dart';
-import 'package:deliberate_practice_app/shared/widgets/loading_indicator.dart';
-import 'package:deliberate_practice_app/core/theme/app_colors.dart';
+import 'package:prompt_loop/domain/entities/app_settings.dart';
+import 'package:prompt_loop/features/settings/providers/settings_provider.dart';
+import 'package:prompt_loop/shared/widgets/app_card.dart';
+import 'package:prompt_loop/shared/widgets/loading_indicator.dart';
+import 'package:prompt_loop/core/theme/app_colors.dart';
 
 /// Settings screen for app configuration.
 class SettingsScreen extends ConsumerWidget {

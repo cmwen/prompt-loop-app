@@ -2,13 +2,13 @@ import 'dart:convert';
 
 import 'package:langchain/langchain.dart';
 import 'package:langchain_openai/langchain_openai.dart';
-import 'package:deliberate_practice_app/core/constants/llm_constants.dart';
-import 'package:deliberate_practice_app/core/utils/json_validator.dart';
-import 'package:deliberate_practice_app/domain/entities/skill.dart';
-import 'package:deliberate_practice_app/domain/entities/sub_skill.dart';
-import 'package:deliberate_practice_app/domain/entities/task.dart';
-import 'package:deliberate_practice_app/domain/entities/app_settings.dart';
-import 'package:deliberate_practice_app/domain/services/llm_service.dart';
+import 'package:prompt_loop/core/constants/llm_constants.dart';
+import 'package:prompt_loop/core/utils/json_validator.dart';
+import 'package:prompt_loop/domain/entities/skill.dart';
+import 'package:prompt_loop/domain/entities/sub_skill.dart';
+import 'package:prompt_loop/domain/entities/task.dart';
+import 'package:prompt_loop/domain/entities/app_settings.dart';
+import 'package:prompt_loop/domain/services/llm_service.dart';
 
 /// BYOK (Bring Your Own Key) LLM service for direct API integration.
 ///

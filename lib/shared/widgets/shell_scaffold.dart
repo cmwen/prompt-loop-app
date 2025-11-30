@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:deliberate_practice_app/core/router/app_router.dart';
+import 'package:prompt_loop/core/router/app_router.dart';
 
 /// Shell scaffold with bottom navigation for main app screens.
 class ShellScaffold extends StatelessWidget {

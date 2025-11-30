@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:deliberate_practice_app/core/router/app_router.dart';
-import 'package:deliberate_practice_app/domain/entities/skill.dart';
-import 'package:deliberate_practice_app/features/skills/providers/skills_provider.dart';
+import 'package:prompt_loop/core/router/app_router.dart';
+import 'package:prompt_loop/domain/entities/skill.dart';
+import 'package:prompt_loop/features/skills/providers/skills_provider.dart';
 
 /// Screen for adding a new skill.
 class AddSkillScreen extends ConsumerStatefulWidget {

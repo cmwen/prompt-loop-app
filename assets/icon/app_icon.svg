@@ -1,0 +1,52 @@
+<svg width="1024" height="1024" viewBox="0 0 1024 1024" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="1024" height="1024" rx="228" fill="url(#gradient)"/>
+  
+  <!-- Loop symbol with arrow indicating continuous improvement -->
+  <g transform="translate(512, 512)">
+    <!-- Outer loop arc -->
+    <path d="M -180 -80 A 200 200 0 1 1 180 -80" 
+          stroke="#FFFFFF" 
+          stroke-width="56" 
+          stroke-linecap="round" 
+          fill="none"
+          opacity="0.95"/>
+    
+    <!-- Inner connecting arc -->
+    <path d="M 180 -80 A 140 140 0 0 0 120 80" 
+          stroke="#FFFFFF" 
+          stroke-width="56" 
+          stroke-linecap="round" 
+          fill="none"
+          opacity="0.95"/>
+    
+    <!-- Return arc -->
+    <path d="M 120 80 A 160 160 0 0 1 -180 -80" 
+          stroke="#FFFFFF" 
+          stroke-width="56" 
+          stroke-linecap="round" 
+          fill="none"
+          opacity="0.95"/>
+    
+    <!-- Arrow head indicating forward progress -->
+    <path d="M -200 -100 L -160 -60 L -220 -40 Z" 
+          fill="#FFFFFF" 
+          opacity="0.95"/>
+    
+    <!-- Center dot representing the learner/focus -->
+    <circle cx="0" cy="0" r="40" fill="#FFFFFF" opacity="0.95"/>
+    
+    <!-- AI spark/node indicators around the loop -->
+    <circle cx="-180" cy="-80" r="28" fill="#E0F2FE" opacity="0.9"/>
+    <circle cx="180" cy="-80" r="28" fill="#E0F2FE" opacity="0.9"/>
+    <circle cx="120" cy="80" r="28" fill="#E0F2FE" opacity="0.9"/>
+  </g>
+  
+  <!-- Gradient definition -->
+  <defs>
+    <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0EA5E9;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#0369A1;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+</svg>

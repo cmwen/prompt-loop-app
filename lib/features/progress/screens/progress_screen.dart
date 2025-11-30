@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:deliberate_practice_app/core/theme/app_colors.dart';
-import 'package:deliberate_practice_app/features/practice/providers/practice_provider.dart';
-import 'package:deliberate_practice_app/features/skills/providers/skills_provider.dart';
-import 'package:deliberate_practice_app/shared/widgets/app_card.dart';
-import 'package:deliberate_practice_app/shared/widgets/progress_indicators.dart';
-import 'package:deliberate_practice_app/shared/widgets/loading_indicator.dart';
+import 'package:prompt_loop/core/theme/app_colors.dart';
+import 'package:prompt_loop/features/practice/providers/practice_provider.dart';
+import 'package:prompt_loop/features/skills/providers/skills_provider.dart';
+import 'package:prompt_loop/shared/widgets/app_card.dart';
+import 'package:prompt_loop/shared/widgets/progress_indicators.dart';
+import 'package:prompt_loop/shared/widgets/loading_indicator.dart';
 
 /// Progress screen showing overall progress and statistics.
 class ProgressScreen extends ConsumerWidget {

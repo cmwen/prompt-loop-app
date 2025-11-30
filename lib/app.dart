@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:deliberate_practice_app/core/router/app_router.dart';
-import 'package:deliberate_practice_app/core/theme/app_theme.dart';
-import 'package:deliberate_practice_app/features/settings/providers/settings_provider.dart';
+import 'package:prompt_loop/core/router/app_router.dart';
+import 'package:prompt_loop/core/theme/app_theme.dart';
+import 'package:prompt_loop/features/settings/providers/settings_provider.dart';
 
 /// The main application widget.
 class PromptLoopApp extends ConsumerWidget {

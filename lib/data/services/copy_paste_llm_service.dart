@@ -1,11 +1,11 @@
 import 'dart:convert';
 
-import 'package:deliberate_practice_app/core/constants/llm_constants.dart';
-import 'package:deliberate_practice_app/core/utils/json_validator.dart';
-import 'package:deliberate_practice_app/domain/entities/skill.dart';
-import 'package:deliberate_practice_app/domain/entities/sub_skill.dart';
-import 'package:deliberate_practice_app/domain/entities/task.dart';
-import 'package:deliberate_practice_app/domain/services/llm_service.dart';
+import 'package:prompt_loop/core/constants/llm_constants.dart';
+import 'package:prompt_loop/core/utils/json_validator.dart';
+import 'package:prompt_loop/domain/entities/skill.dart';
+import 'package:prompt_loop/domain/entities/sub_skill.dart';
+import 'package:prompt_loop/domain/entities/task.dart';
+import 'package:prompt_loop/domain/services/llm_service.dart';
 
 /// Callback for when a prompt is ready to be copied.
 typedef PromptReadyCallback = Future<void> Function(String prompt);

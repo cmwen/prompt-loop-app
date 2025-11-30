@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:deliberate_practice_app/core/theme/app_colors.dart';
-import 'package:deliberate_practice_app/shared/widgets/loading_indicator.dart';
+import 'package:prompt_loop/core/theme/app_colors.dart';
+import 'package:prompt_loop/shared/widgets/loading_indicator.dart';
 
 /// An error view widget.
 class ErrorView extends StatelessWidget {

@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:deliberate_practice_app/core/router/app_router.dart';
-import 'package:deliberate_practice_app/features/skills/providers/skills_provider.dart';
-import 'package:deliberate_practice_app/shared/widgets/app_card.dart';
-import 'package:deliberate_practice_app/shared/widgets/empty_state.dart';
-import 'package:deliberate_practice_app/shared/widgets/loading_indicator.dart';
+import 'package:prompt_loop/core/router/app_router.dart';
+import 'package:prompt_loop/features/skills/providers/skills_provider.dart';
+import 'package:prompt_loop/shared/widgets/app_card.dart';
+import 'package:prompt_loop/shared/widgets/empty_state.dart';
+import 'package:prompt_loop/shared/widgets/loading_indicator.dart';
 
 /// Skills list screen showing all user skills.
 class SkillsListScreen extends ConsumerWidget {

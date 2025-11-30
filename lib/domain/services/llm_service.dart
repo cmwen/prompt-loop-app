@@ -1,6 +1,6 @@
-import 'package:deliberate_practice_app/domain/entities/skill.dart';
-import 'package:deliberate_practice_app/domain/entities/sub_skill.dart';
-import 'package:deliberate_practice_app/domain/entities/task.dart';
+import 'package:prompt_loop/domain/entities/skill.dart';
+import 'package:prompt_loop/domain/entities/sub_skill.dart';
+import 'package:prompt_loop/domain/entities/task.dart';
 
 /// Result of an LLM analysis or generation operation.
 class LlmResult<T> {

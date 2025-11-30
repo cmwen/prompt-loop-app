@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:deliberate_practice_app/core/router/app_router.dart';
-import 'package:deliberate_practice_app/features/settings/providers/settings_provider.dart';
+import 'package:prompt_loop/core/router/app_router.dart';
+import 'package:prompt_loop/features/settings/providers/settings_provider.dart';
 
 /// Onboarding screen shown to first-time users.
 class OnboardingScreen extends ConsumerStatefulWidget {

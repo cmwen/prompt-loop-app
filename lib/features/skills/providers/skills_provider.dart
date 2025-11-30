@@ -1,7 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:deliberate_practice_app/data/providers/repository_providers.dart';
-import 'package:deliberate_practice_app/domain/entities/skill.dart';
-import 'package:deliberate_practice_app/domain/entities/sub_skill.dart';
+import 'package:prompt_loop/data/providers/repository_providers.dart';
+import 'package:prompt_loop/domain/entities/skill.dart';
+import 'package:prompt_loop/domain/entities/sub_skill.dart';
 
 /// Provider for the list of all active skills.
 final skillsProvider =

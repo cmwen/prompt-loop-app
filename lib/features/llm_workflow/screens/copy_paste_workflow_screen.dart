@@ -2,13 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:deliberate_practice_app/core/router/app_router.dart';
-import 'package:deliberate_practice_app/core/theme/app_colors.dart';
-import 'package:deliberate_practice_app/data/services/copy_paste_llm_service.dart';
-import 'package:deliberate_practice_app/domain/services/llm_service.dart';
-import 'package:deliberate_practice_app/features/skills/providers/skills_provider.dart';
-import 'package:deliberate_practice_app/shared/widgets/loading_indicator.dart';
-import 'package:deliberate_practice_app/shared/widgets/app_card.dart';
+import 'package:prompt_loop/core/router/app_router.dart';
+import 'package:prompt_loop/core/theme/app_colors.dart';
+import 'package:prompt_loop/data/services/copy_paste_llm_service.dart';
+import 'package:prompt_loop/domain/services/llm_service.dart';
+import 'package:prompt_loop/features/skills/providers/skills_provider.dart';
+import 'package:prompt_loop/shared/widgets/loading_indicator.dart';
+import 'package:prompt_loop/shared/widgets/app_card.dart';
 
 /// Copy-paste LLM workflow screen.
 class CopyPasteWorkflowScreen extends ConsumerStatefulWidget {

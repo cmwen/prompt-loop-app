@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:deliberate_practice_app/core/theme/app_colors.dart';
+import 'package:prompt_loop/core/theme/app_colors.dart';
 
 /// Empty state widget shown when there's no data.
 class EmptyState extends StatelessWidget {

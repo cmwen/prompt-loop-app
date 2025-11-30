@@ -1,15 +1,15 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:deliberate_practice_app/data/providers/database_provider.dart';
-import 'package:deliberate_practice_app/data/repositories/skill_repository_impl.dart';
-import 'package:deliberate_practice_app/data/repositories/task_repository_impl.dart';
-import 'package:deliberate_practice_app/data/repositories/practice_repository_impl.dart';
-import 'package:deliberate_practice_app/data/repositories/purpose_repository_impl.dart';
-import 'package:deliberate_practice_app/data/repositories/settings_repository_impl.dart';
-import 'package:deliberate_practice_app/domain/repositories/skill_repository.dart';
-import 'package:deliberate_practice_app/domain/repositories/task_repository.dart';
-import 'package:deliberate_practice_app/domain/repositories/practice_repository.dart';
-import 'package:deliberate_practice_app/domain/repositories/purpose_repository.dart';
-import 'package:deliberate_practice_app/domain/repositories/settings_repository.dart';
+import 'package:prompt_loop/data/providers/database_provider.dart';
+import 'package:prompt_loop/data/repositories/skill_repository_impl.dart';
+import 'package:prompt_loop/data/repositories/task_repository_impl.dart';
+import 'package:prompt_loop/data/repositories/practice_repository_impl.dart';
+import 'package:prompt_loop/data/repositories/purpose_repository_impl.dart';
+import 'package:prompt_loop/data/repositories/settings_repository_impl.dart';
+import 'package:prompt_loop/domain/repositories/skill_repository.dart';
+import 'package:prompt_loop/domain/repositories/task_repository.dart';
+import 'package:prompt_loop/domain/repositories/practice_repository.dart';
+import 'package:prompt_loop/domain/repositories/purpose_repository.dart';
+import 'package:prompt_loop/domain/repositories/settings_repository.dart';
 
 /// Provider for the skill repository.
 final skillRepositoryProvider = FutureProvider<SkillRepository>((ref) async {

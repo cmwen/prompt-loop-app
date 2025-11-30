@@ -1,6 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:deliberate_practice_app/data/providers/repository_providers.dart';
-import 'package:deliberate_practice_app/domain/entities/purpose.dart';
+import 'package:prompt_loop/data/providers/repository_providers.dart';
+import 'package:prompt_loop/domain/entities/purpose.dart';
 
 /// Provider for all purposes.
 final purposesProvider =
