@@ -276,6 +276,52 @@ class SettingsScreen extends ConsumerWidget {
                       ],
                     ),
                   ),
+                  const SizedBox(height: 24),
+
+                  // Reset section
+                  _SectionHeader(title: 'Reset'),
+                  const SizedBox(height: 8),
+                  AppCard(
+                    child: ListTile(
+                      leading: const Icon(Icons.restore_outlined),
+                      title: const Text('Show Onboarding'),
+                      subtitle: const Text(
+                        'Reset and show onboarding screens again',
+                      ),
+                      trailing: const Icon(Icons.chevron_right),
+                      onTap: () {
+                        showDialog<void>(
+                          context: context,
+                          builder: (context) => AlertDialog(
+                            title: const Text('Reset Onboarding?'),
+                            content: const Text(
+                              'This will show the onboarding screens again on next app restart.',
+                            ),
+                            actions: [
+                              TextButton(
+                                onPressed: () => Navigator.pop(context),
+                                child: const Text('Cancel'),
+                              ),
+                              TextButton(
+                                onPressed: () {
+                                  ref
+                                      .read(settingsProvider.notifier)
+                                      .resetOnboarding();
+                                  Navigator.pop(context);
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                      content: Text('Onboarding reset'),
+                                    ),
+                                  );
+                                },
+                                child: const Text('Reset'),
+                              ),
+                            ],
+                          ),
+                        );
+                      },
+                    ),
+                  ),
                   const SizedBox(height: 100), // Bottom padding
                 ]),
               ),

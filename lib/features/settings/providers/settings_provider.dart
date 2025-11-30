@@ -79,6 +79,13 @@ class SettingsNotifier extends StateNotifier<AsyncValue<AppSettings>> {
     }
   }
 
+  Future<void> resetOnboarding() async {
+    final current = state.valueOrNull;
+    if (current != null) {
+      await updateSettings(current.copyWith(onboardingCompleted: false));
+    }
+  }
+
   Future<void> setLlmMode(LlmMode mode) async {
     final current = state.valueOrNull;
     if (current != null) {

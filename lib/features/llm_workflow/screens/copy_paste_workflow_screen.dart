@@ -8,6 +8,8 @@ import 'package:prompt_loop/core/theme/app_colors.dart';
 import 'package:prompt_loop/core/constants/llm_constants.dart';
 import 'package:prompt_loop/data/services/copy_paste_llm_service.dart';
 import 'package:prompt_loop/domain/services/llm_service.dart';
+import 'package:prompt_loop/domain/entities/task.dart';
+import 'package:prompt_loop/domain/entities/skill.dart';
 import 'package:prompt_loop/features/skills/providers/skills_provider.dart';
 import 'package:prompt_loop/features/tasks/providers/tasks_provider.dart';
 import 'package:prompt_loop/features/purpose/providers/purpose_provider.dart';
@@ -315,7 +317,54 @@ Please respond with JSON in this format:
   }
 
   Future<void> _processTaskGeneration() async {
-    // TODO: Parse JSON and create tasks
+    if (_selectedSkillId == null) {
+      throw Exception('No skill selected');
+    }
+
+    final response = _responseController.text.trim();
+    if (response.isEmpty) {
+      throw Exception('No response to parse');
+    }
+
+    final service = CopyPasteLlmService(
+      onPromptReady: (_) async {},
+      onResponseReceived: () async => response,
+    );
+
+    final request = TaskGenerationRequest(
+      skill: Skill(
+        id: 0,
+        name: '',
+        currentLevel: SkillLevel.beginner,
+        createdAt: DateTime.now(),
+      ),
+      subSkills: [],
+    );
+
+    final result = await service.generateTasks(request);
+
+    if (!result.isSuccess) {
+      throw Exception(result.error);
+    }
+
+    final tasks = result.data ?? [];
+    final tasksNotifier = ref.read(tasksProvider.notifier);
+
+    for (final taskSuggestion in tasks) {
+      final task = Task(
+        skillId: _selectedSkillId!,
+        title: taskSuggestion.title,
+        description: taskSuggestion.description,
+        durationMinutes: taskSuggestion.durationMinutes,
+        difficulty: taskSuggestion.difficulty,
+        successCriteria: taskSuggestion.successCriteria,
+        frequency: taskSuggestion.frequency,
+        isLlmGenerated: true,
+        createdAt: DateTime.now(),
+      );
+
+      await tasksNotifier.createTask(task);
+    }
   }
 
   Future<void> _processStruggleAnalysis() async {
