@@ -1,11 +1,11 @@
 import 'dart:convert';
 
-import 'package:prompt_loop_app/core/constants/llm_constants.dart';
-import 'package:prompt_loop_app/core/utils/json_validator.dart';
-import 'package:prompt_loop_app/domain/entities/skill.dart';
-import 'package:prompt_loop_app/domain/entities/sub_skill.dart';
-import 'package:prompt_loop_app/domain/entities/task.dart';
-import 'package:prompt_loop_app/domain/services/llm_service.dart';
+import 'package:deliberate_practice_app/core/constants/llm_constants.dart';
+import 'package:deliberate_practice_app/core/utils/json_validator.dart';
+import 'package:deliberate_practice_app/domain/entities/skill.dart';
+import 'package:deliberate_practice_app/domain/entities/sub_skill.dart';
+import 'package:deliberate_practice_app/domain/entities/task.dart';
+import 'package:deliberate_practice_app/domain/services/llm_service.dart';
 
 /// Callback for when a prompt is ready to be copied.
 typedef PromptReadyCallback = Future<void> Function(String prompt);
@@ -139,7 +139,7 @@ Please provide wise feedback in the exact JSON format above.
 
   LlmResult<SkillAnalysisResult> _parseSkillAnalysisResponse(String response) {
     try {
-      final cleanedJson = LlmJsonValidator.cleanLlmResponse(response);
+      final cleanedJson = JsonValidator.cleanLlmResponse(response);
       
       if (cleanedJson == null) {
         return LlmResult.failure(
@@ -195,7 +195,7 @@ Please provide wise feedback in the exact JSON format above.
 
   LlmResult<List<TaskSuggestion>> _parseTaskGenerationResponse(String response) {
     try {
-      final cleanedJson = LlmJsonValidator.cleanLlmResponse(response);
+      final cleanedJson = JsonValidator.cleanLlmResponse(response);
       
       if (cleanedJson == null) {
         return LlmResult.failure(
@@ -221,7 +221,7 @@ Please provide wise feedback in the exact JSON format above.
         return TaskSuggestion(
           title: taskMap['title'] as String,
           description: taskMap['description'] as String,
-          estimatedMinutes: taskMap['estimated_minutes'] as int? ?? 30,
+          durationMinutes: taskMap['estimated_minutes'] as int? ?? 30,
           difficulty: taskMap['difficulty'] as int? ?? 5,
           successCriteria: successCriteriaJson.cast<String>(),
           frequency: _parseFrequency(taskMap['frequency'] as String?),
@@ -240,7 +240,7 @@ Please provide wise feedback in the exact JSON format above.
 
   LlmResult<WiseFeedbackResult> _parseWiseFeedbackResponse(String response) {
     try {
-      final cleanedJson = LlmJsonValidator.cleanLlmResponse(response);
+      final cleanedJson = JsonValidator.cleanLlmResponse(response);
       
       if (cleanedJson == null) {
         return LlmResult.failure(
@@ -294,18 +294,18 @@ Please provide wise feedback in the exact JSON format above.
   SkillLevel _parseSkillLevel(String? level) {
     switch (level?.toLowerCase()) {
       case 'novice':
-        return SkillLevel.novice;
+        return SkillLevel.beginner;
       case 'advanced_beginner':
       case 'advancedbeginner':
-        return SkillLevel.advancedBeginner;
+        return SkillLevel.intermediate;
       case 'competent':
-        return SkillLevel.competent;
+        return SkillLevel.intermediate;
       case 'proficient':
-        return SkillLevel.proficient;
+        return SkillLevel.advanced;
       case 'expert':
         return SkillLevel.expert;
       default:
-        return SkillLevel.novice;
+        return SkillLevel.beginner;
     }
   }
 
@@ -316,11 +316,11 @@ Please provide wise feedback in the exact JSON format above.
       case 'weekly':
         return TaskFrequency.weekly;
       case 'biweekly':
-        return TaskFrequency.biweekly;
+        return TaskFrequency.weekly;
       case 'monthly':
-        return TaskFrequency.monthly;
+        return TaskFrequency.custom;
       case 'once':
-        return TaskFrequency.once;
+        return TaskFrequency.custom;
       default:
         return TaskFrequency.weekly;
     }

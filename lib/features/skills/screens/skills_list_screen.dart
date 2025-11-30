@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:prompt_loop_app/core/router/app_router.dart';
-import 'package:prompt_loop_app/features/skills/providers/skills_provider.dart';
-import 'package:prompt_loop_app/shared/widgets/app_card.dart';
-import 'package:prompt_loop_app/shared/widgets/empty_state.dart';
-import 'package:prompt_loop_app/shared/widgets/loading_indicator.dart';
+import 'package:deliberate_practice_app/core/router/app_router.dart';
+import 'package:deliberate_practice_app/features/skills/providers/skills_provider.dart';
+import 'package:deliberate_practice_app/shared/widgets/app_card.dart';
+import 'package:deliberate_practice_app/shared/widgets/empty_state.dart';
+import 'package:deliberate_practice_app/shared/widgets/loading_indicator.dart';
 
 /// Skills list screen showing all user skills.
 class SkillsListScreen extends ConsumerWidget {
@@ -49,8 +49,8 @@ class SkillsListScreen extends ConsumerWidget {
                         padding: const EdgeInsets.only(bottom: 8),
                         child: SkillCard(
                           name: skill.name,
-                          level: skill.level.displayName,
-                          progress: skill.progressPercentage / 100,
+                          level: skill.currentLevel.displayName,
+                          progress: 0.0, // TODO: Calculate progress
                           onTap: () {
                             context.goNamed(
                               AppRoutes.skillDetail,

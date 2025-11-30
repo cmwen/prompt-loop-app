@@ -1,6 +1,6 @@
-import 'package:prompt_loop_app/domain/entities/skill.dart';
-import 'package:prompt_loop_app/domain/entities/sub_skill.dart';
-import 'package:prompt_loop_app/domain/entities/task.dart';
+import 'package:deliberate_practice_app/domain/entities/skill.dart';
+import 'package:deliberate_practice_app/domain/entities/sub_skill.dart';
+import 'package:deliberate_practice_app/domain/entities/task.dart';
 
 /// Result of an LLM analysis or generation operation.
 class LlmResult<T> {
@@ -101,7 +101,7 @@ class TaskGenerationRequest {
   String toPromptContext() {
     final buffer = StringBuffer();
     buffer.writeln('Skill: ${skill.name}');
-    buffer.writeln('Current level: ${skill.level.name}');
+    buffer.writeln('Current level: ${skill.currentLevel.name}');
     buffer.writeln('Sub-skills to focus on:');
     for (final subSkill in subSkills) {
       buffer.writeln('  - ${subSkill.name} (${subSkill.priority.name} priority)');
@@ -123,7 +123,7 @@ class TaskGenerationRequest {
 class TaskSuggestion {
   final String title;
   final String description;
-  final int estimatedMinutes;
+  final int durationMinutes;
   final int difficulty;
   final List<String> successCriteria;
   final TaskFrequency frequency;
@@ -132,7 +132,7 @@ class TaskSuggestion {
   const TaskSuggestion({
     required this.title,
     required this.description,
-    required this.estimatedMinutes,
+    required this.durationMinutes,
     required this.difficulty,
     required this.successCriteria,
     required this.frequency,

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:prompt_loop_app/core/theme/app_colors.dart';
+import 'package:deliberate_practice_app/core/theme/app_colors.dart';
 
 /// A loading indicator widget.
 class LoadingIndicator extends StatelessWidget {
@@ -23,7 +23,7 @@ class LoadingIndicator extends StatelessWidget {
             height: size,
             child: CircularProgressIndicator(
               strokeWidth: 3,
-              color: AppColors.primary,
+              color: Theme.of(context).colorScheme.primary,
             ),
           ),
           if (message != null) ...[

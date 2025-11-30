@@ -2,14 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:prompt_loop_app/core/router/app_router.dart';
-import 'package:prompt_loop_app/core/theme/app_colors.dart';
-import 'package:prompt_loop_app/data/services/copy_paste_llm_service.dart';
-import 'package:prompt_loop_app/domain/services/llm_service.dart';
-import 'package:prompt_loop_app/features/llm_workflow/providers/llm_provider.dart';
-import 'package:prompt_loop_app/features/skills/providers/skills_provider.dart';
-import 'package:prompt_loop_app/shared/widgets/loading_indicator.dart';
-import 'package:prompt_loop_app/shared/widgets/app_card.dart';
+import 'package:deliberate_practice_app/core/router/app_router.dart';
+import 'package:deliberate_practice_app/core/theme/app_colors.dart';
+import 'package:deliberate_practice_app/data/services/copy_paste_llm_service.dart';
+import 'package:deliberate_practice_app/domain/services/llm_service.dart';
+import 'package:deliberate_practice_app/features/llm_workflow/providers/llm_provider.dart';
+import 'package:deliberate_practice_app/features/skills/providers/skills_provider.dart';
+import 'package:deliberate_practice_app/shared/widgets/loading_indicator.dart';
+import 'package:deliberate_practice_app/shared/widgets/app_card.dart';
 
 /// Copy-paste LLM workflow screen.
 class CopyPasteWorkflowScreen extends ConsumerStatefulWidget {
@@ -516,7 +516,7 @@ class _StepHeader extends StatelessWidget {
           width: 28,
           height: 28,
           decoration: BoxDecoration(
-            color: isActive ? AppColors.primary : AppColors.textTertiary,
+            color: isActive ? Theme.of(context).colorScheme.primary : Theme.of(context).colorScheme.onSurface.withOpacity(0.4),
             shape: BoxShape.circle,
           ),
           child: Center(
@@ -534,7 +534,7 @@ class _StepHeader extends StatelessWidget {
           title,
           style: Theme.of(context).textTheme.titleMedium?.copyWith(
             fontWeight: isActive ? FontWeight.w600 : FontWeight.normal,
-            color: isActive ? null : AppColors.textTertiary,
+            color: isActive ? null : Theme.of(context).colorScheme.onSurface.withOpacity(0.4),
           ),
         ),
       ],

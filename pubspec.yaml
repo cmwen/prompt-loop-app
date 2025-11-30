@@ -39,6 +39,13 @@ dependencies:
   collection: ^1.19.1
   equatable: ^2.0.7
   json_annotation: ^4.9.0
+  
+  # LLM Integration
+  langchain: ^0.7.0
+  langchain_openai: ^0.7.0
+  
+  # HTTP
+  http: ^1.6.0
 
 dev_dependencies:
   flutter_test:

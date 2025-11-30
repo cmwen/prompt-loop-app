@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:prompt_loop_app/core/theme/app_colors.dart';
+import 'package:deliberate_practice_app/core/theme/app_colors.dart';
 
 /// A styled card widget for the app.
 class AppCard extends StatelessWidget {

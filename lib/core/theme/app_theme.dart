@@ -8,7 +8,7 @@ class AppTheme {
   AppTheme._();
 
   /// Light theme
-  static ThemeData get light {
+  static ThemeData get lightTheme {
     final colorScheme = ColorScheme.fromSeed(
       seedColor: AppColors.primarySeed,
       brightness: Brightness.light,
@@ -24,7 +24,7 @@ class AppTheme {
         backgroundColor: colorScheme.surface,
         foregroundColor: colorScheme.onSurface,
       ),
-      cardTheme: CardTheme(
+      cardTheme: CardThemeData(
         elevation: 0,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
@@ -93,7 +93,7 @@ class AppTheme {
           borderRadius: BorderRadius.circular(12),
         ),
       ),
-      dialogTheme: DialogTheme(
+      dialogTheme: DialogThemeData(
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(24),
         ),
@@ -107,7 +107,7 @@ class AppTheme {
   }
 
   /// Dark theme
-  static ThemeData get dark {
+  static ThemeData get darkTheme {
     final colorScheme = ColorScheme.fromSeed(
       seedColor: AppColors.primarySeed,
       brightness: Brightness.dark,
@@ -123,7 +123,7 @@ class AppTheme {
         backgroundColor: colorScheme.surface,
         foregroundColor: colorScheme.onSurface,
       ),
-      cardTheme: CardTheme(
+      cardTheme: CardThemeData(
         elevation: 0,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
@@ -192,7 +192,7 @@ class AppTheme {
           borderRadius: BorderRadius.circular(12),
         ),
       ),
-      dialogTheme: DialogTheme(
+      dialogTheme: DialogThemeData(
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(24),
         ),

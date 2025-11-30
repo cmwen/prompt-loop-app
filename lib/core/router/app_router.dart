@@ -1,19 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:prompt_loop_app/features/settings/providers/settings_provider.dart';
-import 'package:prompt_loop_app/features/home/screens/home_screen.dart';
-import 'package:prompt_loop_app/features/skills/screens/skills_list_screen.dart';
-import 'package:prompt_loop_app/features/skills/screens/skill_detail_screen.dart';
-import 'package:prompt_loop_app/features/skills/screens/add_skill_screen.dart';
-import 'package:prompt_loop_app/features/tasks/screens/tasks_screen.dart';
-import 'package:prompt_loop_app/features/practice/screens/practice_session_screen.dart';
-import 'package:prompt_loop_app/features/progress/screens/progress_screen.dart';
-import 'package:prompt_loop_app/features/settings/screens/settings_screen.dart';
-import 'package:prompt_loop_app/features/onboarding/screens/onboarding_screen.dart';
-import 'package:prompt_loop_app/features/onboarding/screens/purpose_setup_screen.dart';
-import 'package:prompt_loop_app/features/llm_workflow/screens/copy_paste_workflow_screen.dart';
-import 'package:prompt_loop_app/shared/widgets/shell_scaffold.dart';
+import 'package:deliberate_practice_app/features/settings/providers/settings_provider.dart';
+import 'package:deliberate_practice_app/features/home/screens/home_screen.dart';
+import 'package:deliberate_practice_app/features/skills/screens/skills_list_screen.dart';
+import 'package:deliberate_practice_app/features/skills/screens/skill_detail_screen.dart';
+import 'package:deliberate_practice_app/features/skills/screens/add_skill_screen.dart';
+import 'package:deliberate_practice_app/features/tasks/screens/tasks_screen.dart';
+import 'package:deliberate_practice_app/features/practice/screens/practice_session_screen.dart';
+import 'package:deliberate_practice_app/features/progress/screens/progress_screen.dart';
+import 'package:deliberate_practice_app/features/settings/screens/settings_screen.dart';
+import 'package:deliberate_practice_app/features/onboarding/screens/onboarding_screen.dart';
+import 'package:deliberate_practice_app/features/onboarding/screens/purpose_setup_screen.dart';
+import 'package:deliberate_practice_app/features/llm_workflow/screens/copy_paste_workflow_screen.dart';
+import 'package:deliberate_practice_app/shared/widgets/shell_scaffold.dart';
 
 /// Route names for navigation.
 class AppRoutes {

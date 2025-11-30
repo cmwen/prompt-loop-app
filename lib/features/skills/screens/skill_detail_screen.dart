@@ -1,16 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:prompt_loop_app/core/router/app_router.dart';
-import 'package:prompt_loop_app/core/theme/app_colors.dart';
-import 'package:prompt_loop_app/features/skills/providers/skills_provider.dart';
-import 'package:prompt_loop_app/features/tasks/providers/tasks_provider.dart';
-import 'package:prompt_loop_app/features/practice/providers/practice_provider.dart';
-import 'package:prompt_loop_app/features/purpose/providers/purpose_provider.dart';
-import 'package:prompt_loop_app/shared/widgets/app_card.dart';
-import 'package:prompt_loop_app/shared/widgets/progress_indicators.dart';
-import 'package:prompt_loop_app/shared/widgets/loading_indicator.dart';
-import 'package:prompt_loop_app/shared/widgets/empty_state.dart';
+import 'package:deliberate_practice_app/core/router/app_router.dart';
+import 'package:deliberate_practice_app/core/theme/app_colors.dart';
+import 'package:deliberate_practice_app/features/skills/providers/skills_provider.dart';
+import 'package:deliberate_practice_app/features/tasks/providers/tasks_provider.dart';
+import 'package:deliberate_practice_app/features/practice/providers/practice_provider.dart';
+import 'package:deliberate_practice_app/features/purpose/providers/purpose_provider.dart';
+import 'package:deliberate_practice_app/shared/widgets/app_card.dart';
+import 'package:deliberate_practice_app/shared/widgets/progress_indicators.dart';
+import 'package:deliberate_practice_app/shared/widgets/loading_indicator.dart';
+import 'package:deliberate_practice_app/shared/widgets/empty_state.dart';
 
 /// Skill detail screen showing full skill info, tasks, and progress.
 class SkillDetailScreen extends ConsumerWidget {
@@ -105,7 +105,7 @@ class SkillDetailScreen extends ConsumerWidget {
                           Row(
                             children: [
                               CircularProgressWithLabel(
-                                value: skillData.progressPercentage / 100,
+                                value: 0.0, // TODO: Calculate progress
                                 size: 60,
                               ),
                               const SizedBox(width: 16),
@@ -114,7 +114,7 @@ class SkillDetailScreen extends ConsumerWidget {
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Text(
-                                      skillData.level.displayName,
+                                      skillData.currentLevel.displayName,
                                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
                                         fontWeight: FontWeight.w600,
                                       ),
@@ -125,7 +125,7 @@ class SkillDetailScreen extends ConsumerWidget {
                                           ? StreakIndicator(
                                               currentStreak: s.currentCount,
                                               bestStreak: s.longestCount,
-                                              isActiveToday: s.isActiveToday,
+                                              isActiveToday: s.practicedToday,
                                             )
                                           : const Text('Start your streak!'),
                                       loading: () => const SizedBox.shrink(),
@@ -163,7 +163,7 @@ class SkillDetailScreen extends ConsumerWidget {
                               children: [
                                 Icon(
                                   Icons.lightbulb_outline,
-                                  color: AppColors.primary,
+                                  color: Theme.of(context).colorScheme.primary,
                                 ),
                                 const SizedBox(width: 12),
                                 Expanded(
@@ -197,7 +197,7 @@ class SkillDetailScreen extends ConsumerWidget {
                                 children: [
                                   Icon(
                                     Icons.lightbulb,
-                                    color: AppColors.primary,
+                                    color: Theme.of(context).colorScheme.primary,
                                     size: 20,
                                   ),
                                   const SizedBox(width: 8),
@@ -298,7 +298,7 @@ class SkillDetailScreen extends ConsumerWidget {
                                 ],
                                 const SizedBox(height: 8),
                                 ProgressBar(
-                                  value: subSkill.progressPercentage / 100,
+                                  value: 0.0, // TODO: Calculate progress
                                   height: 6,
                                 ),
                               ],
@@ -343,7 +343,7 @@ class SkillDetailScreen extends ConsumerWidget {
                         return Column(
                           children: taskList.map((task) => TaskCard(
                             title: task.title,
-                            subtitle: '${task.estimatedMinutes} min • ${task.frequency.name}',
+                            subtitle: '${task.durationMinutes} min • ${task.frequency.name}',
                             difficulty: task.difficulty,
                             isCompleted: task.isCompleted,
                             onTap: () {
@@ -400,7 +400,7 @@ class SkillDetailScreen extends ConsumerWidget {
       case 'Priority.low':
         return AppColors.success;
       default:
-        return AppColors.textSecondary;
+        return Theme.of(context).colorScheme.onSurface.withOpacity(0.6);
     }
   }
 }

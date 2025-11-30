@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:prompt_loop_app/core/theme/app_colors.dart';
+import 'package:deliberate_practice_app/core/theme/app_colors.dart';
 
 /// A custom progress bar widget.
 class ProgressBar extends StatelessWidget {
@@ -25,7 +25,7 @@ class ProgressBar extends StatelessWidget {
     final radius = borderRadius ?? BorderRadius.circular(height / 2);
     final bgColor = backgroundColor ?? 
         Theme.of(context).colorScheme.surfaceContainerHighest;
-    final fgColor = foregroundColor ?? AppColors.primary;
+    final fgColor = foregroundColor ?? Theme.of(context).colorScheme.primary;
     
     return Container(
       height: height,
@@ -79,7 +79,7 @@ class CircularProgressWithLabel extends StatelessWidget {
   Widget build(BuildContext context) {
     final bgColor = backgroundColor ?? 
         Theme.of(context).colorScheme.surfaceContainerHighest;
-    final fgColor = foregroundColor ?? AppColors.primary;
+    final fgColor = foregroundColor ?? Theme.of(context).colorScheme.primary;
     
     return SizedBox(
       width: size,
@@ -191,7 +191,7 @@ class StreakIndicator extends StatelessWidget {
       children: [
         Icon(
           isActiveToday ? Icons.local_fire_department : Icons.local_fire_department_outlined,
-          color: isActiveToday ? AppColors.warning : AppColors.textTertiary,
+          color: isActiveToday ? AppColors.warning : Theme.of(context).colorScheme.onSurface.withOpacity(0.4),
           size: 20,
         ),
         const SizedBox(width: 4),
@@ -199,7 +199,7 @@ class StreakIndicator extends StatelessWidget {
           '$currentStreak day${currentStreak != 1 ? 's' : ''}',
           style: Theme.of(context).textTheme.bodyMedium?.copyWith(
             fontWeight: FontWeight.w600,
-            color: isActiveToday ? AppColors.warning : AppColors.textTertiary,
+            color: isActiveToday ? AppColors.warning : Theme.of(context).colorScheme.onSurface.withOpacity(0.4),
           ),
         ),
         if (bestStreak > currentStreak) ...[

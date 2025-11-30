@@ -2,13 +2,13 @@ import 'dart:convert';
 
 import 'package:langchain/langchain.dart';
 import 'package:langchain_openai/langchain_openai.dart';
-import 'package:prompt_loop_app/core/constants/llm_constants.dart';
-import 'package:prompt_loop_app/core/utils/json_validator.dart';
-import 'package:prompt_loop_app/domain/entities/skill.dart';
-import 'package:prompt_loop_app/domain/entities/sub_skill.dart';
-import 'package:prompt_loop_app/domain/entities/task.dart';
-import 'package:prompt_loop_app/domain/entities/app_settings.dart';
-import 'package:prompt_loop_app/domain/services/llm_service.dart';
+import 'package:deliberate_practice_app/core/constants/llm_constants.dart';
+import 'package:deliberate_practice_app/core/utils/json_validator.dart';
+import 'package:deliberate_practice_app/domain/entities/skill.dart';
+import 'package:deliberate_practice_app/domain/entities/sub_skill.dart';
+import 'package:deliberate_practice_app/domain/entities/task.dart';
+import 'package:deliberate_practice_app/domain/entities/app_settings.dart';
+import 'package:deliberate_practice_app/domain/services/llm_service.dart';
 
 /// BYOK (Bring Your Own Key) LLM service for direct API integration.
 ///
@@ -165,7 +165,7 @@ ${LlmConstants.wiseFeedbackSchema}
 
   LlmResult<SkillAnalysisResult> _parseSkillAnalysisResponse(String response) {
     try {
-      final cleanedJson = LlmJsonValidator.cleanLlmResponse(response);
+      final cleanedJson = JsonValidator.cleanLlmResponse(response);
       
       if (cleanedJson == null) {
         return LlmResult.failure(
@@ -218,7 +218,7 @@ ${LlmConstants.wiseFeedbackSchema}
 
   LlmResult<List<TaskSuggestion>> _parseTaskGenerationResponse(String response) {
     try {
-      final cleanedJson = LlmJsonValidator.cleanLlmResponse(response);
+      final cleanedJson = JsonValidator.cleanLlmResponse(response);
       
       if (cleanedJson == null) {
         return LlmResult.failure(
@@ -244,7 +244,7 @@ ${LlmConstants.wiseFeedbackSchema}
         return TaskSuggestion(
           title: taskMap['title'] as String,
           description: taskMap['description'] as String,
-          estimatedMinutes: taskMap['estimated_minutes'] as int? ?? 30,
+          durationMinutes: taskMap['estimated_minutes'] as int? ?? 30,
           difficulty: taskMap['difficulty'] as int? ?? 5,
           successCriteria: successCriteriaJson.cast<String>(),
           frequency: _parseFrequency(taskMap['frequency'] as String?),
@@ -263,7 +263,7 @@ ${LlmConstants.wiseFeedbackSchema}
 
   LlmResult<WiseFeedbackResult> _parseWiseFeedbackResponse(String response) {
     try {
-      final cleanedJson = LlmJsonValidator.cleanLlmResponse(response);
+      final cleanedJson = JsonValidator.cleanLlmResponse(response);
       
       if (cleanedJson == null) {
         return LlmResult.failure(
@@ -317,18 +317,18 @@ ${LlmConstants.wiseFeedbackSchema}
   SkillLevel _parseSkillLevel(String? level) {
     switch (level?.toLowerCase()) {
       case 'novice':
-        return SkillLevel.novice;
+        return SkillLevel.beginner;
       case 'advanced_beginner':
       case 'advancedbeginner':
-        return SkillLevel.advancedBeginner;
+        return SkillLevel.intermediate;
       case 'competent':
-        return SkillLevel.competent;
+        return SkillLevel.intermediate;
       case 'proficient':
-        return SkillLevel.proficient;
+        return SkillLevel.advanced;
       case 'expert':
         return SkillLevel.expert;
       default:
-        return SkillLevel.novice;
+        return SkillLevel.beginner;
     }
   }
 
@@ -339,11 +339,11 @@ ${LlmConstants.wiseFeedbackSchema}
       case 'weekly':
         return TaskFrequency.weekly;
       case 'biweekly':
-        return TaskFrequency.biweekly;
+        return TaskFrequency.weekly;
       case 'monthly':
-        return TaskFrequency.monthly;
+        return TaskFrequency.custom;
       case 'once':
-        return TaskFrequency.once;
+        return TaskFrequency.custom;
       default:
         return TaskFrequency.weekly;
     }

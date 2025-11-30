@@ -1,8 +1,8 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:prompt_loop_app/data/providers/repository_providers.dart';
-import 'package:prompt_loop_app/domain/entities/practice_session.dart';
-import 'package:prompt_loop_app/domain/entities/streak.dart';
-import 'package:prompt_loop_app/domain/entities/struggle_entry.dart';
+import 'package:deliberate_practice_app/data/providers/repository_providers.dart';
+import 'package:deliberate_practice_app/domain/entities/practice_session.dart';
+import 'package:deliberate_practice_app/domain/entities/streak.dart';
+import 'package:deliberate_practice_app/domain/entities/struggle_entry.dart';
 
 /// Provider for all practice sessions.
 final practiceSessionsProvider = StateNotifierProvider<PracticeSessionsNotifier, AsyncValue<List<PracticeSession>>>((ref) {

@@ -1,7 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:prompt_loop_app/data/providers/repository_providers.dart';
-import 'package:prompt_loop_app/domain/entities/skill.dart';
-import 'package:prompt_loop_app/domain/entities/sub_skill.dart';
+import 'package:deliberate_practice_app/data/providers/repository_providers.dart';
+import 'package:deliberate_practice_app/domain/entities/skill.dart';
+import 'package:deliberate_practice_app/domain/entities/sub_skill.dart';
 
 /// Provider for the list of all active skills.
 final skillsProvider = StateNotifierProvider<SkillsNotifier, AsyncValue<List<Skill>>>((ref) {
@@ -23,7 +23,7 @@ final skillByIdProvider = Provider.family<AsyncValue<Skill?>, int>((ref, id) {
 /// Provider for sub-skills of a specific skill.
 final subSkillsProvider = FutureProvider.family<List<SubSkill>, int>((ref, skillId) async {
   final repository = await ref.watch(skillRepositoryProvider.future);
-  return repository.getSubSkillsBySkill(skillId);
+  return repository.getSubSkills(skillId);
 });
 
 /// Skills state notifier.

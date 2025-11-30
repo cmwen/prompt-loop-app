@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:prompt_loop_app/core/router/app_router.dart';
-import 'package:prompt_loop_app/domain/entities/skill.dart';
-import 'package:prompt_loop_app/features/skills/providers/skills_provider.dart';
+import 'package:deliberate_practice_app/core/router/app_router.dart';
+import 'package:deliberate_practice_app/domain/entities/skill.dart';
+import 'package:deliberate_practice_app/features/skills/providers/skills_provider.dart';
 
 /// Screen for adding a new skill.
 class AddSkillScreen extends ConsumerStatefulWidget {
@@ -17,7 +17,7 @@ class _AddSkillScreenState extends ConsumerState<AddSkillScreen> {
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
   final _descriptionController = TextEditingController();
-  SkillLevel _selectedLevel = SkillLevel.novice;
+  SkillLevel _selectedLevel = SkillLevel.beginner;
   bool _isLoading = false;
   
   @override
@@ -210,13 +210,13 @@ class _AddSkillScreenState extends ConsumerState<AddSkillScreen> {
   
   String _getLevelDescription(SkillLevel level) {
     switch (level) {
-      case SkillLevel.novice:
+      case SkillLevel.beginner:
         return 'Just starting out, learning the basics';
-      case SkillLevel.advancedBeginner:
+      case SkillLevel.intermediate:
         return 'Know the basics, building initial competence';
-      case SkillLevel.competent:
+      case SkillLevel.intermediate:
         return 'Can work independently, developing proficiency';
-      case SkillLevel.proficient:
+      case SkillLevel.advanced:
         return 'Good understanding, can handle complex situations';
       case SkillLevel.expert:
         return 'Deep expertise, can teach others';

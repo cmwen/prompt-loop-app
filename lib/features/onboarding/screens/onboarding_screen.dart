@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:prompt_loop_app/core/router/app_router.dart';
-import 'package:prompt_loop_app/core/theme/app_colors.dart';
-import 'package:prompt_loop_app/features/settings/providers/settings_provider.dart';
+import 'package:deliberate_practice_app/core/router/app_router.dart';
+import 'package:deliberate_practice_app/core/theme/app_colors.dart';
+import 'package:deliberate_practice_app/features/settings/providers/settings_provider.dart';
 
 /// Onboarding screen shown to first-time users.
 class OnboardingScreen extends ConsumerStatefulWidget {
@@ -104,8 +104,8 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                     margin: const EdgeInsets.symmetric(horizontal: 4),
                     decoration: BoxDecoration(
                       color: index == _currentPage 
-                          ? AppColors.primary 
-                          : AppColors.primary.withOpacity(0.3),
+                          ? Theme.of(context).colorScheme.primary 
+                          : Theme.of(context).colorScheme.primary.withOpacity(0.3),
                       borderRadius: BorderRadius.circular(4),
                     ),
                   );
@@ -154,13 +154,13 @@ class _OnboardingPage extends StatelessWidget {
             width: 120,
             height: 120,
             decoration: BoxDecoration(
-              color: AppColors.primary.withOpacity(0.1),
+              color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
               shape: BoxShape.circle,
             ),
             child: Icon(
               icon,
               size: 56,
-              color: AppColors.primary,
+              color: Theme.of(context).colorScheme.primary,
             ),
           ),
           const SizedBox(height: 48),

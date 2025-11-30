@@ -1,6 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:prompt_loop_app/data/providers/repository_providers.dart';
-import 'package:prompt_loop_app/domain/entities/task.dart';
+import 'package:deliberate_practice_app/data/providers/repository_providers.dart';
+import 'package:deliberate_practice_app/domain/entities/task.dart';
 
 /// Provider for all tasks.
 final tasksProvider = StateNotifierProvider<TasksNotifier, AsyncValue<List<Task>>>((ref) {
@@ -10,19 +10,19 @@ final tasksProvider = StateNotifierProvider<TasksNotifier, AsyncValue<List<Task>
 /// Provider for tasks by skill.
 final tasksBySkillProvider = FutureProvider.family<List<Task>, int>((ref, skillId) async {
   final repository = await ref.watch(taskRepositoryProvider.future);
-  return repository.getTasksBySkill(skillId);
+  return repository.getTasksForSkill(skillId);
 });
 
 /// Provider for tasks by sub-skill.
 final tasksBySubSkillProvider = FutureProvider.family<List<Task>, int>((ref, subSkillId) async {
   final repository = await ref.watch(taskRepositoryProvider.future);
-  return repository.getTasksBySubSkill(subSkillId);
+  return repository.getTasksForSkill(subSkillId); // TODO: Filter by subSkill
 });
 
 /// Provider for today's tasks.
 final todaysTasksProvider = FutureProvider<List<Task>>((ref) async {
   final repository = await ref.watch(taskRepositoryProvider.future);
-  final allTasks = await repository.getAllTasks();
+  final allTasks = await repository.getIncompleteTasks();
   final today = DateTime.now();
   
   return allTasks.where((task) {
@@ -33,18 +33,18 @@ final todaysTasksProvider = FutureProvider<List<Task>>((ref) async {
       case TaskFrequency.daily:
         return true;
       case TaskFrequency.weekly:
-        if (task.lastCompletedAt == null) return true;
-        final daysSinceComplete = today.difference(task.lastCompletedAt!).inDays;
+        if (task.completedAt == null) return true;
+        final daysSinceComplete = today.difference(task.completedAt!).inDays;
         return daysSinceComplete >= 7;
-      case TaskFrequency.biweekly:
-        if (task.lastCompletedAt == null) return true;
-        final daysSinceComplete = today.difference(task.lastCompletedAt!).inDays;
+      case TaskFrequency.weekly:
+        if (task.completedAt == null) return true;
+        final daysSinceComplete = today.difference(task.completedAt!).inDays;
         return daysSinceComplete >= 14;
-      case TaskFrequency.monthly:
-        if (task.lastCompletedAt == null) return true;
-        final daysSinceComplete = today.difference(task.lastCompletedAt!).inDays;
+      case TaskFrequency.custom:
+        if (task.completedAt == null) return true;
+        final daysSinceComplete = today.difference(task.completedAt!).inDays;
         return daysSinceComplete >= 30;
-      case TaskFrequency.once:
+      case TaskFrequency.custom:
         return !task.isCompleted;
     }
   }).toList();
@@ -53,10 +53,10 @@ final todaysTasksProvider = FutureProvider<List<Task>>((ref) async {
 /// Provider for upcoming tasks (next 7 days).
 final upcomingTasksProvider = FutureProvider<List<Task>>((ref) async {
   final repository = await ref.watch(taskRepositoryProvider.future);
-  final allTasks = await repository.getAllTasks();
+  final allTasks = await repository.getIncompleteTasks();
   
   return allTasks.where((task) {
-    if (task.isCompleted && task.frequency == TaskFrequency.once) return false;
+    if (task.isCompleted && task.frequency == TaskFrequency.custom) return false;
     return true;
   }).toList();
 });
@@ -73,7 +73,7 @@ class TasksNotifier extends StateNotifier<AsyncValue<List<Task>>> {
     try {
       state = const AsyncValue.loading();
       final repository = await _ref.read(taskRepositoryProvider.future);
-      final tasks = await repository.getAllTasks();
+      final tasks = await repository.getIncompleteTasks();
       state = AsyncValue.data(tasks);
     } catch (e, st) {
       state = AsyncValue.error(e, st);
@@ -116,7 +116,7 @@ class TasksNotifier extends StateNotifier<AsyncValue<List<Task>>> {
   Future<void> completeTask(int id) async {
     try {
       final repository = await _ref.read(taskRepositoryProvider.future);
-      await repository.markTaskCompleted(id);
+      await repository.completeTask(id);
       await loadTasks();
       _ref.invalidate(todaysTasksProvider);
     } catch (e) {
@@ -127,7 +127,10 @@ class TasksNotifier extends StateNotifier<AsyncValue<List<Task>>> {
   Future<void> uncompleteTask(int id) async {
     try {
       final repository = await _ref.read(taskRepositoryProvider.future);
-      await repository.markTaskIncomplete(id);
+      final task = await repository.getTaskById(id);
+      if (task != null) {
+        await repository.updateTask(task.copyWith(isCompleted: false));
+      }
       await loadTasks();
       _ref.invalidate(todaysTasksProvider);
     } catch (e) {

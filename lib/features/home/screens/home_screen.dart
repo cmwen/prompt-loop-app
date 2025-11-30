@@ -1,16 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:prompt_loop_app/core/router/app_router.dart';
-import 'package:prompt_loop_app/core/theme/app_colors.dart';
-import 'package:prompt_loop_app/features/skills/providers/skills_provider.dart';
-import 'package:prompt_loop_app/features/tasks/providers/tasks_provider.dart';
-import 'package:prompt_loop_app/features/practice/providers/practice_provider.dart';
-import 'package:prompt_loop_app/features/purpose/providers/purpose_provider.dart';
-import 'package:prompt_loop_app/shared/widgets/app_card.dart';
-import 'package:prompt_loop_app/shared/widgets/progress_indicators.dart';
-import 'package:prompt_loop_app/shared/widgets/loading_indicator.dart';
-import 'package:prompt_loop_app/shared/widgets/empty_state.dart';
+import 'package:deliberate_practice_app/core/router/app_router.dart';
+import 'package:deliberate_practice_app/core/theme/app_colors.dart';
+import 'package:deliberate_practice_app/features/skills/providers/skills_provider.dart';
+import 'package:deliberate_practice_app/features/tasks/providers/tasks_provider.dart';
+import 'package:deliberate_practice_app/features/practice/providers/practice_provider.dart';
+import 'package:deliberate_practice_app/features/purpose/providers/purpose_provider.dart';
+import 'package:deliberate_practice_app/shared/widgets/app_card.dart';
+import 'package:deliberate_practice_app/shared/widgets/progress_indicators.dart';
+import 'package:deliberate_practice_app/shared/widgets/loading_indicator.dart';
+import 'package:deliberate_practice_app/shared/widgets/empty_state.dart';
 
 /// Home screen showing today's overview and quick actions.
 class HomeScreen extends ConsumerWidget {
@@ -70,7 +70,7 @@ class HomeScreen extends ConsumerWidget {
                     return Column(
                       children: tasks.take(3).map((task) => TaskCard(
                         title: task.title,
-                        subtitle: '${task.estimatedMinutes} min',
+                        subtitle: '${task.durationMinutes} min',
                         difficulty: task.difficulty,
                         isCompleted: task.isCompleted,
                         onTap: () {
@@ -107,8 +107,8 @@ class HomeScreen extends ConsumerWidget {
                     return Column(
                       children: skillList.take(3).map((skill) => SkillCard(
                         name: skill.name,
-                        level: skill.level.displayName,
-                        progress: skill.progressPercentage / 100,
+                        level: skill.currentLevel.displayName,
+                        progress: 0.0, // TODO: Calculate progress
                         onTap: () {
                           context.goNamed(
                             AppRoutes.skillDetail,
@@ -208,15 +208,15 @@ class _PurposeReminderCard extends ConsumerWidget {
               decoration: BoxDecoration(
                 gradient: LinearGradient(
                   colors: [
-                    AppColors.primary.withOpacity(0.1),
-                    AppColors.primary.withOpacity(0.05),
+                    Theme.of(context).colorScheme.primary.withOpacity(0.1),
+                    Theme.of(context).colorScheme.primary.withOpacity(0.05),
                   ],
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                 ),
                 borderRadius: BorderRadius.circular(16),
                 border: Border.all(
-                  color: AppColors.primary.withOpacity(0.2),
+                  color: Theme.of(context).colorScheme.primary.withOpacity(0.2),
                 ),
               ),
               child: Column(
@@ -226,14 +226,14 @@ class _PurposeReminderCard extends ConsumerWidget {
                     children: [
                       Icon(
                         Icons.lightbulb_outline,
-                        color: AppColors.primary,
+                        color: Theme.of(context).colorScheme.primary,
                         size: 20,
                       ),
                       const SizedBox(width: 8),
                       Text(
                         'Remember your why',
                         style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                          color: AppColors.primary,
+                          color: Theme.of(context).colorScheme.primary,
                           fontWeight: FontWeight.w600,
                         ),
                       ),
@@ -241,7 +241,7 @@ class _PurposeReminderCard extends ConsumerWidget {
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    '"${purpose.description}"',
+                    '"${purpose.statement}"',
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                       fontStyle: FontStyle.italic,
                     ),
@@ -291,12 +291,12 @@ class _TodaysStatsCard extends StatelessWidget {
                     Container(
                       padding: const EdgeInsets.all(8),
                       decoration: BoxDecoration(
-                        color: AppColors.primary.withOpacity(0.1),
+                        color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: Icon(
                         Icons.timer_outlined,
-                        color: AppColors.primary,
+                        color: Theme.of(context).colorScheme.primary,
                         size: 20,
                       ),
                     ),

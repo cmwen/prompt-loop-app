@@ -1,6 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:prompt_loop_app/data/providers/repository_providers.dart';
-import 'package:prompt_loop_app/domain/entities/app_settings.dart';
+import 'package:deliberate_practice_app/data/providers/repository_providers.dart';
+import 'package:deliberate_practice_app/domain/entities/app_settings.dart';
 
 /// Current app settings state.
 final settingsProvider = StateNotifierProvider<SettingsNotifier, AsyncValue<AppSettings>>((ref) {
@@ -11,7 +11,7 @@ final settingsProvider = StateNotifierProvider<SettingsNotifier, AsyncValue<AppS
 final onboardingCompletedProvider = Provider<AsyncValue<bool>>((ref) {
   final settings = ref.watch(settingsProvider);
   return settings.when(
-    data: (s) => AsyncValue.data(s.hasCompletedOnboarding),
+    data: (s) => AsyncValue.data(s.onboardingCompleted),
     loading: () => const AsyncValue.loading(),
     error: (e, st) => AsyncValue.error(e, st),
   );

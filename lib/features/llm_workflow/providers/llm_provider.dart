@@ -1,9 +1,9 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:prompt_loop_app/data/services/copy_paste_llm_service.dart';
-import 'package:prompt_loop_app/data/services/byok_llm_service.dart';
-import 'package:prompt_loop_app/domain/entities/app_settings.dart';
-import 'package:prompt_loop_app/domain/services/llm_service.dart';
-import 'package:prompt_loop_app/features/settings/providers/settings_provider.dart';
+import 'package:deliberate_practice_app/data/services/copy_paste_llm_service.dart';
+import 'package:deliberate_practice_app/data/services/byok_llm_service.dart';
+import 'package:deliberate_practice_app/domain/entities/app_settings.dart';
+import 'package:deliberate_practice_app/domain/services/llm_service.dart';
+import 'package:deliberate_practice_app/features/settings/providers/settings_provider.dart';
 
 /// Provider for the current LLM service based on settings.
 final llmServiceProvider = Provider<LlmService?>((ref) {

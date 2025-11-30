@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:prompt_loop_app/core/router/app_router.dart';
-import 'package:prompt_loop_app/core/theme/app_colors.dart';
-import 'package:prompt_loop_app/domain/entities/purpose.dart';
-import 'package:prompt_loop_app/features/purpose/providers/purpose_provider.dart';
-import 'package:prompt_loop_app/features/skills/providers/skills_provider.dart';
+import 'package:deliberate_practice_app/core/router/app_router.dart';
+import 'package:deliberate_practice_app/core/theme/app_colors.dart';
+import 'package:deliberate_practice_app/domain/entities/purpose.dart';
+import 'package:deliberate_practice_app/features/purpose/providers/purpose_provider.dart';
+import 'package:deliberate_practice_app/features/skills/providers/skills_provider.dart';
 
 /// Purpose setup screen for connecting skills to meaning.
 class PurposeSetupScreen extends ConsumerStatefulWidget {
@@ -102,7 +102,7 @@ class _PurposeSetupScreenState extends ConsumerState<PurposeSetupScreen> {
               width: double.infinity,
               padding: const EdgeInsets.all(32),
               decoration: BoxDecoration(
-                color: AppColors.primary.withOpacity(0.1),
+                color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
                 borderRadius: BorderRadius.circular(16),
               ),
               child: Column(
@@ -110,7 +110,7 @@ class _PurposeSetupScreenState extends ConsumerState<PurposeSetupScreen> {
                   const Icon(
                     Icons.lightbulb,
                     size: 64,
-                    color: AppColors.primary,
+                    color: Theme.of(context).colorScheme.primary,
                   ),
                   const SizedBox(height: 16),
                   Text(

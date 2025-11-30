@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:prompt_loop_app/core/router/app_router.dart';
-import 'package:prompt_loop_app/features/tasks/providers/tasks_provider.dart';
-import 'package:prompt_loop_app/shared/widgets/app_card.dart';
-import 'package:prompt_loop_app/shared/widgets/empty_state.dart';
-import 'package:prompt_loop_app/shared/widgets/loading_indicator.dart';
+import 'package:deliberate_practice_app/core/router/app_router.dart';
+import 'package:deliberate_practice_app/features/tasks/providers/tasks_provider.dart';
+import 'package:deliberate_practice_app/shared/widgets/app_card.dart';
+import 'package:deliberate_practice_app/shared/widgets/empty_state.dart';
+import 'package:deliberate_practice_app/shared/widgets/loading_indicator.dart';
 
 /// Tasks screen showing all tasks grouped by status.
 class TasksScreen extends ConsumerWidget {
@@ -52,7 +52,7 @@ class TasksScreen extends ConsumerWidget {
                         padding: const EdgeInsets.only(bottom: 8),
                         child: TaskCard(
                           title: task.title,
-                          subtitle: '${task.estimatedMinutes} min',
+                          subtitle: '${task.durationMinutes} min',
                           difficulty: task.difficulty,
                           isCompleted: task.isCompleted,
                           onTap: () {
@@ -97,7 +97,7 @@ class TasksScreen extends ConsumerWidget {
                         padding: const EdgeInsets.only(bottom: 8),
                         child: TaskCard(
                           title: task.title,
-                          subtitle: '${task.frequency.name} • ${task.estimatedMinutes} min',
+                          subtitle: '${task.frequency.name} • ${task.durationMinutes} min',
                           difficulty: task.difficulty,
                           isCompleted: task.isCompleted,
                           onTap: () {

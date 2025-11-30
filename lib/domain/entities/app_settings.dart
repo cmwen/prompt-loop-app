@@ -77,6 +77,7 @@ enum ThemeMode {
 class AppSettings extends Equatable {
   final LlmMode llmMode;
   final LlmProvider llmProvider;
+  final String? llmModel;
   final ThemeMode themeMode;
   final bool notificationsEnabled;
   final String dailyReminderTime;
@@ -87,6 +88,7 @@ class AppSettings extends Equatable {
   const AppSettings({
     this.llmMode = LlmMode.copyPaste,
     this.llmProvider = LlmProvider.openai,
+    this.llmModel,
     this.themeMode = ThemeMode.system,
     this.notificationsEnabled = true,
     this.dailyReminderTime = '09:00',
@@ -94,11 +96,14 @@ class AppSettings extends Equatable {
     this.streakRecoveryEnabled = true,
     this.onboardingCompleted = false,
   });
+  
+  bool get isDarkMode => themeMode == ThemeMode.dark;
 
   /// Create a copy with modified fields
   AppSettings copyWith({
     LlmMode? llmMode,
     LlmProvider? llmProvider,
+    String? llmModel,
     ThemeMode? themeMode,
     bool? notificationsEnabled,
     String? dailyReminderTime,
@@ -109,6 +114,7 @@ class AppSettings extends Equatable {
     return AppSettings(
       llmMode: llmMode ?? this.llmMode,
       llmProvider: llmProvider ?? this.llmProvider,
+      llmModel: llmModel ?? this.llmModel,
       themeMode: themeMode ?? this.themeMode,
       notificationsEnabled: notificationsEnabled ?? this.notificationsEnabled,
       dailyReminderTime: dailyReminderTime ?? this.dailyReminderTime,
@@ -122,6 +128,7 @@ class AppSettings extends Equatable {
   List<Object?> get props => [
         llmMode,
         llmProvider,
+        llmModel,
         themeMode,
         notificationsEnabled,
         dailyReminderTime,

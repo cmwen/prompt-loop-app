@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:prompt_loop_app/core/theme/app_colors.dart';
-import 'package:prompt_loop_app/features/practice/providers/practice_provider.dart';
-import 'package:prompt_loop_app/features/skills/providers/skills_provider.dart';
-import 'package:prompt_loop_app/shared/widgets/app_card.dart';
-import 'package:prompt_loop_app/shared/widgets/progress_indicators.dart';
-import 'package:prompt_loop_app/shared/widgets/loading_indicator.dart';
+import 'package:deliberate_practice_app/core/theme/app_colors.dart';
+import 'package:deliberate_practice_app/features/practice/providers/practice_provider.dart';
+import 'package:deliberate_practice_app/features/skills/providers/skills_provider.dart';
+import 'package:deliberate_practice_app/shared/widgets/app_card.dart';
+import 'package:deliberate_practice_app/shared/widgets/progress_indicators.dart';
+import 'package:deliberate_practice_app/shared/widgets/loading_indicator.dart';
 
 /// Progress screen showing overall progress and statistics.
 class ProgressScreen extends ConsumerWidget {
@@ -44,7 +44,7 @@ class ProgressScreen extends ConsumerWidget {
                           Expanded(
                             child: _StatItem(
                               icon: Icons.timer_outlined,
-                              iconColor: AppColors.primary,
+                              iconColor: Theme.of(context).colorScheme.primary,
                               label: 'Practice Time',
                               value: weeklyTime.when(
                                 data: (d) => '${d.inHours}h ${d.inMinutes % 60}m',
@@ -110,7 +110,7 @@ class ProgressScreen extends ConsumerWidget {
                                       ),
                                       const SizedBox(height: 2),
                                       Text(
-                                        skill.level.displayName,
+                                        skill.currentLevel.displayName,
                                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
                                           color: Theme.of(context).colorScheme.onSurfaceVariant,
                                         ),
@@ -119,7 +119,7 @@ class ProgressScreen extends ConsumerWidget {
                                   ),
                                 ),
                                 CircularProgressWithLabel(
-                                  value: skill.progressPercentage / 100,
+                                  value: 0.0, // TODO: Calculate progress
                                   size: 50,
                                   strokeWidth: 5,
                                 ),
@@ -139,7 +139,7 @@ class ProgressScreen extends ConsumerWidget {
                 
                 // Motivation section
                 AppCard(
-                  backgroundColor: AppColors.primary.withOpacity(0.1),
+                  backgroundColor: Theme.of(context).colorScheme.primary.withOpacity(0.1),
                   child: Row(
                     children: [
                       const Icon(Icons.emoji_events, color: AppColors.warning, size: 40),
@@ -244,7 +244,7 @@ class _SkillStreakInfo extends ConsumerWidget {
         return StreakIndicator(
           currentStreak: s.currentCount,
           bestStreak: s.longestCount,
-          isActiveToday: s.isActiveToday,
+          isActiveToday: s.practicedToday,
         );
       },
       loading: () => const SizedBox.shrink(),

@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:prompt_loop_app/domain/entities/practice_session.dart';
-import 'package:prompt_loop_app/features/skills/providers/skills_provider.dart';
-import 'package:prompt_loop_app/features/tasks/providers/tasks_provider.dart';
-import 'package:prompt_loop_app/features/practice/providers/practice_provider.dart';
-import 'package:prompt_loop_app/shared/widgets/loading_indicator.dart';
-import 'package:prompt_loop_app/core/theme/app_colors.dart';
+import 'package:deliberate_practice_app/domain/entities/practice_session.dart';
+import 'package:deliberate_practice_app/features/skills/providers/skills_provider.dart';
+import 'package:deliberate_practice_app/features/tasks/providers/tasks_provider.dart';
+import 'package:deliberate_practice_app/features/practice/providers/practice_provider.dart';
+import 'package:deliberate_practice_app/shared/widgets/loading_indicator.dart';
+import 'package:deliberate_practice_app/core/theme/app_colors.dart';
 
 /// Practice session screen for deliberate practice.
 class PracticeSessionScreen extends ConsumerStatefulWidget {
@@ -372,12 +372,12 @@ class _RatingSelector extends StatelessWidget {
                 height: 48,
                 decoration: BoxDecoration(
                   color: value <= rating 
-                      ? AppColors.primary.withOpacity(0.1) 
+                      ? Theme.of(context).colorScheme.primary.withOpacity(0.1) 
                       : Colors.transparent,
                   shape: BoxShape.circle,
                   border: Border.all(
                     color: value <= rating 
-                        ? AppColors.primary 
+                        ? Theme.of(context).colorScheme.primary 
                         : Theme.of(context).colorScheme.outline,
                     width: 2,
                   ),
