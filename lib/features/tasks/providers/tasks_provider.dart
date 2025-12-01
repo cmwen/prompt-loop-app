@@ -52,13 +52,9 @@ final todaysTasksProvider = FutureProvider<List<Task>>((ref) async {
 /// Provider for upcoming tasks (next 7 days).
 final upcomingTasksProvider = FutureProvider<List<Task>>((ref) async {
   final repository = await ref.watch(taskRepositoryProvider.future);
-  final allTasks = await repository.getIncompleteTasks();
+  final allTasks = await repository.getAllTasks();
 
-  return allTasks.where((task) {
-    if (task.isCompleted && task.frequency == TaskFrequency.custom)
-      return false;
-    return true;
-  }).toList();
+  return allTasks;
 });
 
 /// Tasks state notifier.
@@ -73,7 +69,7 @@ class TasksNotifier extends StateNotifier<AsyncValue<List<Task>>> {
     try {
       state = const AsyncValue.loading();
       final repository = await _ref.read(taskRepositoryProvider.future);
-      final tasks = await repository.getIncompleteTasks();
+      final tasks = await repository.getAllTasks();
       state = AsyncValue.data(tasks);
     } catch (e, st) {
       state = AsyncValue.error(e, st);

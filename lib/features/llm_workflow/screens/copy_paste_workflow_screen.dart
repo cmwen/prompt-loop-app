@@ -16,7 +16,6 @@ import 'package:prompt_loop/features/tasks/providers/tasks_provider.dart';
 import 'package:prompt_loop/features/purpose/providers/purpose_provider.dart';
 import 'package:prompt_loop/shared/widgets/loading_indicator.dart';
 import 'package:prompt_loop/shared/widgets/app_card.dart';
-import 'package:prompt_loop/services/share_service.dart';
 
 /// Copy-paste LLM workflow screen.
 class CopyPasteWorkflowScreen extends ConsumerStatefulWidget {

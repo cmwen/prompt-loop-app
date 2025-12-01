@@ -37,33 +37,34 @@ ${purposeStatement != null ? 'PURPOSE: $purposeStatement' : ''}
 
 ${LlmConstants.jsonInstructions}
 
+REQUIRED FORMAT - You must respond with exactly this structure:
 {
-  "type": "${LlmConstants.typeSkillAnalysis}",
-  "version": "${LlmConstants.schemaVersion}",
-  "data": {
-    "skill": {
-      "name": "$skillName",
-      "description": "Brief description of the skill",
-      "estimatedTimeToCompetency": "e.g., 3-6 months",
-      "subSkills": [
-        {
-          "id": "sub_001",
-          "name": "Sub-skill name",
-          "description": "What this involves",
-          "currentLevel": "beginner",
-          "priority": "high|medium|low",
-          "estimatedHours": 20,
-          "prerequisites": []
-        }
-      ]
+  "skill_name": "The skill name",
+  "skill_description": "Brief 1-2 sentence description of the skill",
+  "suggested_level": "beginner|intermediate|advanced|expert",
+  "sub_skills": [
+    {
+      "name": "Sub-skill name",
+      "description": "What this involves and why it matters",
+      "priority": "high|medium|low",
+      "estimated_hours": 20
     }
-  }
+  ],
+  "learning_path": [
+    "Step 1: Start with...",
+    "Step 2: Progress to...",
+    "Step 3: Master..."
+  ]
 }
 
 REQUIREMENTS:
-- Generate 4-7 sub-skills
-- Order by learning sequence (prerequisites first)
-- Prioritize by impact on overall skill
+- skill_name: Must match the skill being analyzed
+- skill_description: 1-2 sentences explaining what the skill is
+- suggested_level: Assess user's current level based on their context
+- sub_skills: Generate 4-7 sub-skills ordered by learning sequence
+- Each sub_skill must have: name, description, priority, estimated_hours
+- priority: high (fundamental), medium (important), low (nice-to-have)
+- learning_path: 3-5 steps outlining recommended progression
 - Be specific and actionable
 - Consider the user's stated purpose when prioritizing
 ''';

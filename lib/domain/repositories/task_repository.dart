@@ -2,6 +2,9 @@ import '../entities/task.dart';
 
 /// Task repository interface
 abstract class TaskRepository {
+  /// Get all tasks
+  Future<List<Task>> getAllTasks();
+  
   /// Get all tasks for a skill
   Future<List<Task>> getTasksForSkill(int skillId);
 

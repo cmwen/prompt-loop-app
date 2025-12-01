@@ -1,0 +1,118 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro'
+---
+<BaseLayout title="Privacy Policy - Prompt Loop">
+  <section>
+    <h1>Privacy Policy</h1>
+    <p class="lead">Last updated: December 2024</p>
+
+    <div class="card">
+      <h2>Overview</h2>
+      <p>Prompt Loop is a local-first skill development app. Your privacy is important to us, and we've designed the app to keep your data on your device.</p>
+    </div>
+
+    <div class="card">
+      <h2>Data Collection</h2>
+      <h3>What We Collect</h3>
+      <p>Prompt Loop is a <strong>local-first application</strong>. All your data is stored locally on your device:</p>
+      <ul>
+        <li><strong>Skills data</strong> - Your skills, sub-skills, and progress</li>
+        <li><strong>Tasks</strong> - Practice tasks and completion records</li>
+        <li><strong>Practice sessions</strong> - Session history and notes</li>
+        <li><strong>Settings</strong> - App preferences and configurations</li>
+      </ul>
+      
+      <h3>What We Don't Collect</h3>
+      <ul>
+        <li>We do not collect, transmit, or store your personal data on any servers</li>
+        <li>We do not track your usage or behavior</li>
+        <li>We do not share your data with third parties</li>
+        <li>We do not use analytics or tracking services</li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <h2>LLM Integration</h2>
+      <p>The app offers two modes for AI assistance:</p>
+      
+      <h3>Copy-Paste Mode (Default)</h3>
+      <ul>
+        <li>You manually copy prompts to external LLM services (ChatGPT, Claude, etc.)</li>
+        <li>You paste responses back into the app</li>
+        <li>The app never connects to any external services</li>
+        <li>Your data stays on your device</li>
+      </ul>
+
+      <h3>Bring Your Own Key (BYOK) Mode</h3>
+      <ul>
+        <li>You provide your own API key for OpenAI or other providers</li>
+        <li>Your API key is stored securely in your device's secure storage</li>
+        <li>The app connects directly to the LLM provider using your credentials</li>
+        <li>We never see, store, or have access to your API keys</li>
+        <li>Your prompts and responses go directly between your device and the LLM provider</li>
+      </ul>
+
+      <p><strong>Important:</strong> When using BYOK mode, your data is subject to the privacy policy of your chosen LLM provider (OpenAI, Anthropic, etc.). We recommend reviewing their policies.</p>
+    </div>
+
+    <div class="card">
+      <h2>Data Storage</h2>
+      <ul>
+        <li>All data is stored in a local SQLite database on your device</li>
+        <li>API keys (if provided) are stored in secure device storage using platform-specific secure storage</li>
+        <li>No data is synced to cloud services</li>
+        <li>No backups are created outside your device</li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <h2>Permissions</h2>
+      <p>The app requires minimal permissions:</p>
+      <ul>
+        <li><strong>Storage</strong> - To save your local database</li>
+        <li><strong>Internet</strong> (optional) - Only required if using BYOK mode for LLM integration</li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <h2>Data Deletion</h2>
+      <p>Since all data is stored locally on your device:</p>
+      <ul>
+        <li>You can delete all data by uninstalling the app</li>
+        <li>You can clear specific data through the app's interface</li>
+        <li>There is no data to delete from our servers because we don't have any</li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <h2>Open Source</h2>
+      <p>Prompt Loop is open source, meaning:</p>
+      <ul>
+        <li>You can review all the code on <a href="https://github.com/cmwen/prompt-loop-app" target="_blank" rel="noopener">GitHub</a></li>
+        <li>You can verify that we're not collecting or transmitting your data</li>
+        <li>The community can audit our privacy practices</li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <h2>Changes to This Policy</h2>
+      <p>We may update this privacy policy from time to time. We will notify you of any changes by posting the new privacy policy on this page and updating the "Last updated" date.</p>
+    </div>
+
+    <div class="card">
+      <h2>Contact</h2>
+      <p>If you have questions about this privacy policy, please:</p>
+      <ul>
+        <li>Open an issue on <a href="https://github.com/cmwen/prompt-loop-app/issues" target="_blank" rel="noopener">GitHub</a></li>
+        <li>Review our <a href="https://github.com/cmwen/prompt-loop-app" target="_blank" rel="noopener">source code</a></li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <h2>Summary</h2>
+      <p class="lead">
+        <strong>Your data never leaves your device.</strong> Prompt Loop is designed as a privacy-first, local-first application. We don't collect, store, or transmit your personal data. When you use external LLM services, those interactions are governed by their respective privacy policies.
+      </p>
+    </div>
+  </section>
+</BaseLayout>

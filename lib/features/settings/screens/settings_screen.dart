@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:package_info_plus/package_info_plus.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:prompt_loop/core/router/app_router.dart';
 import 'package:prompt_loop/domain/entities/app_settings.dart';
 import 'package:prompt_loop/features/settings/providers/settings_provider.dart';
@@ -267,19 +268,21 @@ class SettingsScreen extends ConsumerWidget {
                         ListTile(
                           leading: const Icon(Icons.description_outlined),
                           title: const Text('Privacy Policy'),
-                          trailing: const Icon(Icons.chevron_right),
-                          onTap: () {
-                            // TODO: Show privacy policy
-                          },
+                          trailing: const Icon(Icons.open_in_new, size: 20),
+                          onTap: () => _launchUrl(
+                            context,
+                            'https://cmwen.github.io/prompt-loop-app/privacy',
+                          ),
                         ),
                         const Divider(),
                         ListTile(
                           leading: const Icon(Icons.help_outline),
                           title: const Text('Help & Support'),
-                          trailing: const Icon(Icons.chevron_right),
-                          onTap: () {
-                            // TODO: Show help
-                          },
+                          trailing: const Icon(Icons.open_in_new, size: 20),
+                          onTap: () => _launchUrl(
+                            context,
+                            'https://github.com/cmwen/prompt-loop-app/issues',
+                          ),
                         ),
                       ],
                     ),
@@ -412,6 +415,27 @@ class SettingsScreen extends ConsumerWidget {
       final formattedTime =
           '${time.hourOfPeriod}:${time.minute.toString().padLeft(2, '0')} ${time.period == DayPeriod.am ? 'AM' : 'PM'}';
       ref.read(settingsProvider.notifier).setDailyReminderTime(formattedTime);
+    }
+  }
+
+  Future<void> _launchUrl(BuildContext context, String urlString) async {
+    final url = Uri.parse(urlString);
+    try {
+      if (await canLaunchUrl(url)) {
+        await launchUrl(url, mode: LaunchMode.externalApplication);
+      } else {
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Could not open $urlString')),
+          );
+        }
+      }
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error opening link: $e')),
+        );
+      }
     }
   }
 }

@@ -158,6 +158,8 @@ class _PracticeSessionScreenState extends ConsumerState<PracticeSessionScreen> {
             return const Center(child: Text('Skill not found'));
           }
 
+          final isTaskCompleted = task?.isCompleted ?? false;
+
           return SingleChildScrollView(
             padding: const EdgeInsets.all(16),
             child: Column(
@@ -230,46 +232,102 @@ class _PracticeSessionScreenState extends ConsumerState<PracticeSessionScreen> {
                   const SizedBox(height: 24),
                 ],
 
-                // Timer
-                if (_isPracticing) ...[
-                  _PracticeTimer(startTime: _startTime!),
+                // Show completed status or timer
+                if (isTaskCompleted) ...[
+                  Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: AppColors.success.withAlpha(25),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: AppColors.success),
+                    ),
+                    child: Row(
+                      children: [
+                        const Icon(Icons.check_circle, color: AppColors.success),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Task Completed',
+                                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                                  color: AppColors.success,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              if (task?.completedAt != null)
+                                Text(
+                                  'Completed on ${_formatDate(task!.completedAt!)}',
+                                  style: Theme.of(context).textTheme.bodySmall,
+                                ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                  Text(
+                    'Want to practice again?',
+                    style: Theme.of(context).textTheme.titleMedium,
+                  ),
+                  const SizedBox(height: 8),
+                  SizedBox(
+                    width: double.infinity,
+                    child: FilledButton.icon(
+                      onPressed: () {
+                        ref.read(tasksProvider.notifier).uncompleteTask(task!.id!);
+                        setState(() {
+                          _startPractice();
+                        });
+                      },
+                      icon: const Icon(Icons.replay),
+                      label: const Text('Practice Again'),
+                    ),
+                  ),
+                ] else ...[
+                  // Timer
+                  if (_isPracticing) ...[
+                    _PracticeTimer(startTime: _startTime!),
+                    const SizedBox(height: 32),
+                  ],
+
+                  // Rating
+                  Text(
+                    'How did the practice feel?',
+                    style: Theme.of(context).textTheme.titleMedium,
+                  ),
+                  const SizedBox(height: 8),
+                  _RatingSelector(
+                    rating: _rating,
+                    onRatingChanged: (r) => setState(() => _rating = r),
+                  ),
+                  const SizedBox(height: 24),
+
+                  // Notes
+                  TextField(
+                    controller: _notesController,
+                    decoration: const InputDecoration(
+                      labelText: 'Notes (optional)',
+                      hintText: 'What did you learn? What was challenging?',
+                      border: OutlineInputBorder(),
+                    ),
+                    maxLines: 4,
+                    textCapitalization: TextCapitalization.sentences,
+                  ),
                   const SizedBox(height: 32),
+
+                  // End session button
+                  SizedBox(
+                    width: double.infinity,
+                    child: FilledButton.icon(
+                      onPressed: _endPractice,
+                      icon: const Icon(Icons.check),
+                      label: const Text('End Practice'),
+                    ),
+                  ),
                 ],
-
-                // Rating
-                Text(
-                  'How did the practice feel?',
-                  style: Theme.of(context).textTheme.titleMedium,
-                ),
-                const SizedBox(height: 8),
-                _RatingSelector(
-                  rating: _rating,
-                  onRatingChanged: (r) => setState(() => _rating = r),
-                ),
-                const SizedBox(height: 24),
-
-                // Notes
-                TextField(
-                  controller: _notesController,
-                  decoration: const InputDecoration(
-                    labelText: 'Notes (optional)',
-                    hintText: 'What did you learn? What was challenging?',
-                    border: OutlineInputBorder(),
-                  ),
-                  maxLines: 4,
-                  textCapitalization: TextCapitalization.sentences,
-                ),
-                const SizedBox(height: 32),
-
-                // End session button
-                SizedBox(
-                  width: double.infinity,
-                  child: FilledButton.icon(
-                    onPressed: _endPractice,
-                    icon: const Icon(Icons.check),
-                    label: const Text('End Practice'),
-                  ),
-                ),
               ],
             ),
           );
@@ -279,6 +337,21 @@ class _PracticeSessionScreenState extends ConsumerState<PracticeSessionScreen> {
       ),
       ),
     );
+  }
+
+  String _formatDate(DateTime date) {
+    final now = DateTime.now();
+    final difference = now.difference(date);
+    
+    if (difference.inDays == 0) {
+      return 'today';
+    } else if (difference.inDays == 1) {
+      return 'yesterday';
+    } else if (difference.inDays < 7) {
+      return '${difference.inDays} days ago';
+    } else {
+      return '${date.day}/${date.month}/${date.year}';
+    }
   }
 
   void _showExitConfirmation() {
