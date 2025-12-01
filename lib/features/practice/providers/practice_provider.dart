@@ -64,6 +64,43 @@ final todaysPracticeTimeProvider = FutureProvider<Duration>((ref) async {
   return Duration(seconds: totalSeconds);
 });
 
+/// Provider for total completed tasks for a skill.
+final completedTasksCountProvider =
+    FutureProvider.family<int, int>((ref, skillId) async {
+  final repository = await ref.watch(practiceRepositoryProvider.future);
+  return repository.getCompletedTasksCount(skillId);
+});
+
+/// Provider for total tasks for a skill.
+final totalTasksCountProvider =
+    FutureProvider.family<int, int>((ref, skillId) async {
+  final repository = await ref.watch(practiceRepositoryProvider.future);
+  return repository.getTotalTasksCount(skillId);
+});
+
+/// Provider for skill progress percentage (0-100).
+final skillProgressPercentProvider =
+    FutureProvider.family<double, int>((ref, skillId) async {
+  final repository = await ref.watch(practiceRepositoryProvider.future);
+  return repository.getSkillProgressPercent(skillId);
+});
+
+/// Provider for daily progress data for a skill (last 30 days).
+final dailyProgressDataProvider = FutureProvider.family<
+    List<Map<String, dynamic>>,
+    ({int skillId, int daysBack})>((ref, params) async {
+  final repository = await ref.watch(practiceRepositoryProvider.future);
+  return repository.getDailyProgressData(params.skillId, params.daysBack);
+});
+
+/// Provider for completed tasks count for a specific day.
+final completedTasksForDayProvider = FutureProvider.family<
+    int,
+    ({int skillId, DateTime date})>((ref, params) async {
+  final repository = await ref.watch(practiceRepositoryProvider.future);
+  return repository.getCompletedTasksCountForDay(params.skillId, params.date);
+});
+
 /// Provider for total practice time this week.
 final weeklyPracticeTimeProvider = FutureProvider<Duration>((ref) async {
   final repository = await ref.watch(practiceRepositoryProvider.future);

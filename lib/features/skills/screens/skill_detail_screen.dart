@@ -111,9 +111,30 @@ class SkillDetailScreen extends ConsumerWidget {
                         children: [
                           Row(
                             children: [
-                              CircularProgressWithLabel(
-                                value: 0.0, // TODO: Calculate progress
-                                size: 60,
+                                                            Consumer(
+                                builder: (context, ref, _) {
+                                  final progress = ref.watch(
+                                    skillProgressPercentProvider(skillId),
+                                  );
+                                  return progress.when(
+                                    data: (percent) =>
+                                        CircularProgressWithLabel(
+                                          value: percent / 100,
+                                          size: 60,
+                                        ),
+                                    loading: () =>
+                                        const SizedBox(
+                                          width: 60,
+                                          height: 60,
+                                          child: CircularProgressIndicator(),
+                                        ),
+                                    error: (_, __) =>
+                                        CircularProgressWithLabel(
+                                          value: 0.0,
+                                          size: 60,
+                                        ),
+                                  );
+                                },
                               ),
                               const SizedBox(width: 16),
                               Expanded(

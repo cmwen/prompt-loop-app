@@ -199,6 +199,90 @@ class PracticeRepositoryImpl implements PracticeRepository {
     return maps.map(_mapToStreak).toList();
   }
 
+  @override
+  Future<int> getCompletedTasksCount(int skillId) async {
+    final result = await _db.rawQuery(
+      '''
+      SELECT COUNT(*) as count
+      FROM ${DbConstants.tableTasks}
+      WHERE ${DbConstants.colSkillId} = ?
+      AND ${DbConstants.colIsCompleted} = 1
+    ''',
+      [skillId],
+    );
+    return (result.first['count'] as int?) ?? 0;
+  }
+
+  @override
+  Future<int> getTotalTasksCount(int skillId) async {
+    final result = await _db.rawQuery(
+      '''
+      SELECT COUNT(*) as count
+      FROM ${DbConstants.tableTasks}
+      WHERE ${DbConstants.colSkillId} = ?
+    ''',
+      [skillId],
+    );
+    return (result.first['count'] as int?) ?? 0;
+  }
+
+  @override
+  Future<int> getCompletedTasksCountForDay(int skillId, DateTime date) async {
+    final startOfDay = DateTime(date.year, date.month, date.day);
+    final endOfDay = startOfDay.add(const Duration(days: 1));
+    
+    final result = await _db.rawQuery(
+      '''
+      SELECT COUNT(*) as count
+      FROM ${DbConstants.tableTasks} t
+      JOIN ${DbConstants.tablePracticeSessions} ps ON t.${DbConstants.colId} = ps.${DbConstants.colTaskId}
+      WHERE t.${DbConstants.colSkillId} = ?
+      AND ps.${DbConstants.colCompletedAt} >= ?
+      AND ps.${DbConstants.colCompletedAt} < ?
+    ''',
+      [skillId, startOfDay.toIsoString(), endOfDay.toIsoString()],
+    );
+    return (result.first['count'] as int?) ?? 0;
+  }
+
+  @override
+  Future<double> getSkillProgressPercent(int skillId) async {
+    final total = await getTotalTasksCount(skillId);
+    if (total == 0) return 0.0;
+    
+    final completed = await getCompletedTasksCount(skillId);
+    return ((completed / total) * 100).clamp(0, 100);
+  }
+
+  @override
+  Future<List<Map<String, dynamic>>> getDailyProgressData(
+    int skillId,
+    int daysBack,
+  ) async {
+    final endDate = DateTime.now();
+    final startDate = endDate.subtract(Duration(days: daysBack));
+    
+    final result = await _db.rawQuery(
+      '''
+      SELECT 
+        DATE(ps.${DbConstants.colCompletedAt}) as day,
+        COUNT(DISTINCT ps.${DbConstants.colId}) as tasks_completed,
+        SUM(ps.${DbConstants.colActualDurationSeconds}) as total_seconds
+      FROM ${DbConstants.tablePracticeSessions} ps
+      JOIN ${DbConstants.tableTasks} t ON ps.${DbConstants.colTaskId} = t.${DbConstants.colId}
+      WHERE t.${DbConstants.colSkillId} = ?
+      AND ps.${DbConstants.colCompletedAt} IS NOT NULL
+      AND DATE(ps.${DbConstants.colCompletedAt}) >= DATE(?)
+      AND DATE(ps.${DbConstants.colCompletedAt}) <= DATE(?)
+      GROUP BY DATE(ps.${DbConstants.colCompletedAt})
+      ORDER BY day DESC
+    ''',
+      [skillId, startDate.toIsoString(), endDate.toIsoString()],
+    );
+    
+    return result;
+  }
+
   PracticeSession _mapToSession(Map<String, dynamic> map) {
     List<String> criteriaMet = [];
     final criteriaJson = map[DbConstants.colCriteriaMet] as String?;

@@ -49,4 +49,19 @@ abstract class PracticeRepository {
 
   /// Get all streaks
   Future<List<Streak>> getAllStreaks();
+
+  /// Get total completed tasks for a skill
+  Future<int> getCompletedTasksCount(int skillId);
+
+  /// Get total tasks for a skill
+  Future<int> getTotalTasksCount(int skillId);
+
+  /// Get completed tasks count for today
+  Future<int> getCompletedTasksCountForDay(int skillId, DateTime date);
+
+  /// Get skill progress percentage (0-100)
+  Future<double> getSkillProgressPercent(int skillId);
+
+  /// Get daily progress data for a skill
+  Future<List<Map<String, dynamic>>> getDailyProgressData(int skillId, int daysBack);
 }
