@@ -12,6 +12,9 @@ abstract class SkillRepository {
   /// Get skill by ID
   Future<Skill?> getSkillById(int id);
 
+  /// Get skill by name
+  Future<Skill?> getSkillByName(String name);
+
   /// Create a new skill
   Future<int> createSkill(Skill skill);
 

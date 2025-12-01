@@ -46,6 +46,17 @@ class SkillRepositoryImpl implements SkillRepository {
   }
 
   @override
+  Future<Skill?> getSkillByName(String name) async {
+    final maps = await _db.query(
+      DbConstants.tableSkills,
+      where: '${DbConstants.colName} = ? AND ${DbConstants.colIsArchived} = ?',
+      whereArgs: [name, 0],
+    );
+    if (maps.isEmpty) return null;
+    return _mapToSkill(maps.first);
+  }
+
+  @override
   Future<int> createSkill(Skill skill) async {
     final now = DateTime.now().toIsoString();
     return _db.insert(DbConstants.tableSkills, {

@@ -14,6 +14,7 @@ import 'package:prompt_loop/domain/entities/sub_skill.dart';
 import 'package:prompt_loop/features/skills/providers/skills_provider.dart';
 import 'package:prompt_loop/features/tasks/providers/tasks_provider.dart';
 import 'package:prompt_loop/features/purpose/providers/purpose_provider.dart';
+import 'package:prompt_loop/data/providers/repository_providers.dart';
 import 'package:prompt_loop/shared/widgets/loading_indicator.dart';
 import 'package:prompt_loop/shared/widgets/app_card.dart';
 
@@ -41,8 +42,9 @@ class _CopyPasteWorkflowScreenState
   final _currentLevelController = TextEditingController();
   final _goalsController = TextEditingController();
 
-  // Selected skill for task generation
+  // Selected skill and sub-skill for task generation
   int? _selectedSkillId;
+  int? _selectedSubSkillId;
 
   @override
   void initState() {
@@ -133,6 +135,15 @@ class _CopyPasteWorkflowScreenState
       // Get sub-skills
       final subSkills = await ref.read(subSkillsProvider(_selectedSkillId!).future);
 
+      // Get specific sub-skill if selected
+      SubSkill? targetSubSkill;
+      if (_selectedSubSkillId != null) {
+        targetSubSkill = subSkills.firstWhere(
+          (s) => s.id == _selectedSubSkillId,
+          orElse: () => throw Exception('Sub-skill not found'),
+        );
+      }
+
       // Get purpose (if any)
       final purpose = await ref.read(purposeBySkillProvider(_selectedSkillId!).future);
 
@@ -151,13 +162,21 @@ class _CopyPasteWorkflowScreenState
       contextBuffer.writeln('SKILL: ${skill.name}');
       contextBuffer.writeln('LEVEL: ${skill.currentLevel.name}');
 
+      if (targetSubSkill != null) {
+        contextBuffer.writeln();
+        contextBuffer.writeln('TARGET SUB-SKILL: ${targetSubSkill.name}');
+        contextBuffer.writeln('Description: ${targetSubSkill.description}');
+        contextBuffer.writeln('Priority: ${targetSubSkill.priority.name}');
+        contextBuffer.writeln('Progress: ${targetSubSkill.progressPercent}%');
+      }
+
       if (purpose != null) {
         contextBuffer.writeln();
         contextBuffer.writeln('PURPOSE: "${purpose.statement}"');
         contextBuffer.writeln('(Category: ${_getCategoryLabel(purpose.category)})');
       }
 
-      if (subSkills.isNotEmpty) {
+      if (subSkills.isNotEmpty && targetSubSkill == null) {
         contextBuffer.writeln();
         contextBuffer.writeln('SUB-SKILLS IN PROGRESS:');
         for (final subSkill in subSkills) {
@@ -178,8 +197,12 @@ class _CopyPasteWorkflowScreenState
       contextBuffer.writeln('═══════════════════════════════════════════════════════════════');
       contextBuffer.writeln();
       contextBuffer.writeln('Generate 3-5 practice tasks that:');
-      contextBuffer.writeln('• Build on current progress shown above');
-      contextBuffer.writeln('• Target the sub-skills marked as high priority');
+      if (targetSubSkill != null) {
+        contextBuffer.writeln('• Focus specifically on the "${targetSubSkill.name}" sub-skill');
+      } else {
+        contextBuffer.writeln('• Build on current progress shown above');
+        contextBuffer.writeln('• Target the sub-skills marked as high priority');
+      }
       if (purpose != null) {
         contextBuffer.writeln('• Connect to the user\'s purpose: "${purpose.statement}"');
       }
@@ -356,28 +379,49 @@ Please respond with JSON in this format:
       throw Exception('No analysis data returned');
     }
 
-    // Create the skill
-    final skill = Skill(
-      name: analysis.skillName,
-      description: analysis.skillDescription,
-      currentLevel: analysis.suggestedLevel,
-      createdAt: DateTime.now(),
-    );
+    // Check if skill already exists by name
+    final repository = await ref.read(skillRepositoryProvider.future);
+    final existingSkill = await repository.getSkillByName(analysis.skillName);
 
-    final skillId = await ref.read(skillsProvider.notifier).createSkill(skill);
-
-    // Create sub-skills
-    for (final subSkillSuggestion in analysis.subSkills) {
-      final subSkill = SubSkill(
-        skillId: skillId,
-        name: subSkillSuggestion.name,
-        description: subSkillSuggestion.description,
-        priority: subSkillSuggestion.priority,
-        isLlmGenerated: true,
+    int skillId;
+    if (existingSkill != null) {
+      // Update existing skill
+      final updatedSkill = existingSkill.copyWith(
+        description: analysis.skillDescription,
+        currentLevel: analysis.suggestedLevel,
+        updatedAt: DateTime.now(),
+      );
+      await ref.read(skillsProvider.notifier).updateSkill(updatedSkill);
+      skillId = existingSkill.id!;
+    } else {
+      // Create new skill
+      final skill = Skill(
+        name: analysis.skillName,
+        description: analysis.skillDescription,
+        currentLevel: analysis.suggestedLevel,
         createdAt: DateTime.now(),
       );
+      skillId = await ref.read(skillsProvider.notifier).createSkill(skill);
+    }
 
-      await ref.read(skillsProvider.notifier).createSubSkill(subSkill);
+    // Get existing sub-skills to avoid duplicates
+    final existingSubSkills = await repository.getSubSkills(skillId);
+    final existingSubSkillNames = existingSubSkills.map((s) => s.name.toLowerCase()).toSet();
+
+    // Create only new sub-skills
+    for (final subSkillSuggestion in analysis.subSkills) {
+      if (!existingSubSkillNames.contains(subSkillSuggestion.name.toLowerCase())) {
+        final subSkill = SubSkill(
+          skillId: skillId,
+          name: subSkillSuggestion.name,
+          description: subSkillSuggestion.description,
+          priority: subSkillSuggestion.priority,
+          isLlmGenerated: true,
+          createdAt: DateTime.now(),
+        );
+
+        await ref.read(skillsProvider.notifier).createSubSkill(subSkill);
+      }
     }
   }
 
@@ -418,6 +462,7 @@ Please respond with JSON in this format:
     for (final taskSuggestion in tasks) {
       final task = Task(
         skillId: _selectedSkillId!,
+        subSkillId: _selectedSubSkillId, // Associate with selected sub-skill
         title: taskSuggestion.title,
         description: taskSuggestion.description,
         durationMinutes: taskSuggestion.durationMinutes,
@@ -764,9 +809,10 @@ Please respond with JSON in this format:
             }
 
             return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 DropdownButtonFormField<int>(
-                  initialValue: _selectedSkillId,
+                  value: _selectedSkillId,
                   decoration: const InputDecoration(
                     labelText: 'Select Skill',
                     border: OutlineInputBorder(),
@@ -779,9 +825,72 @@ Please respond with JSON in this format:
                         ),
                       )
                       .toList(),
-                  onChanged: (value) =>
-                      setState(() => _selectedSkillId = value),
+                  onChanged: (value) {
+                    setState(() {
+                      _selectedSkillId = value;
+                      _selectedSubSkillId = null; // Reset sub-skill selection
+                    });
+                  },
                 ),
+                if (_selectedSkillId != null) ...[
+                  const SizedBox(height: 16),
+                  Consumer(
+                    builder: (context, ref, _) {
+                      final subSkills = ref.watch(subSkillsProvider(_selectedSkillId!));
+                      return subSkills.when(
+                        data: (subSkillList) {
+                          if (subSkillList.isEmpty) {
+                            return Container(
+                              padding: const EdgeInsets.all(12),
+                              decoration: BoxDecoration(
+                                color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: Text(
+                                'No sub-skills for this skill yet. Tasks will be generated for the skill overall.',
+                                style: Theme.of(context).textTheme.bodySmall,
+                              ),
+                            );
+                          }
+                          return Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Optional: Select a specific sub-skill',
+                                style: Theme.of(context).textTheme.labelLarge,
+                              ),
+                              const SizedBox(height: 8),
+                              DropdownButtonFormField<int?>(
+                                value: _selectedSubSkillId,
+                                decoration: const InputDecoration(
+                                  labelText: 'Sub-skill (Optional)',
+                                  border: OutlineInputBorder(),
+                                  hintText: 'All sub-skills',
+                                ),
+                                items: [
+                                  const DropdownMenuItem<int?>(
+                                    value: null,
+                                    child: Text('All sub-skills'),
+                                  ),
+                                  ...subSkillList.map(
+                                    (subSkill) => DropdownMenuItem<int?>(
+                                      value: subSkill.id,
+                                      child: Text(subSkill.name),
+                                    ),
+                                  ),
+                                ],
+                                onChanged: (value) =>
+                                    setState(() => _selectedSubSkillId = value),
+                              ),
+                            ],
+                          );
+                        },
+                        loading: () => const LinearProgressIndicator(),
+                        error: (e, _) => Text('Error loading sub-skills: $e'),
+                      );
+                    },
+                  ),
+                ],
                 const SizedBox(height: 16),
                 SizedBox(
                   width: double.infinity,

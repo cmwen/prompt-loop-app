@@ -6,6 +6,7 @@ import 'package:prompt_loop/features/home/screens/home_screen.dart';
 import 'package:prompt_loop/features/skills/screens/skills_list_screen.dart';
 import 'package:prompt_loop/features/skills/screens/skill_detail_screen.dart';
 import 'package:prompt_loop/features/skills/screens/add_skill_screen.dart';
+import 'package:prompt_loop/features/skills/screens/edit_skill_screen.dart';
 import 'package:prompt_loop/features/tasks/screens/tasks_screen.dart';
 import 'package:prompt_loop/features/practice/screens/practice_session_screen.dart';
 import 'package:prompt_loop/features/progress/screens/progress_screen.dart';
@@ -27,6 +28,7 @@ class AppRoutes {
   static const String skills = 'skills';
   static const String skillDetail = 'skill-detail';
   static const String addSkill = 'add-skill';
+  static const String editSkill = 'edit-skill';
   static const String tasks = 'tasks';
   static const String practiceSession = 'practice-session';
   static const String progress = 'progress';
@@ -45,6 +47,7 @@ class AppPaths {
   static const String skills = '/skills';
   static const String skillDetail = '/skills/:id';
   static const String addSkill = '/skills/add';
+  static const String editSkill = '/skills/:id/edit';
   static const String tasks = '/tasks';
   static const String practiceSession = '/practice/:skillId';
   static const String progress = '/progress';
@@ -136,6 +139,14 @@ final routerProvider = Provider<GoRouter>((ref) {
                 name: AppRoutes.addSkill,
                 path: 'add',
                 builder: (context, state) => const AddSkillScreen(),
+              ),
+              GoRoute(
+                name: AppRoutes.editSkill,
+                path: ':id/edit',
+                builder: (context, state) {
+                  final id = int.parse(state.pathParameters['id']!);
+                  return EditSkillScreen(skillId: id);
+                },
               ),
               GoRoute(
                 name: AppRoutes.skillDetail,

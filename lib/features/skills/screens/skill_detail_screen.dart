@@ -45,7 +45,10 @@ class SkillDetailScreen extends ConsumerWidget {
                   IconButton(
                     icon: const Icon(Icons.edit_outlined),
                     onPressed: () {
-                      // TODO: Edit skill
+                      context.goNamed(
+                        AppRoutes.editSkill,
+                        pathParameters: {'id': skillId.toString()},
+                      );
                     },
                   ),
                   PopupMenuButton(
