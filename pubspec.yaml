@@ -48,8 +48,11 @@ dependencies:
   http: ^1.6.0
 
   # Sharing
-  share_plus: ^10.1.4
+  share_plus: ^10.1.2
   receive_sharing_intent: ^1.8.1
+  
+  # App Info
+  package_info_plus: ^8.0.3
 
 dev_dependencies:
   flutter_test:

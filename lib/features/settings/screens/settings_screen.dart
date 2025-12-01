@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:prompt_loop/core/router/app_router.dart';
 import 'package:prompt_loop/domain/entities/app_settings.dart';
 import 'package:prompt_loop/features/settings/providers/settings_provider.dart';
@@ -250,10 +251,17 @@ class SettingsScreen extends ConsumerWidget {
                   AppCard(
                     child: Column(
                       children: [
-                        ListTile(
-                          leading: const Icon(Icons.info_outline),
-                          title: const Text('Version'),
-                          trailing: const Text('1.0.0'),
+                        FutureBuilder<PackageInfo>(
+                          future: PackageInfo.fromPlatform(),
+                          builder: (context, snapshot) {
+                            final version = snapshot.data?.version ?? '1.0.0';
+                            final buildNumber = snapshot.data?.buildNumber ?? '1';
+                            return ListTile(
+                              leading: const Icon(Icons.info_outline),
+                              title: const Text('Version'),
+                              trailing: Text('$version+$buildNumber'),
+                            );
+                          },
                         ),
                         const Divider(),
                         ListTile(

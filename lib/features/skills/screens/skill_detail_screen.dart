@@ -160,8 +160,8 @@ class SkillDetailScreen extends ConsumerWidget {
                           return AppCard(
                             onTap: () {
                               context.goNamed(
-                                AppRoutes.purposeSetup,
-                                extra: skillId,
+                                AppRoutes.purposeEdit,
+                                extra: {'skillId': skillId, 'purposeId': null},
                               );
                             },
                             child: Row(
@@ -203,6 +203,15 @@ class SkillDetailScreen extends ConsumerWidget {
                         }
 
                         return AppCard(
+                          onTap: () {
+                            context.goNamed(
+                              AppRoutes.purposeEdit,
+                              extra: {
+                                'skillId': skillId,
+                                'purposeId': purposeData.id,
+                              },
+                            );
+                          },
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
@@ -216,13 +225,16 @@ class SkillDetailScreen extends ConsumerWidget {
                                     size: 20,
                                   ),
                                   const SizedBox(width: 8),
-                                  Text(
-                                    'Your Why',
-                                    style: Theme.of(context)
-                                        .textTheme
-                                        .titleSmall
-                                        ?.copyWith(fontWeight: FontWeight.w600),
+                                  Expanded(
+                                    child: Text(
+                                      'Your Why',
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .titleSmall
+                                          ?.copyWith(fontWeight: FontWeight.w600),
+                                    ),
                                   ),
+                                  const Icon(Icons.edit_outlined, size: 18),
                                 ],
                               ),
                               const SizedBox(height: 8),

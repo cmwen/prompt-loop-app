@@ -108,9 +108,14 @@ class _PracticeSessionScreenState extends ConsumerState<PracticeSessionScreen> {
         actions: [
           FilledButton(
             onPressed: () {
-              Navigator.pop(dialogContext);
-              if (mounted && context.canPop()) {
-                context.pop();
+              Navigator.of(dialogContext).pop(); // Close dialog
+              if (mounted) {
+                // Navigate back to home or previous screen
+                if (context.canPop()) {
+                  context.pop();
+                } else {
+                  context.go('/'); // Go to home if can't pop
+                }
               }
             },
             child: const Text('Done'),
@@ -284,14 +289,19 @@ class _PracticeSessionScreenState extends ConsumerState<PracticeSessionScreen> {
         content: const Text('Your progress will not be saved.'),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(dialogContext),
+            onPressed: () => Navigator.of(dialogContext).pop(),
             child: const Text('Continue Practicing'),
           ),
           TextButton(
             onPressed: () {
-              Navigator.pop(dialogContext);
-              if (mounted && context.canPop()) {
-                context.pop();
+              Navigator.of(dialogContext).pop(); // Close dialog
+              if (mounted) {
+                // Navigate back
+                if (context.canPop()) {
+                  context.pop();
+                } else {
+                  context.go('/'); // Go to home if can't pop
+                }
               }
             },
             child: const Text('Exit'),

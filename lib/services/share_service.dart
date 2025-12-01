@@ -1,10 +1,11 @@
 import 'dart:async';
-import 'package:flutter/services.dart';
+import 'package:flutter/material.dart';
 import 'package:share_plus/share_plus.dart';
+import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 
 /// Service for handling sharing prompts and receiving shared text.
 class ShareService {
-  static const _channel = MethodChannel('prompt_loop/share');
+  static StreamSubscription? _intentDataStreamSubscription;
   
   /// Stream controller for incoming shared text
   static final _sharedTextController = StreamController<String>.broadcast();
@@ -14,19 +15,19 @@ class ShareService {
   
   /// Initialize the share service and listen for incoming shares
   static void initialize() {
-    _channel.setMethodCallHandler(_handleMethodCall);
-  }
-  
-  /// Handle method calls from native code
-  static Future<dynamic> _handleMethodCall(MethodCall call) async {
-    switch (call.method) {
-      case 'onSharedText':
-        final text = call.arguments as String?;
-        if (text != null && text.isNotEmpty) {
-          _sharedTextController.add(text);
-        }
-        break;
-    }
+    debugPrint('[ShareService] Initializing...');
+    
+    // Note: For text sharing from other apps, we'll rely on manual clipboard paste
+    // The receive_sharing_intent package primarily handles file/media sharing
+    // Text intent handling requires platform-specific implementation
+    
+    // Users will:
+    // 1. Copy the prompt from our app
+    // 2. Paste it into ChatGPT/Claude
+    // 3. Copy the response
+    // 4. Paste it back into our response field
+    
+    debugPrint('[ShareService] Initialized - Users can use clipboard for text sharing');
   }
   
   /// Share text to other apps (e.g., prompt to LLM apps)
@@ -50,6 +51,7 @@ class ShareService {
   
   /// Dispose the service
   static void dispose() {
+    _intentDataStreamSubscription?.cancel();
     _sharedTextController.close();
   }
 }

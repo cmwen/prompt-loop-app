@@ -16,6 +16,7 @@ import 'package:prompt_loop/features/tasks/providers/tasks_provider.dart';
 import 'package:prompt_loop/features/purpose/providers/purpose_provider.dart';
 import 'package:prompt_loop/shared/widgets/loading_indicator.dart';
 import 'package:prompt_loop/shared/widgets/app_card.dart';
+import 'package:prompt_loop/services/share_service.dart';
 
 /// Copy-paste LLM workflow screen.
 class CopyPasteWorkflowScreen extends ConsumerStatefulWidget {
@@ -43,6 +44,18 @@ class _CopyPasteWorkflowScreenState
 
   // Selected skill for task generation
   int? _selectedSkillId;
+
+  @override
+  void initState() {
+    super.initState();
+    // Add listener to rebuild button state when text changes
+    _skillNameController.addListener(() {
+      setState(() {}); // Rebuild to update button enabled state
+    });
+    
+    // Note: For text sharing, users will use the "Paste from Clipboard" button
+    // The receive_sharing_intent package doesn't support text intents in this version
+  }
 
   @override
   void dispose() {
