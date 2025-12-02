@@ -1,27 +1,24 @@
 # Agent Configuration and Instructions
 
-This document provides guidance for AI agents and automated tools working with this Android Flutter template repository.
+This document provides guidance for AI agents and automated tools working with the Prompt Loop app repository.
 
 ## 🎯 Quick Reference for AI Agents
 
 **First-Time Users**: Direct them to [GETTING_STARTED.md](GETTING_STARTED.md) for complete setup guide.
 
-**Customization**: Use [APP_CUSTOMIZATION.md](APP_CUSTOMIZATION.md) for comprehensive customization checklist with AI prompts.
-
-**Important Files to Update When Renaming App**:
-- `pubspec.yaml` (name, description)
-- `lib/main.dart` (imports, title)
-- `test/widget_test.dart` (imports)
-- `android/app/build.gradle.kts` (namespace, applicationId)
-- `android/app/src/main/AndroidManifest.xml` (label)
+**App Identity**:
+- **Name**: Prompt Loop
+- **Package**: prompt_loop
+- **Application ID**: com.cmwen.prompt_loop
+- **Version**: 1.0.8+10
 
 ## Repository Overview
 
-This is a production-ready Android Flutter template with AI-powered development workflow, optimized build system (Java 17, parallel builds, caching), and comprehensive CI/CD. All agents have access to VS Code tools including terminal, debugger, test runner, and codebase explorer.
+Prompt Loop is an AI-powered skill development app that uses deliberate practice loops to help users build expertise faster. This repository includes AI-powered development workflow, optimized build system (Java 17, parallel builds, caching), and comprehensive CI/CD. All agents have access to VS Code tools including terminal, debugger, test runner, and codebase explorer.
 
 ## AI Agents Overview
 
-This template includes 6 specialized GitHub Copilot agents:
+Prompt Loop uses 6 specialized GitHub Copilot agents:
 
 | Agent | Tools | Purpose |
 |-------|-------|---------|
@@ -70,22 +67,22 @@ This template includes 6 specialized GitHub Copilot agents:
 
 ## AI Customization Points
 
-When using this template, AI agents should focus on these key customization areas:
+When extending Prompt Loop, AI agents should focus on these key areas:
 
 ### 1. App Identity (pubspec.yaml)
 ```yaml
-name: your_app_name           # Change app name
-description: "Your app description"
-version: 1.0.0+1              # Update version
+name: prompt_loop
+description: "AI-powered skill development through deliberate practice loops"
+version: 1.0.8+10
 ```
 
 ### 2. App Entry Point (lib/main.dart)
-- Change `title` in MaterialApp
-- Modify `colorScheme` seedColor for theming
-- Replace `MyHomePage` with your own screens
+- Modify screens and navigation
+- Adjust `colorScheme` for theming
+- Add new features and practice modes
 
 ### 3. Android Configuration
-- `android/app/build.gradle.kts`: Change `applicationId`
+- `android/app/build.gradle.kts`: applicationId is `com.cmwen.prompt_loop`
 - `android/app/build.gradle.kts`: Configure signing (see release workflow)
 
 ## Flutter Commands
@@ -189,23 +186,22 @@ For complete details, see [BUILD_OPTIMIZATION.md](BUILD_OPTIMIZATION.md)
 
 ## Common Tasks and Agent Workflows
 
-### Task: Rename the App
+### Task: Add New Practice Mode
 
 **Agent**: @flutter-developer
 
 **Prompt**:
 ```
-Please rename this Flutter app from "min_flutter_template" to "my_awesome_app" 
-and update the package from "com.cmwen.min_flutter_template" to "com.mycompany.my_awesome_app".
+Please add a new practice mode called "[MODE_NAME]" to Prompt Loop.
 
-Update all files including:
-- pubspec.yaml (name, description)
-- lib/main.dart (imports, title)
-- test/widget_test.dart (imports)
-- android/app/build.gradle.kts (namespace, applicationId)
-- android/app/src/main/AndroidManifest.xml (label)
+Requirements:
+- Create model in lib/models/
+- Implement service in lib/services/
+- Create UI screen in lib/screens/
+- Add tests for the new mode
+- Integrate with existing navigation
 
-After updates, run flutter pub get and verify compilation.
+After implementation, run flutter test and verify compilation.
 ```
 
 ### Task: Generate App Icon
@@ -216,13 +212,13 @@ After updates, run flutter pub get and verify compilation.
 ```
 @icon-generation.prompt.md
 
-Create an app launcher icon for my [TYPE OF APP] app.
+Create an app launcher icon for Prompt Loop.
 
 Requirements:
-- App concept: [DESCRIBE]
-- Style: [minimal/flat/gradient]
-- Primary color: #[HEX]
-- Symbol: [DESCRIBE ICON CONCEPT]
+- App concept: AI-powered skill development through deliberate practice
+- Style: minimal/gradient
+- Primary color: #3B82F6
+- Symbol: Loop or circular arrow representing practice cycles
 
 Provide 1024×1024 PNG and setup instructions for flutter_launcher_icons package.
 ```
