@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:prompt_loop/core/router/app_router.dart';
 import 'package:prompt_loop/core/theme/app_theme.dart';
+import 'package:prompt_loop/domain/entities/app_settings.dart';
 import 'package:prompt_loop/features/settings/providers/settings_provider.dart';
 
 /// The main application widget.
@@ -15,7 +16,16 @@ class PromptLoopApp extends ConsumerWidget {
 
     // Determine theme mode based on settings
     final themeMode = settings.when(
-      data: (s) => s.isDarkMode ? ThemeMode.dark : ThemeMode.light,
+      data: (s) {
+        switch (s.themeMode) {
+          case AppThemeMode.light:
+            return ThemeMode.light;
+          case AppThemeMode.dark:
+            return ThemeMode.dark;
+          case AppThemeMode.system:
+            return ThemeMode.system;
+        }
+      },
       loading: () => ThemeMode.system,
       error: (_, __) => ThemeMode.system,
     );

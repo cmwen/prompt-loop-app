@@ -32,7 +32,7 @@ class SettingsRepositoryImpl implements SettingsRepository {
       llmProvider: LlmProvider.fromString(
         settingsMap['llm_provider'] ?? 'openai',
       ),
-      themeMode: ThemeMode.fromString(settingsMap['theme_mode'] ?? 'system'),
+      themeMode: AppThemeMode.fromString(settingsMap['theme_mode'] ?? 'system'),
       notificationsEnabled:
           settingsMap['notification_enabled']?.toLowerCase() == 'true',
       dailyReminderTime: settingsMap['daily_reminder_time'] ?? '09:00',

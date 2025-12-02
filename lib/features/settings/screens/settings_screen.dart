@@ -1,14 +1,23 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:share_plus/share_plus.dart';
+import 'package:path_provider/path_provider.dart';
+import 'dart:io';
 import 'package:prompt_loop/core/router/app_router.dart';
 import 'package:prompt_loop/domain/entities/app_settings.dart';
 import 'package:prompt_loop/features/settings/providers/settings_provider.dart';
+import 'package:prompt_loop/features/skills/providers/skills_provider.dart';
+import 'package:prompt_loop/features/tasks/providers/tasks_provider.dart';
+import 'package:prompt_loop/features/practice/providers/practice_provider.dart';
+import 'package:prompt_loop/features/purpose/providers/purpose_provider.dart';
 import 'package:prompt_loop/shared/widgets/app_card.dart';
 import 'package:prompt_loop/shared/widgets/loading_indicator.dart';
 import 'package:prompt_loop/core/theme/app_colors.dart';
+import 'package:intl/intl.dart';
 
 /// Settings screen for app configuration.
 class SettingsScreen extends ConsumerWidget {
@@ -182,13 +191,40 @@ class SettingsScreen extends ConsumerWidget {
                   _SectionHeader(title: 'Appearance'),
                   const SizedBox(height: 8),
                   AppCard(
-                    child: SwitchListTile(
-                      title: const Text('Dark Mode'),
-                      subtitle: const Text('Use dark color scheme'),
-                      value: settingsData.isDarkMode,
-                      onChanged: (value) {
-                        ref.read(settingsProvider.notifier).setDarkMode(value);
-                      },
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Theme',
+                          style: Theme.of(context).textTheme.titleSmall,
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          'Choose your preferred color scheme',
+                          style: Theme.of(context).textTheme.bodySmall
+                              ?.copyWith(
+                                color: Theme.of(
+                                  context,
+                                ).colorScheme.onSurfaceVariant,
+                              ),
+                        ),
+                        const SizedBox(height: 12),
+                        ...AppThemeMode.values.map(
+                          (mode) => RadioListTile<AppThemeMode>(
+                            title: Text(mode.displayName),
+                            subtitle: Text(mode.description),
+                            value: mode,
+                            groupValue: settingsData.themeMode,
+                            onChanged: (value) {
+                              if (value != null) {
+                                ref
+                                    .read(settingsProvider.notifier)
+                                    .setThemeMode(value);
+                              }
+                            },
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                   const SizedBox(height: 24),
@@ -209,6 +245,22 @@ class SettingsScreen extends ConsumerWidget {
                           onTap: () => context.push(AppPaths.purposesList),
                         ),
                       ],
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+
+                  // Data Management section
+                  _SectionHeader(title: 'Data'),
+                  const SizedBox(height: 8),
+                  AppCard(
+                    child: ListTile(
+                      leading: const Icon(Icons.download_outlined),
+                      title: const Text('Export Data'),
+                      subtitle: const Text(
+                        'Export all your data as JSON',
+                      ),
+                      trailing: const Icon(Icons.chevron_right),
+                      onTap: () => _exportData(context, ref),
                     ),
                   ),
                   const SizedBox(height: 24),
@@ -415,6 +467,123 @@ class SettingsScreen extends ConsumerWidget {
       final formattedTime =
           '${time.hourOfPeriod}:${time.minute.toString().padLeft(2, '0')} ${time.period == DayPeriod.am ? 'AM' : 'PM'}';
       ref.read(settingsProvider.notifier).setDailyReminderTime(formattedTime);
+    }
+  }
+
+  Future<void> _exportData(BuildContext context, WidgetRef ref) async {
+    try {
+      // Show loading dialog
+      if (context.mounted) {
+        showDialog(
+          context: context,
+          barrierDismissible: false,
+          builder: (context) => const AlertDialog(
+            content: Row(
+              children: [
+                CircularProgressIndicator(),
+                SizedBox(width: 16),
+                Text('Exporting data...'),
+              ],
+            ),
+          ),
+        );
+      }
+
+      // Gather all data
+      final skillsValue = ref.read(skillsProvider);
+      final tasksValue = ref.read(tasksProvider);
+      final sessionsValue = ref.read(practiceSessionsProvider);
+      final purposesValue = ref.read(purposesProvider);
+
+      final skills = skillsValue.valueOrNull ?? [];
+      final tasks = tasksValue.valueOrNull ?? [];
+      final sessions = sessionsValue.valueOrNull ?? [];
+      final purposes = purposesValue.valueOrNull ?? [];
+
+      final exportData = {
+        'export_version': '1.0',
+        'export_date': DateTime.now().toIso8601String(),
+        'app_version': '1.0.3',
+        'data': {
+          'skills': skills.map((s) => {
+            'id': s.id,
+            'name': s.name,
+            'description': s.description,
+            'current_level': s.currentLevel.name,
+            'target_level': s.targetLevel?.name,
+            'created_at': s.createdAt.toIso8601String(),
+          }).toList(),
+          'tasks': tasks.map((t) => {
+            'id': t.id,
+            'skill_id': t.skillId,
+            'title': t.title,
+            'description': t.description,
+            'duration_minutes': t.durationMinutes,
+            'difficulty': t.difficulty,
+            'is_completed': t.isCompleted,
+            'completed_at': t.completedAt?.toIso8601String(),
+            'created_at': t.createdAt.toIso8601String(),
+          }).toList(),
+          'practice_sessions': sessions.map((s) => {
+            'id': s.id,
+            'task_id': s.taskId,
+            'started_at': s.startedAt.toIso8601String(),
+            'completed_at': s.completedAt?.toIso8601String(),
+            'duration_seconds': s.actualDurationSeconds,
+            'rating': s.rating,
+            'notes': s.notes,
+          }).toList(),
+          'purposes': purposes.map((p) => {
+            'id': p.id,
+            'skill_id': p.skillId,
+            'statement': p.statement,
+            'category': p.category.name,
+            'created_at': p.createdAt.toIso8601String(),
+          }).toList(),
+        },
+      };
+
+      // Convert to JSON
+      final jsonString = const JsonEncoder.withIndent('  ').convert(exportData);
+
+      // Save to temporary file
+      final timestamp = DateFormat('yyyyMMdd_HHmmss').format(DateTime.now());
+      final fileName = 'prompt_loop_export_$timestamp.json';
+      final tempDir = await getTemporaryDirectory();
+      final file = File('${tempDir.path}/$fileName');
+      await file.writeAsString(jsonString);
+
+      // Close loading dialog
+      if (context.mounted) {
+        Navigator.pop(context);
+      }
+
+      // Share the file
+      await Share.shareXFiles(
+        [XFile(file.path)],
+        subject: 'Prompt Loop Data Export',
+        text: 'Your Prompt Loop data export from ${DateFormat('yyyy-MM-dd').format(DateTime.now())}',
+      );
+
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Data exported successfully!'),
+            backgroundColor: AppColors.success,
+          ),
+        );
+      }
+    } catch (e) {
+      // Close loading dialog if open
+      if (context.mounted) {
+        Navigator.pop(context);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Export failed: $e'),
+            backgroundColor: AppColors.error,
+          ),
+        );
+      }
     }
   }
 

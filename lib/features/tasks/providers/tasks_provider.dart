@@ -29,11 +29,36 @@ final tasksBySubSkillProvider = FutureProvider.family<List<Task>, int>((
 /// Provider for today's tasks.
 final todaysTasksProvider = FutureProvider<List<Task>>((ref) async {
   final repository = await ref.watch(taskRepositoryProvider.future);
-  final allTasks = await repository.getIncompleteTasks();
+  final allTasks = await repository.getAllTasks();
   final today = DateTime.now();
+  final todayStr = DateTime(today.year, today.month, today.day);
 
   return allTasks.where((task) {
-    if (task.isCompleted) return false;
+    // Include tasks scheduled for today regardless of completion
+    if (task.scheduledDate != null) {
+      final scheduledDay = DateTime(
+        task.scheduledDate!.year,
+        task.scheduledDate!.month,
+        task.scheduledDate!.day,
+      );
+      if (scheduledDay.isAtSameMomentAs(todayStr)) {
+        return true;
+      }
+    }
+
+    // For unscheduled tasks, check completion and frequency
+    if (task.isCompleted) {
+      // Check if completed today
+      if (task.completedAt != null) {
+        final completedDay = DateTime(
+          task.completedAt!.year,
+          task.completedAt!.month,
+          task.completedAt!.day,
+        );
+        return completedDay.isAtSameMomentAs(todayStr);
+      }
+      return false;
+    }
 
     // Check if task is due today based on frequency
     switch (task.frequency) {
@@ -44,7 +69,7 @@ final todaysTasksProvider = FutureProvider<List<Task>>((ref) async {
         final daysSinceComplete = today.difference(task.completedAt!).inDays;
         return daysSinceComplete >= 7;
       case TaskFrequency.custom:
-        return !task.isCompleted;
+        return true;
     }
   }).toList();
 });

@@ -59,16 +59,38 @@ enum LlmProvider {
   }
 }
 
-/// Theme mode
-enum ThemeMode {
+/// App theme mode
+enum AppThemeMode {
   light,
   dark,
   system;
 
-  static ThemeMode fromString(String value) {
-    return ThemeMode.values.firstWhere(
+  String get displayName {
+    switch (this) {
+      case AppThemeMode.light:
+        return 'Light';
+      case AppThemeMode.dark:
+        return 'Dark';
+      case AppThemeMode.system:
+        return 'System Default';
+    }
+  }
+
+  String get description {
+    switch (this) {
+      case AppThemeMode.light:
+        return 'Always use light theme';
+      case AppThemeMode.dark:
+        return 'Always use dark theme';
+      case AppThemeMode.system:
+        return 'Follow system settings';
+    }
+  }
+
+  static AppThemeMode fromString(String value) {
+    return AppThemeMode.values.firstWhere(
       (e) => e.name == value.toLowerCase(),
-      orElse: () => ThemeMode.system,
+      orElse: () => AppThemeMode.system,
     );
   }
 }
@@ -78,7 +100,7 @@ class AppSettings extends Equatable {
   final LlmMode llmMode;
   final LlmProvider llmProvider;
   final String? llmModel;
-  final ThemeMode themeMode;
+  final AppThemeMode themeMode;
   final bool notificationsEnabled;
   final String dailyReminderTime;
   final bool showPurposeReminder;
@@ -89,7 +111,7 @@ class AppSettings extends Equatable {
     this.llmMode = LlmMode.copyPaste,
     this.llmProvider = LlmProvider.openai,
     this.llmModel,
-    this.themeMode = ThemeMode.system,
+    this.themeMode = AppThemeMode.system,
     this.notificationsEnabled = true,
     this.dailyReminderTime = '09:00',
     this.showPurposeReminder = true,
@@ -97,14 +119,14 @@ class AppSettings extends Equatable {
     this.onboardingCompleted = false,
   });
 
-  bool get isDarkMode => themeMode == ThemeMode.dark;
+  bool get isDarkMode => themeMode == AppThemeMode.dark;
 
   /// Create a copy with modified fields
   AppSettings copyWith({
     LlmMode? llmMode,
     LlmProvider? llmProvider,
     String? llmModel,
-    ThemeMode? themeMode,
+    AppThemeMode? themeMode,
     bool? notificationsEnabled,
     String? dailyReminderTime,
     bool? showPurposeReminder,

@@ -110,8 +110,17 @@ class SettingsNotifier extends StateNotifier<AsyncValue<AppSettings>> {
     final current = state.valueOrNull;
     if (current != null) {
       await updateSettings(
-        current.copyWith(themeMode: isDark ? ThemeMode.dark : ThemeMode.light),
+        current.copyWith(
+          themeMode: isDark ? AppThemeMode.dark : AppThemeMode.light,
+        ),
       );
+    }
+  }
+
+  Future<void> setThemeMode(AppThemeMode mode) async {
+    final current = state.valueOrNull;
+    if (current != null) {
+      await updateSettings(current.copyWith(themeMode: mode));
     }
   }
 

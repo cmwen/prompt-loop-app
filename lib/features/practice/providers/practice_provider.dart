@@ -57,7 +57,8 @@ final struggleEntriesBySessionProvider =
 /// Provider for total practice time today.
 final todaysPracticeTimeProvider = FutureProvider<Duration>((ref) async {
   final sessions = await ref.watch(todaysSessionsProvider.future);
-  final totalSeconds = sessions.fold<int>(
+  final completedSessions = sessions.where((s) => s.completedAt != null);
+  final totalSeconds = completedSessions.fold<int>(
     0,
     (sum, s) => sum + (s.actualDurationSeconds ?? 0),
   );
@@ -108,7 +109,8 @@ final weeklyPracticeTimeProvider = FutureProvider<Duration>((ref) async {
   final startOfWeek = now.subtract(Duration(days: now.weekday - 1));
   final start = DateTime(startOfWeek.year, startOfWeek.month, startOfWeek.day);
   final sessions = await repository.getSessionsForDateRange(start, now);
-  final totalSeconds = sessions.fold<int>(
+  final completedSessions = sessions.where((s) => s.completedAt != null);
+  final totalSeconds = completedSessions.fold<int>(
     0,
     (sum, s) => sum + (s.actualDurationSeconds ?? 0),
   );
