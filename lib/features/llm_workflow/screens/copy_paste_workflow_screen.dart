@@ -7,13 +7,16 @@ import 'package:prompt_loop/core/router/app_router.dart';
 import 'package:prompt_loop/core/theme/app_colors.dart';
 import 'package:prompt_loop/core/constants/llm_constants.dart';
 import 'package:prompt_loop/data/services/copy_paste_llm_service.dart';
+import 'package:prompt_loop/data/services/byok_llm_service.dart';
 import 'package:prompt_loop/domain/services/llm_service.dart';
 import 'package:prompt_loop/domain/entities/task.dart';
 import 'package:prompt_loop/domain/entities/skill.dart';
 import 'package:prompt_loop/domain/entities/sub_skill.dart';
+import 'package:prompt_loop/domain/entities/app_settings.dart';
 import 'package:prompt_loop/features/skills/providers/skills_provider.dart';
 import 'package:prompt_loop/features/tasks/providers/tasks_provider.dart';
 import 'package:prompt_loop/features/purpose/providers/purpose_provider.dart';
+import 'package:prompt_loop/features/settings/providers/settings_provider.dart';
 import 'package:prompt_loop/data/providers/repository_providers.dart';
 import 'package:prompt_loop/shared/widgets/loading_indicator.dart';
 import 'package:prompt_loop/shared/widgets/app_card.dart';
@@ -36,6 +39,8 @@ class _CopyPasteWorkflowScreenState
   bool _isPromptCopied = false;
   bool _isProcessing = false;
   String? _errorMessage;
+  bool _isByokMode = false;
+  String? _apiKey;
 
   // For skill analysis
   final _skillNameController = TextEditingController();
@@ -54,8 +59,22 @@ class _CopyPasteWorkflowScreenState
       setState(() {}); // Rebuild to update button enabled state
     });
     
-    // Note: For text sharing, users will use the "Paste from Clipboard" button
-    // The receive_sharing_intent package doesn't support text intents in this version
+    // Check if BYOK is available
+    _checkByokMode();
+  }
+
+  Future<void> _checkByokMode() async {
+    final settingsValue = ref.read(settingsProvider);
+    final apiKey = await ref.read(settingsProvider.notifier).getApiKey();
+    
+    settingsValue.whenData((settings) {
+      setState(() {
+        _isByokMode = settings.llmMode == LlmMode.byok && 
+                      apiKey != null && 
+                      apiKey.isNotEmpty;
+        _apiKey = apiKey;
+      });
+    });
   }
 
   @override
@@ -84,6 +103,12 @@ class _CopyPasteWorkflowScreenState
       _errorMessage = null;
     });
 
+    // If BYOK mode is active, process directly instead of copy-paste
+    if (_isByokMode && _apiKey != null) {
+      _processWithByok();
+      return;
+    }
+
     switch (widget.workflowType) {
       case CopyPasteWorkflowType.skillAnalysis:
         _generateSkillAnalysisPrompt();
@@ -94,6 +119,57 @@ class _CopyPasteWorkflowScreenState
       case CopyPasteWorkflowType.struggleAnalysis:
         _generateStrugglePrompt();
         break;
+    }
+  }
+
+  Future<void> _processWithByok() async {
+    setState(() {
+      _isProcessing = true;
+      _errorMessage = null;
+    });
+
+    try {
+      final settingsValue = ref.read(settingsProvider);
+      final settings = settingsValue.value;
+      if (settings == null) {
+        throw Exception('Settings not loaded');
+      }
+      
+      final service = ByokLlmService(
+        apiKey: _apiKey!,
+        provider: settings.llmProvider,
+        model: settings.llmModel,
+      );
+
+      switch (widget.workflowType) {
+        case CopyPasteWorkflowType.skillAnalysis:
+          await _processSkillAnalysisWithByok(service);
+          break;
+        case CopyPasteWorkflowType.taskGeneration:
+          await _processTaskGenerationWithByok(service);
+          break;
+        case CopyPasteWorkflowType.struggleAnalysis:
+          await _processStruggleAnalysisWithByok(service);
+          break;
+      }
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Successfully generated with AI!'),
+            backgroundColor: AppColors.success,
+          ),
+        );
+        if (context.canPop()) {
+          context.pop();
+        } else {
+          context.go(AppPaths.home);
+        }
+      }
+    } catch (e) {
+      setState(() => _errorMessage = 'Error: $e');
+    } finally {
+      setState(() => _isProcessing = false);
     }
   }
 
@@ -481,6 +557,144 @@ Please respond with JSON in this format:
     // TODO: Parse JSON and show feedback
   }
 
+  // -- BYOK Processing Methods --
+
+  Future<void> _processSkillAnalysisWithByok(ByokLlmService service) async {
+    final request = SkillAnalysisRequest(
+      skillDescription: _skillNameController.text.trim(),
+      currentLevel: _currentLevelController.text.trim().isEmpty
+          ? null
+          : _currentLevelController.text.trim(),
+      goals: _goalsController.text.trim().isEmpty
+          ? null
+          : _goalsController.text.trim(),
+    );
+
+    final result = await service.analyzeSkill(request);
+
+    if (!result.isSuccess) {
+      throw Exception(result.error);
+    }
+
+    final analysis = result.data;
+    if (analysis == null) {
+      throw Exception('No analysis data returned');
+    }
+
+    // Check if skill already exists by name
+    final repository = await ref.read(skillRepositoryProvider.future);
+    final existingSkill = await repository.getSkillByName(analysis.skillName);
+
+    int skillId;
+    if (existingSkill != null) {
+      // Update existing skill
+      final updatedSkill = existingSkill.copyWith(
+        description: analysis.skillDescription,
+        currentLevel: analysis.suggestedLevel,
+        updatedAt: DateTime.now(),
+      );
+      await ref.read(skillsProvider.notifier).updateSkill(updatedSkill);
+      skillId = existingSkill.id!;
+    } else {
+      // Create new skill
+      final skill = Skill(
+        name: analysis.skillName,
+        description: analysis.skillDescription,
+        currentLevel: analysis.suggestedLevel,
+        createdAt: DateTime.now(),
+      );
+      skillId = await ref.read(skillsProvider.notifier).createSkill(skill);
+    }
+
+    // Get existing sub-skills to avoid duplicates
+    final existingSubSkills = await repository.getSubSkills(skillId);
+    final existingSubSkillNames = existingSubSkills.map((s) => s.name.toLowerCase()).toSet();
+
+    // Create only new sub-skills
+    for (final subSkillSuggestion in analysis.subSkills) {
+      if (!existingSubSkillNames.contains(subSkillSuggestion.name.toLowerCase())) {
+        final subSkill = SubSkill(
+          skillId: skillId,
+          name: subSkillSuggestion.name,
+          description: subSkillSuggestion.description,
+          priority: subSkillSuggestion.priority,
+          isLlmGenerated: true,
+          createdAt: DateTime.now(),
+        );
+
+        await ref.read(skillsProvider.notifier).createSubSkill(subSkill);
+      }
+    }
+  }
+
+  Future<void> _processTaskGenerationWithByok(ByokLlmService service) async {
+    if (_selectedSkillId == null) {
+      throw Exception('No skill selected');
+    }
+
+    final repository = await ref.read(skillRepositoryProvider.future);
+    final skill = await repository.getSkillById(_selectedSkillId!);
+    if (skill == null) {
+      throw Exception('Skill not found');
+    }
+
+    final subSkills = await repository.getSubSkills(_selectedSkillId!);
+    final selectedSubSkills = _selectedSubSkillId != null
+        ? subSkills.where((s) => s.id == _selectedSubSkillId).toList()
+        : subSkills;
+
+    final request = TaskGenerationRequest(
+      skill: skill,
+      subSkills: selectedSubSkills,
+    );
+
+    final result = await service.generateTasks(request);
+
+    if (!result.isSuccess) {
+      throw Exception(result.error);
+    }
+
+    final tasks = result.data;
+    if (tasks == null || tasks.isEmpty) {
+      throw Exception('No tasks generated');
+    }
+
+    // Create tasks
+    for (final taskSuggestion in tasks) {
+      // Find matching sub-skill by name if target is specified
+      int? targetSubSkillId;
+      if (taskSuggestion.targetSubSkillName != null) {
+        final matchingSubSkill = subSkills.firstWhere(
+          (s) => s.name.toLowerCase() == taskSuggestion.targetSubSkillName!.toLowerCase(),
+          orElse: () => subSkills.first,
+        );
+        targetSubSkillId = matchingSubSkill.id;
+      } else if (subSkills.isNotEmpty) {
+        targetSubSkillId = subSkills.first.id;
+      }
+
+      final task = Task(
+        skillId: _selectedSkillId!,
+        subSkillId: targetSubSkillId,
+        title: taskSuggestion.title,
+        description: taskSuggestion.description,
+        durationMinutes: taskSuggestion.durationMinutes,
+        difficulty: taskSuggestion.difficulty,
+        frequency: taskSuggestion.frequency,
+        successCriteria: taskSuggestion.successCriteria,
+        isLlmGenerated: true,
+        createdAt: DateTime.now(),
+      );
+
+      await ref.read(tasksProvider.notifier).createTask(task);
+    }
+  }
+
+  Future<void> _processStruggleAnalysisWithByok(ByokLlmService service) async {
+    // TODO: Implement struggle analysis with BYOK
+    throw UnimplementedError('Struggle analysis with BYOK not yet implemented');
+  }
+
   /// Handle back button press with confirmation if there's unsaved work
   Future<bool> _onWillPop() async {
     // If we have a generated prompt but haven't processed it, confirm exit
@@ -551,6 +765,44 @@ Please respond with JSON in this format:
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // BYOK Mode Banner
+            if (_isByokMode) ...[
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: AppColors.success.withAlpha(25),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: AppColors.success),
+                ),
+                child: Row(
+                  children: [
+                    const Icon(Icons.auto_awesome, color: AppColors.success),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Direct AI Mode Active',
+                            style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                              color: AppColors.success,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            'Using your API key - No copy/paste needed!',
+                            style: Theme.of(context).textTheme.bodySmall,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 16),
+            ],
+            
             // Step 1: Input
             _StepHeader(
               step: 1,
@@ -780,11 +1032,12 @@ Please respond with JSON in this format:
         const SizedBox(height: 16),
         SizedBox(
           width: double.infinity,
-          child: FilledButton(
+          child: FilledButton.icon(
             onPressed: _skillNameController.text.trim().isEmpty
                 ? null
                 : _generatePrompt,
-            child: const Text('Generate Prompt'),
+            icon: Icon(_isByokMode ? Icons.auto_awesome : Icons.copy),
+            label: Text(_isByokMode ? 'Generate with AI' : 'Generate Prompt'),
           ),
         ),
       ],
@@ -928,9 +1181,10 @@ Please respond with JSON in this format:
         const SizedBox(height: 16),
         SizedBox(
           width: double.infinity,
-          child: FilledButton(
+          child: FilledButton.icon(
             onPressed: _generatePrompt,
-            child: const Text('Generate Prompt'),
+            icon: Icon(_isByokMode ? Icons.auto_awesome : Icons.copy),
+            label: Text(_isByokMode ? 'Generate with AI' : 'Generate Prompt'),
           ),
         ),
       ],

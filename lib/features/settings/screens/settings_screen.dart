@@ -9,6 +9,7 @@ import 'package:path_provider/path_provider.dart';
 import 'dart:io';
 import 'package:prompt_loop/core/router/app_router.dart';
 import 'package:prompt_loop/domain/entities/app_settings.dart';
+import 'package:prompt_loop/data/services/byok_llm_service.dart';
 import 'package:prompt_loop/features/settings/providers/settings_provider.dart';
 import 'package:prompt_loop/features/skills/providers/skills_provider.dart';
 import 'package:prompt_loop/features/tasks/providers/tasks_provider.dart';
@@ -402,53 +403,152 @@ class SettingsScreen extends ConsumerWidget {
 
   void _showApiKeyDialog(BuildContext context, WidgetRef ref) {
     final controller = TextEditingController();
+    bool isValidating = false;
+    String? validationError;
 
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Configure API Key'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Text(
-              'Enter your OpenAI API key. It will be stored securely.',
-            ),
-            const SizedBox(height: 16),
-            TextField(
-              controller: controller,
-              decoration: const InputDecoration(
-                labelText: 'API Key',
-                hintText: 'sk-...',
-                border: OutlineInputBorder(),
+      builder: (context) => StatefulBuilder(
+        builder: (context, setState) => AlertDialog(
+          title: const Text('Configure API Key'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                'Enter your OpenAI API key. It will be stored securely and validated.',
               ),
-              obscureText: true,
+              const SizedBox(height: 16),
+              TextField(
+                controller: controller,
+                decoration: const InputDecoration(
+                  labelText: 'API Key',
+                  hintText: 'sk-...',
+                  border: OutlineInputBorder(),
+                ),
+                obscureText: true,
+                onChanged: (_) {
+                  if (validationError != null) {
+                    setState(() => validationError = null);
+                  }
+                },
+              ),
+              if (validationError != null) ...[
+                const SizedBox(height: 8),
+                Row(
+                  children: [
+                    const Icon(Icons.error, color: AppColors.error, size: 16),
+                    const SizedBox(width: 4),
+                    Expanded(
+                      child: Text(
+                        validationError!,
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: AppColors.error,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+              if (isValidating) ...[
+                const SizedBox(height: 12),
+                const Row(
+                  children: [
+                    SizedBox(
+                      width: 16,
+                      height: 16,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    ),
+                    SizedBox(width: 8),
+                    Text('Validating API key...'),
+                  ],
+                ),
+              ],
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: isValidating ? null : () => Navigator.pop(context),
+              child: const Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: isValidating
+                  ? null
+                  : () async {
+                      await ref.read(settingsProvider.notifier).clearApiKey();
+                      if (context.mounted) Navigator.pop(context);
+                    },
+              child: const Text('Clear'),
+            ),
+            FilledButton(
+              onPressed: isValidating
+                  ? null
+                  : () async {
+                      if (controller.text.isEmpty) {
+                        setState(() =>
+                            validationError = 'Please enter an API key');
+                        return;
+                      }
+
+                      setState(() {
+                        isValidating = true;
+                        validationError = null;
+                      });
+
+                      try {
+                        // Validate the API key
+                        final settingsValue = ref.read(settingsProvider);
+                        final settings = settingsValue.value;
+                        if (settings == null) {
+                          setState(() {
+                            isValidating = false;
+                            validationError = 'Settings not loaded';
+                          });
+                          return;
+                        }
+                        
+                        final service = ByokLlmService(
+                          apiKey: controller.text.trim(),
+                          provider: settings.llmProvider,
+                          model: settings.llmModel,
+                        );
+
+                        final isValid = await service.validateApiKey();
+
+                        if (!isValid) {
+                          setState(() {
+                            isValidating = false;
+                            validationError =
+                                'Invalid API key or connection failed';
+                          });
+                          return;
+                        }
+
+                        // Save if valid
+                        await ref
+                            .read(settingsProvider.notifier)
+                            .saveApiKey(controller.text.trim());
+
+                        if (context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('API key validated and saved!'),
+                              backgroundColor: AppColors.success,
+                            ),
+                          );
+                          Navigator.pop(context);
+                        }
+                      } catch (e) {
+                        setState(() {
+                          isValidating = false;
+                          validationError = 'Validation error: $e';
+                        });
+                      }
+                    },
+              child: const Text('Validate & Save'),
             ),
           ],
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
-          ),
-          TextButton(
-            onPressed: () async {
-              await ref.read(settingsProvider.notifier).clearApiKey();
-              if (context.mounted) Navigator.pop(context);
-            },
-            child: const Text('Clear'),
-          ),
-          FilledButton(
-            onPressed: () async {
-              if (controller.text.isNotEmpty) {
-                await ref
-                    .read(settingsProvider.notifier)
-                    .saveApiKey(controller.text);
-              }
-              if (context.mounted) Navigator.pop(context);
-            },
-            child: const Text('Save'),
-          ),
-        ],
       ),
     );
   }

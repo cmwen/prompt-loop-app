@@ -55,6 +55,27 @@ class ByokLlmService implements LlmService {
   @override
   bool get isAvailable => apiKey.isNotEmpty && _openAiClient != null;
 
+  /// Validates the API key by making a test request
+  Future<bool> validateApiKey() async {
+    if (!isAvailable) return false;
+
+    try {
+      // Make a simple test request
+      final messages = [
+        ChatMessage.humanText('Say "OK" if you can read this.')
+      ];
+      
+      final response = await _openAiClient!.invoke(
+        PromptValue.chat(messages),
+      ).timeout(const Duration(seconds: 10));
+      
+      return response.output.content.isNotEmpty;
+    } catch (e) {
+      // API key is invalid or request failed
+      return false;
+    }
+  }
+
   @override
   Future<LlmResult<SkillAnalysisResult>> analyzeSkill(
     SkillAnalysisRequest request,
