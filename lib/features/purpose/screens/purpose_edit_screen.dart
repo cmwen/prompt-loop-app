@@ -12,11 +12,7 @@ class PurposeEditScreen extends ConsumerStatefulWidget {
   final int skillId;
   final int? purposeId;
 
-  const PurposeEditScreen({
-    super.key,
-    required this.skillId,
-    this.purposeId,
-  });
+  const PurposeEditScreen({super.key, required this.skillId, this.purposeId});
 
   @override
   ConsumerState<PurposeEditScreen> createState() => _PurposeEditScreenState();
@@ -39,7 +35,9 @@ class _PurposeEditScreenState extends ConsumerState<PurposeEditScreen> {
 
   Future<void> _loadExistingPurpose() async {
     if (isEditing && !_isInitialized) {
-      final purpose = await ref.read(purposeBySkillProvider(widget.skillId).future);
+      final purpose = await ref.read(
+        purposeBySkillProvider(widget.skillId).future,
+      );
       if (purpose != null && mounted) {
         setState(() {
           _statementController.text = purpose.statement;
@@ -84,9 +82,9 @@ class _PurposeEditScreenState extends ConsumerState<PurposeEditScreen> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Error: $e')));
       }
     } finally {
       if (mounted) {
@@ -131,7 +129,9 @@ class _PurposeEditScreenState extends ConsumerState<PurposeEditScreen> {
                   Container(
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                      color: Theme.of(
+                        context,
+                      ).colorScheme.surfaceContainerHighest,
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Row(
@@ -146,15 +146,17 @@ class _PurposeEditScreenState extends ConsumerState<PurposeEditScreen> {
                           children: [
                             Text(
                               'Skill',
-                              style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                                color: Theme.of(context).colorScheme.onSurfaceVariant,
-                              ),
+                              style: Theme.of(context).textTheme.labelSmall
+                                  ?.copyWith(
+                                    color: Theme.of(
+                                      context,
+                                    ).colorScheme.onSurfaceVariant,
+                                  ),
                             ),
                             Text(
                               skillData.name,
-                              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                                fontWeight: FontWeight.w600,
-                              ),
+                              style: Theme.of(context).textTheme.titleMedium
+                                  ?.copyWith(fontWeight: FontWeight.w600),
                             ),
                           ],
                         ),
@@ -185,7 +187,8 @@ class _PurposeEditScreenState extends ConsumerState<PurposeEditScreen> {
                     controller: _statementController,
                     decoration: const InputDecoration(
                       labelText: 'Your purpose statement',
-                      hintText: 'e.g., "To write songs that express what I can\'t say in words"',
+                      hintText:
+                          'e.g., "To write songs that express what I can\'t say in words"',
                       border: OutlineInputBorder(),
                       alignLabelWithHint: true,
                     ),
@@ -238,10 +241,14 @@ class _PurposeEditScreenState extends ConsumerState<PurposeEditScreen> {
                   Container(
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
-                      color: Theme.of(context).colorScheme.primary.withAlpha(13),
+                      color: Theme.of(
+                        context,
+                      ).colorScheme.primary.withAlpha(13),
                       borderRadius: BorderRadius.circular(12),
                       border: Border.all(
-                        color: Theme.of(context).colorScheme.primary.withAlpha(51),
+                        color: Theme.of(
+                          context,
+                        ).colorScheme.primary.withAlpha(51),
                       ),
                     ),
                     child: Column(
@@ -257,28 +264,48 @@ class _PurposeEditScreenState extends ConsumerState<PurposeEditScreen> {
                             const SizedBox(width: 8),
                             Text(
                               'Tips for Writing Meaningful Purposes',
-                              style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                                color: Theme.of(context).colorScheme.primary,
-                                fontWeight: FontWeight.w600,
-                              ),
+                              style: Theme.of(context).textTheme.titleSmall
+                                  ?.copyWith(
+                                    color: Theme.of(
+                                      context,
+                                    ).colorScheme.primary,
+                                    fontWeight: FontWeight.w600,
+                                  ),
                             ),
                           ],
                         ),
                         const SizedBox(height: 12),
-                        _buildTip(context, '• Connect to people you care about'),
-                        _buildTip(context, '• Think about the impact you want to have'),
-                        _buildTip(context, '• Consider how this fits your life\'s work'),
+                        _buildTip(
+                          context,
+                          '• Connect to people you care about',
+                        ),
+                        _buildTip(
+                          context,
+                          '• Think about the impact you want to have',
+                        ),
+                        _buildTip(
+                          context,
+                          '• Consider how this fits your life\'s work',
+                        ),
                         const SizedBox(height: 12),
                         Text(
                           'Examples:',
-                          style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                            fontWeight: FontWeight.w600,
-                          ),
+                          style: Theme.of(context).textTheme.labelMedium
+                              ?.copyWith(fontWeight: FontWeight.w600),
                         ),
                         const SizedBox(height: 4),
-                        _buildExample(context, '"To become financially independent and provide for my family"'),
-                        _buildExample(context, '"To create art that moves people"'),
-                        _buildExample(context, '"To communicate in multiple languages and connect with more people"'),
+                        _buildExample(
+                          context,
+                          '"To become financially independent and provide for my family"',
+                        ),
+                        _buildExample(
+                          context,
+                          '"To create art that moves people"',
+                        ),
+                        _buildExample(
+                          context,
+                          '"To communicate in multiple languages and connect with more people"',
+                        ),
                       ],
                     ),
                   ),
@@ -312,10 +339,7 @@ class _PurposeEditScreenState extends ConsumerState<PurposeEditScreen> {
   Widget _buildTip(BuildContext context, String text) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 4),
-      child: Text(
-        text,
-        style: Theme.of(context).textTheme.bodySmall,
-      ),
+      child: Text(text, style: Theme.of(context).textTheme.bodySmall),
     );
   }
 

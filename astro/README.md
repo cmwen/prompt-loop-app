@@ -1,6 +1,6 @@
-# Documentation Website (Astro)
+# Prompt Loop Website (Astro)
 
-This folder contains an Astro-based documentation site for the repository, deployed to GitHub Pages.
+This folder contains an Astro-based documentation site for Prompt Loop, deployed to GitHub Pages.
 
 **Note**: This site uses Astro v5.15 and requires Node 18+ to run locally.
 
@@ -16,14 +16,14 @@ npm run preview  # Preview build
 
 ## Configuration
 
-Update `astro.config.mjs` for your GitHub Pages deployment:
+The site is configured in `astro.config.mjs`:
 
 ```js
-const GITHUB_USERNAME = 'your-username';
-const REPO_NAME = 'your-repo-name';
+const GITHUB_USERNAME = 'cmwen';
+const REPO_NAME = 'prompt-loop-app';
 ```
 
-Your site will be deployed to: `https://your-username.github.io/your-repo-name/`
+Site deployed to: `https://cmwen.github.io/prompt-loop-app/`
 
 ## Features
 
@@ -32,7 +32,7 @@ Your site will be deployed to: `https://your-username.github.io/your-repo-name/`
 - Auto-deploy to GitHub Pages via `.github/workflows/deploy-website.yml`
 - Published when a GitHub Release is created (or via manual workflow dispatch)
 
-## Flutter Project Commands
+## Flutter App Commands
 
 For app build instructions, from the repo root:
 
@@ -46,12 +46,10 @@ flutter run
 # Build for release
 flutter build apk         # Android
 flutter build appbundle   # Play Store
-flutter build ios         # iOS
-flutter build web         # Web
 ```
 
 ## Releases
 
 Download prebuilt artifacts from GitHub Releases:
-https://github.com/cmwen/min-android-app-template/releases/latest
+https://github.com/cmwen/prompt-loop-app/releases/latest
 

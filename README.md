@@ -1,19 +1,19 @@
-# Minimal Android App Template
+# Prompt Loop
 
-A production-ready Android Flutter template with **AI-powered development workflow**, optimized build system, and comprehensive documentation. Start building your Android app in minutes, not hours.
+AI-powered skill development through deliberate practice loops. Build expertise faster with intelligent feedback and structured learning paths.
 
-## ✨ What Makes This Template Special
+## ✨ Features
 
-- 🤖 **AI-First Development**: 6 custom GitHub Copilot agents (product owner, UX designer, architect, developer, researcher, doc writer)
-- ⚡ **Optimized Build System**: Java 17, parallel builds, multi-level caching - builds 60% faster
-- 🚀 **Production CI/CD**: GitHub Actions workflows with caching, testing, and signed releases
-- 📱 **Android Focused**: Clean, minimal Android-only configuration
-- 🎨 **Material Design 3**: Beautiful, accessible UI out of the box
-- 📚 **Extensive Documentation**: Step-by-step guides for first-time users
-- 🧪 **Testing Framework**: Unit, widget, and integration testing ready
-- 🔧 **VS Code Optimized**: Agents configured with terminal, debugger, and VS Code API access
+- 🤖 **AI-Powered Practice**: Intelligent feedback loops for skill development
+- 🎯 **Deliberate Practice**: Structured exercises designed for rapid improvement
+- 📈 **Progress Tracking**: Monitor your growth across multiple skill domains
+- 🔄 **Adaptive Learning**: Personalized practice sessions based on your performance
+- 🎨 **Material Design 3**: Beautiful, accessible UI
+- 📱 **Android Focused**: Optimized for mobile learning
+- ⚡ **Optimized Build System**: Java 17, parallel builds, multi-level caching
+- 🚀 **Production CI/CD**: GitHub Actions workflows with testing and signed releases
 
-## 🚀 Quick Start (5 Minutes)
+## 🚀 Quick Start
 
 ### Prerequisites
 
@@ -26,104 +26,46 @@ Verify: `flutter doctor -v && java -version`
 
 > 📖 **New to development?** See [PREREQUISITES.md](PREREQUISITES.md) for detailed installation instructions.
 
-### Option 1: Automated Setup (Recommended)
+### Clone and Run
 
 ```bash
-# Clone this template
-git clone https://github.com/yourusername/your-repo-name.git
-cd your-repo-name
-
-# Run the quick start script
-./scripts/setup/quick-start.sh
-```
-
-The script will guide you through naming your app and make all necessary changes automatically!
-
-### Option 2: Manual Setup
-
-```bash
-# Clone this template
-git clone https://github.com/yourusername/your-repo-name.git
-cd your-repo-name
+# Clone the repository
+git clone https://github.com/cmwen/prompt-loop-app.git
+cd prompt-loop-app
 
 # Get dependencies
 flutter pub get
 
-# Verify everything works
-flutter test && flutter analyze
+# Run the app
+flutter run
 ```
 
-Then customize using AI:
-```
-@flutter-developer Please rename this app from "min_flutter_template" 
-to "my_awesome_app" with package "com.mycompany.my_awesome_app"
-```
+### GitHub Codespaces (No Installation!)
 
-### Option 3: GitHub Codespaces (No Installation!)
-
-1. Click **"Use this template"** → **"Create a new repository"**
-2. In your new repo, click **Code** → **Codespaces** → **"Create codespace on main"**
-3. Everything is pre-configured - start coding immediately!
+1. Click **Code** → **Codespaces** → **"Create codespace on main"**
+2. Everything is pre-configured - start coding immediately!
 
 **See [GETTING_STARTED.md](GETTING_STARTED.md) for complete setup guide.**
 
-### Generate App Icon
-
-```
-@icon-generation.prompt.md Create an app icon for my [describe app] 
-with primary color #3B82F6 in minimal style
-```
-
-### Build and Run
+### Build for Release
 
 ```bash
-flutter run -d android     # Android (connected device/emulator)
 flutter build apk          # Release APK
+flutter build appbundle    # Android App Bundle
 ```
-
-**Full customization guide: [APP_CUSTOMIZATION.md](APP_CUSTOMIZATION.md)**
 
 ## 🤖 AI-Powered Development
 
-### Meet Your AI Team
-
-This template includes 6 specialized AI agents for VS Code:
+Prompt Loop uses 6 specialized AI agents for development:
 
 | Agent | Purpose | Example Usage |
 |-------|---------|---------------|
-| **@product-owner** | Define features & requirements | `@product-owner Create user stories for a note-taking app` |
-| **@experience-designer** | Design UX & user flows | `@experience-designer Design the login and onboarding flow` |
-| **@architect** | Plan technical architecture | `@architect How should I structure authentication?` |
-| **@researcher** | Find packages & best practices | `@researcher Best packages for local database in Flutter` |
-| **@flutter-developer** | Implement features & fix bugs | `@flutter-developer Implement login screen with validation` |
-| **@doc-writer** | Write documentation | `@doc-writer Document the authentication API` |
-
-### Example Workflow
-
-```bash
-# 1. Define your app concept
-@product-owner I want to build a recipe app with categories, 
-search, and favorites. Create user stories and MVP scope.
-
-# 2. Design the experience
-@experience-designer Based on the requirements, design the 
-information architecture and main user flows.
-
-# 3. Research dependencies
-@researcher What packages do I need for local storage, 
-images, and JSON parsing?
-
-# 4. Plan architecture
-@architect Design the app architecture with Riverpod state management 
-and repository pattern for recipes.
-
-# 5. Implement features
-@flutter-developer Implement the recipe list screen with 
-category filtering and search.
-
-# 6. Write documentation
-@doc-writer Document the recipe repository API and usage examples.
-```
+| **@product-owner** | Define features & requirements | `@product-owner Create user stories for a new practice mode` |
+| **@experience-designer** | Design UX & user flows | `@experience-designer Design the practice session flow` |
+| **@architect** | Plan technical architecture | `@architect How should I structure the feedback system?` |
+| **@researcher** | Find packages & best practices | `@researcher Best packages for spaced repetition in Flutter` |
+| **@flutter-developer** | Implement features & fix bugs | `@flutter-developer Implement the progress tracking screen` |
+| **@doc-writer** | Write documentation | `@doc-writer Document the practice loop API` |
 
 **All agents have access to VS Code terminal, debugger, and test runner!**
 
@@ -178,20 +120,23 @@ git tag v1.0.0 && git push --tags
 ## Project Structure
 
 ```
-├── lib/main.dart         # App entry point
+├── lib/                  # Dart source code
+│   ├── main.dart         # App entry point
+│   ├── models/           # Data models
+│   ├── screens/          # UI screens
+│   └── services/         # Business logic
 ├── test/                 # Tests
 ├── android/              # Android configuration
 ├── astro/                # GitHub Pages website
-├── docs/                 # AI prompting guides
+├── docs/                 # Documentation
 └── pubspec.yaml          # Dependencies
 ```
 
 ## 📚 Documentation
 
 ### Getting Started
-- **[GETTING_STARTED.md](GETTING_STARTED.md)** - Complete setup guide for first-time users ⭐
-- **[APP_CUSTOMIZATION.md](APP_CUSTOMIZATION.md)** - Comprehensive customization checklist & AI prompts ⭐
-- **[PREREQUISITES.md](PREREQUISITES.md)** - Installation requirements for all platforms
+- **[GETTING_STARTED.md](GETTING_STARTED.md)** - Complete setup guide ⭐
+- **[PREREQUISITES.md](PREREQUISITES.md)** - Installation requirements
 
 ### Development
 - [AI_PROMPTING_GUIDE.md](AI_PROMPTING_GUIDE.md) - AI agent best practices
@@ -203,37 +148,11 @@ git tag v1.0.0 && git push --tags
 ### Help
 - [TROUBLESHOOTING.md](TROUBLESHOOTING.md) - Common issues and solutions
 
-### Prompts
-- `.github/prompts/icon-generation.prompt.md` - Icon generation guide
+## 🔗 Links
 
-## 💡 Pro Tips
-
-1. **Start with @product-owner** - Define clear requirements before coding
-2. **Use @experience-designer** - Plan UX before implementing screens
-3. **Let @researcher find packages** - Don't waste time searching pub.dev
-4. **@flutter-developer has terminal access** - Can run tests, format, build
-5. **Save documentation to docs/** - AI agents reference prior decisions
-6. **Use pre-release workflow** - Test builds before production releases
-
-## 🎓 Learning Path
-
-### For Beginners
-1. Read [GETTING_STARTED.md](GETTING_STARTED.md)
-2. Follow the customization checklist
-3. Ask `@flutter-developer` questions as you learn
-4. Start with simple features
-
-### For Intermediate Developers
-1. Review [BUILD_OPTIMIZATION.md](BUILD_OPTIMIZATION.md) 
-2. Set up CI/CD workflows
-3. Use AI agents to accelerate development
-4. Implement advanced features with @architect guidance
-
-### For Teams
-1. Review [AGENTS.md](AGENTS.md) for agent roles
-2. Set up shared documentation in docs/
-3. Use @product-owner for requirement alignment
-4. Leverage @doc-writer for team documentation
+- **Repository**: [github.com/cmwen/prompt-loop-app](https://github.com/cmwen/prompt-loop-app)
+- **Releases**: [Latest Release](https://github.com/cmwen/prompt-loop-app/releases/latest)
+- **Issues**: [Report a Bug](https://github.com/cmwen/prompt-loop-app/issues)
 
 ## Resources
 

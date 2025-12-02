@@ -111,7 +111,7 @@ class SkillDetailScreen extends ConsumerWidget {
                         children: [
                           Row(
                             children: [
-                                                            Consumer(
+                              Consumer(
                                 builder: (context, ref, _) {
                                   final progress = ref.watch(
                                     skillProgressPercentProvider(skillId),
@@ -122,17 +122,15 @@ class SkillDetailScreen extends ConsumerWidget {
                                           value: percent / 100,
                                           size: 60,
                                         ),
-                                    loading: () =>
-                                        const SizedBox(
-                                          width: 60,
-                                          height: 60,
-                                          child: CircularProgressIndicator(),
-                                        ),
-                                    error: (_, __) =>
-                                        CircularProgressWithLabel(
-                                          value: 0.0,
-                                          size: 60,
-                                        ),
+                                    loading: () => const SizedBox(
+                                      width: 60,
+                                      height: 60,
+                                      child: CircularProgressIndicator(),
+                                    ),
+                                    error: (_, __) => CircularProgressWithLabel(
+                                      value: 0.0,
+                                      size: 60,
+                                    ),
                                   );
                                 },
                               ),
@@ -255,7 +253,9 @@ class SkillDetailScreen extends ConsumerWidget {
                                       style: Theme.of(context)
                                           .textTheme
                                           .titleSmall
-                                          ?.copyWith(fontWeight: FontWeight.w600),
+                                          ?.copyWith(
+                                            fontWeight: FontWeight.w600,
+                                          ),
                                     ),
                                   ),
                                   const Icon(Icons.edit_outlined, size: 18),

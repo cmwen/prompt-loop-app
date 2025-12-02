@@ -129,21 +129,23 @@ class ProgressScreen extends ConsumerWidget {
                                       Consumer(
                                         builder: (context, ref, _) {
                                           final progress = ref.watch(
-                                            skillProgressPercentProvider(skill.id!),
+                                            skillProgressPercentProvider(
+                                              skill.id!,
+                                            ),
                                           );
                                           return progress.when(
                                             data: (percent) =>
                                                 CircularProgressWithLabel(
-                                              value: percent / 100,
-                                              size: 50,
-                                              strokeWidth: 5,
-                                            ),
-                                            loading: () =>
-                                                const SizedBox(
-                                                  width: 50,
-                                                  height: 50,
-                                                  child: CircularProgressIndicator(),
+                                                  value: percent / 100,
+                                                  size: 50,
+                                                  strokeWidth: 5,
                                                 ),
+                                            loading: () => const SizedBox(
+                                              width: 50,
+                                              height: 50,
+                                              child:
+                                                  CircularProgressIndicator(),
+                                            ),
                                             error: (_, __) =>
                                                 CircularProgressWithLabel(
                                                   value: 0.0,

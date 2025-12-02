@@ -68,7 +68,9 @@ class SkillsListScreen extends ConsumerWidget {
                                 onPressed: () {
                                   context.goNamed(
                                     AppRoutes.practiceSession,
-                                    pathParameters: {'skillId': skill.id.toString()},
+                                    pathParameters: {
+                                      'skillId': skill.id.toString(),
+                                    },
                                   );
                                 },
                               ),
@@ -88,7 +90,9 @@ class SkillsListScreen extends ConsumerWidget {
                                 onPressed: () {
                                   context.goNamed(
                                     AppRoutes.practiceSession,
-                                    pathParameters: {'skillId': skill.id.toString()},
+                                    pathParameters: {
+                                      'skillId': skill.id.toString(),
+                                    },
                                   );
                                 },
                               ),
@@ -108,7 +112,9 @@ class SkillsListScreen extends ConsumerWidget {
                                 onPressed: () {
                                   context.goNamed(
                                     AppRoutes.practiceSession,
-                                    pathParameters: {'skillId': skill.id.toString()},
+                                    pathParameters: {
+                                      'skillId': skill.id.toString(),
+                                    },
                                   );
                                 },
                               ),

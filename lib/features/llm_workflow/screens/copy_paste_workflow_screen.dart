@@ -58,7 +58,7 @@ class _CopyPasteWorkflowScreenState
     _skillNameController.addListener(() {
       setState(() {}); // Rebuild to update button enabled state
     });
-    
+
     // Check if BYOK is available
     _checkByokMode();
   }
@@ -66,12 +66,13 @@ class _CopyPasteWorkflowScreenState
   Future<void> _checkByokMode() async {
     final settingsValue = ref.read(settingsProvider);
     final apiKey = await ref.read(settingsProvider.notifier).getApiKey();
-    
+
     settingsValue.whenData((settings) {
       setState(() {
-        _isByokMode = settings.llmMode == LlmMode.byok && 
-                      apiKey != null && 
-                      apiKey.isNotEmpty;
+        _isByokMode =
+            settings.llmMode == LlmMode.byok &&
+            apiKey != null &&
+            apiKey.isNotEmpty;
         _apiKey = apiKey;
       });
     });
@@ -134,7 +135,7 @@ class _CopyPasteWorkflowScreenState
       if (settings == null) {
         throw Exception('Settings not loaded');
       }
-      
+
       final service = ByokLlmService(
         apiKey: _apiKey!,
         provider: settings.llmProvider,
@@ -209,7 +210,9 @@ class _CopyPasteWorkflowScreenState
       );
 
       // Get sub-skills
-      final subSkills = await ref.read(subSkillsProvider(_selectedSkillId!).future);
+      final subSkills = await ref.read(
+        subSkillsProvider(_selectedSkillId!).future,
+      );
 
       // Get specific sub-skill if selected
       SubSkill? targetSubSkill;
@@ -221,19 +224,29 @@ class _CopyPasteWorkflowScreenState
       }
 
       // Get purpose (if any)
-      final purpose = await ref.read(purposeBySkillProvider(_selectedSkillId!).future);
+      final purpose = await ref.read(
+        purposeBySkillProvider(_selectedSkillId!).future,
+      );
 
       // Get recent tasks for this skill
-      final tasks = await ref.read(tasksBySkillProvider(_selectedSkillId!).future);
+      final tasks = await ref.read(
+        tasksBySkillProvider(_selectedSkillId!).future,
+      );
       final recentTasks = tasks.take(5).toList();
 
       // Build context-enriched prompt
       final contextBuffer = StringBuffer();
-      contextBuffer.writeln('You are a deliberate practice coach. Generate specific, measurable practice tasks.');
+      contextBuffer.writeln(
+        'You are a deliberate practice coach. Generate specific, measurable practice tasks.',
+      );
       contextBuffer.writeln();
-      contextBuffer.writeln('═══════════════════════════════════════════════════════════════');
+      contextBuffer.writeln(
+        '═══════════════════════════════════════════════════════════════',
+      );
       contextBuffer.writeln('USER CONTEXT');
-      contextBuffer.writeln('═══════════════════════════════════════════════════════════════');
+      contextBuffer.writeln(
+        '═══════════════════════════════════════════════════════════════',
+      );
       contextBuffer.writeln();
       contextBuffer.writeln('SKILL: ${skill.name}');
       contextBuffer.writeln('LEVEL: ${skill.currentLevel.name}');
@@ -249,14 +262,18 @@ class _CopyPasteWorkflowScreenState
       if (purpose != null) {
         contextBuffer.writeln();
         contextBuffer.writeln('PURPOSE: "${purpose.statement}"');
-        contextBuffer.writeln('(Category: ${_getCategoryLabel(purpose.category)})');
+        contextBuffer.writeln(
+          '(Category: ${_getCategoryLabel(purpose.category)})',
+        );
       }
 
       if (subSkills.isNotEmpty && targetSubSkill == null) {
         contextBuffer.writeln();
         contextBuffer.writeln('SUB-SKILLS IN PROGRESS:');
         for (final subSkill in subSkills) {
-          contextBuffer.writeln('  • ${subSkill.name} (${subSkill.priority.name} priority) - ${subSkill.progressPercent}% complete');
+          contextBuffer.writeln(
+            '  • ${subSkill.name} (${subSkill.priority.name} priority) - ${subSkill.progressPercent}% complete',
+          );
         }
       }
 
@@ -270,21 +287,31 @@ class _CopyPasteWorkflowScreenState
       }
 
       contextBuffer.writeln();
-      contextBuffer.writeln('═══════════════════════════════════════════════════════════════');
+      contextBuffer.writeln(
+        '═══════════════════════════════════════════════════════════════',
+      );
       contextBuffer.writeln();
       contextBuffer.writeln('Generate 3-5 practice tasks that:');
       if (targetSubSkill != null) {
-        contextBuffer.writeln('• Focus specifically on the "${targetSubSkill.name}" sub-skill');
+        contextBuffer.writeln(
+          '• Focus specifically on the "${targetSubSkill.name}" sub-skill',
+        );
       } else {
         contextBuffer.writeln('• Build on current progress shown above');
-        contextBuffer.writeln('• Target the sub-skills marked as high priority');
+        contextBuffer.writeln(
+          '• Target the sub-skills marked as high priority',
+        );
       }
       if (purpose != null) {
-        contextBuffer.writeln('• Connect to the user\'s purpose: "${purpose.statement}"');
+        contextBuffer.writeln(
+          '• Connect to the user\'s purpose: "${purpose.statement}"',
+        );
       }
-      contextBuffer.writeln('• Are specific, measurable, and achievable in 10-30 minutes');
+      contextBuffer.writeln(
+        '• Are specific, measurable, and achievable in 10-30 minutes',
+      );
       contextBuffer.writeln();
-      contextBuffer.writeln('${LlmConstants.jsonInstructions}');
+      contextBuffer.writeln(LlmConstants.jsonInstructions);
       contextBuffer.writeln();
       contextBuffer.writeln('''{
   "tasks": [
@@ -332,7 +359,8 @@ class _CopyPasteWorkflowScreenState
     // Generate prompt for struggle analysis
     setState(() {
       _currentPrompt = PromptTemplates.wiseFeedback(
-        skillName: 'your skill', // User will provide context in their description
+        skillName:
+            'your skill', // User will provide context in their description
         struggleDescription: '[Describe your struggle here]',
         taskTitle: 'your current task',
       );
@@ -356,16 +384,13 @@ class _CopyPasteWorkflowScreenState
     if (_currentPrompt == null) return;
 
     try {
-      await Share.share(
-        _currentPrompt!,
-        subject: 'Practice Task Prompt',
-      );
+      await Share.share(_currentPrompt!, subject: 'Practice Task Prompt');
       setState(() => _isPromptCopied = true);
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error sharing: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Error sharing: $e')));
       }
     }
   }
@@ -478,11 +503,15 @@ class _CopyPasteWorkflowScreenState
 
     // Get existing sub-skills to avoid duplicates
     final existingSubSkills = await repository.getSubSkills(skillId);
-    final existingSubSkillNames = existingSubSkills.map((s) => s.name.toLowerCase()).toSet();
+    final existingSubSkillNames = existingSubSkills
+        .map((s) => s.name.toLowerCase())
+        .toSet();
 
     // Create only new sub-skills
     for (final subSkillSuggestion in analysis.subSkills) {
-      if (!existingSubSkillNames.contains(subSkillSuggestion.name.toLowerCase())) {
+      if (!existingSubSkillNames.contains(
+        subSkillSuggestion.name.toLowerCase(),
+      )) {
         final subSkill = SubSkill(
           skillId: skillId,
           name: subSkillSuggestion.name,
@@ -562,9 +591,7 @@ class _CopyPasteWorkflowScreenState
         context: context,
         builder: (context) => AlertDialog(
           title: const Text('Feedback Received'),
-          content: SingleChildScrollView(
-            child: Text(response),
-          ),
+          content: SingleChildScrollView(child: Text(response)),
           actions: [
             FilledButton(
               onPressed: () => Navigator.of(context).pop(),
@@ -627,11 +654,15 @@ class _CopyPasteWorkflowScreenState
 
     // Get existing sub-skills to avoid duplicates
     final existingSubSkills = await repository.getSubSkills(skillId);
-    final existingSubSkillNames = existingSubSkills.map((s) => s.name.toLowerCase()).toSet();
+    final existingSubSkillNames = existingSubSkills
+        .map((s) => s.name.toLowerCase())
+        .toSet();
 
     // Create only new sub-skills
     for (final subSkillSuggestion in analysis.subSkills) {
-      if (!existingSubSkillNames.contains(subSkillSuggestion.name.toLowerCase())) {
+      if (!existingSubSkillNames.contains(
+        subSkillSuggestion.name.toLowerCase(),
+      )) {
         final subSkill = SubSkill(
           skillId: skillId,
           name: subSkillSuggestion.name,
@@ -684,7 +715,9 @@ class _CopyPasteWorkflowScreenState
       int? targetSubSkillId;
       if (taskSuggestion.targetSubSkillName != null) {
         final matchingSubSkill = subSkills.firstWhere(
-          (s) => s.name.toLowerCase() == taskSuggestion.targetSubSkillName!.toLowerCase(),
+          (s) =>
+              s.name.toLowerCase() ==
+              taskSuggestion.targetSubSkillName!.toLowerCase(),
           orElse: () => subSkills.first,
         );
         targetSubSkillId = matchingSubSkill.id;
@@ -798,201 +831,147 @@ class _CopyPasteWorkflowScreenState
           title: Text(_title),
         ),
         body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // BYOK Mode Banner
-            if (_isByokMode) ...[
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: AppColors.success.withAlpha(25),
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: AppColors.success),
-                ),
-                child: Row(
-                  children: [
-                    const Icon(Icons.auto_awesome, color: AppColors.success),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Direct AI Mode Active',
-                            style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                              color: AppColors.success,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          const SizedBox(height: 2),
-                          Text(
-                            'Using your API key - No copy/paste needed!',
-                            style: Theme.of(context).textTheme.bodySmall,
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 16),
-            ],
-            
-            // Step 1: Input
-            _StepHeader(
-              step: 1,
-              title: 'Describe what you need',
-              isActive: _currentPrompt == null,
-            ),
-            if (_currentPrompt == null) ...[
-              const SizedBox(height: 12),
-              _buildInputForm(),
-            ],
-            const SizedBox(height: 24),
-
-            // Step 2: Copy prompt
-            _StepHeader(
-              step: 2,
-              title: 'Share or copy prompt',
-              isActive: _currentPrompt != null && !_isPromptCopied,
-            ),
-            if (_currentPrompt != null) ...[
-              const SizedBox(height: 12),
-              AppCard(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        const Expanded(
-                          child: Text(
-                            'Prompt ready!',
-                            style: TextStyle(fontWeight: FontWeight.w600),
-                          ),
-                        ),
-                        // Share button (recommended for Android)
-                        OutlinedButton.icon(
-                          onPressed: _sharePrompt,
-                          icon: const Icon(Icons.share),
-                          label: const Text('Share'),
-                        ),
-                        const SizedBox(width: 8),
-                        // Copy button (fallback)
-                        FilledButton.icon(
-                          onPressed: _copyPrompt,
-                          icon: Icon(
-                            _isPromptCopied ? Icons.check : Icons.copy,
-                          ),
-                          label: Text(_isPromptCopied ? 'Copied!' : 'Copy'),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 12),
-                    // Tip about sharing
-                    Container(
-                      padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        color: Theme.of(context).colorScheme.primary.withAlpha(25),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Row(
-                        children: [
-                          Icon(
-                            Icons.lightbulb_outline,
-                            size: 20,
-                            color: Theme.of(context).colorScheme.primary,
-                          ),
-                          const SizedBox(width: 8),
-                          Expanded(
-                            child: Text(
-                              'Tip: Use "Share" to send directly to ChatGPT or Claude. '
-                              'After getting a response, share it back to import.',
-                              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                color: Theme.of(context).colorScheme.primary,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    // Prompt preview
-                    Container(
-                      padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        color: Theme.of(
-                          context,
-                        ).colorScheme.surfaceContainerHighest,
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Text(
-                        _currentPrompt!.length > 300
-                            ? '${_currentPrompt!.substring(0, 300)}...'
-                            : _currentPrompt!,
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          fontFamily: 'monospace',
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-            const SizedBox(height: 24),
-
-            // Step 3: Paste response
-            _StepHeader(
-              step: 3,
-              title: 'Paste AI response',
-              isActive: _isPromptCopied,
-            ),
-            if (_isPromptCopied) ...[
-              const SizedBox(height: 12),
-              Row(
-                children: [
-                  Expanded(
-                    child: TextField(
-                      controller: _responseController,
-                      decoration: const InputDecoration(
-                        labelText: 'AI Response (JSON)',
-                        hintText:
-                            'Paste the response from ChatGPT/Claude here...',
-                        border: OutlineInputBorder(),
-                      ),
-                      maxLines: 8,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 8),
-              Row(
-                children: [
-                  OutlinedButton.icon(
-                    onPressed: _pasteResponse,
-                    icon: const Icon(Icons.paste),
-                    label: const Text('Paste from Clipboard'),
-                  ),
-                  const Spacer(),
-                ],
-              ),
-              if (_errorMessage != null) ...[
-                const SizedBox(height: 8),
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // BYOK Mode Banner
+              if (_isByokMode) ...[
                 Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: AppColors.error.withAlpha(25),
+                    color: AppColors.success.withAlpha(25),
                     borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: AppColors.success),
                   ),
                   child: Row(
                     children: [
-                      const Icon(Icons.error, color: AppColors.error, size: 20),
-                      const SizedBox(width: 8),
+                      const Icon(Icons.auto_awesome, color: AppColors.success),
+                      const SizedBox(width: 12),
                       Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Direct AI Mode Active',
+                              style: Theme.of(context).textTheme.titleSmall
+                                  ?.copyWith(
+                                    color: AppColors.success,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                            ),
+                            const SizedBox(height: 2),
+                            Text(
+                              'Using your API key - No copy/paste needed!',
+                              style: Theme.of(context).textTheme.bodySmall,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 16),
+              ],
+
+              // Step 1: Input
+              _StepHeader(
+                step: 1,
+                title: 'Describe what you need',
+                isActive: _currentPrompt == null,
+              ),
+              if (_currentPrompt == null) ...[
+                const SizedBox(height: 12),
+                _buildInputForm(),
+              ],
+              const SizedBox(height: 24),
+
+              // Step 2: Copy prompt
+              _StepHeader(
+                step: 2,
+                title: 'Share or copy prompt',
+                isActive: _currentPrompt != null && !_isPromptCopied,
+              ),
+              if (_currentPrompt != null) ...[
+                const SizedBox(height: 12),
+                AppCard(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          const Expanded(
+                            child: Text(
+                              'Prompt ready!',
+                              style: TextStyle(fontWeight: FontWeight.w600),
+                            ),
+                          ),
+                          // Share button (recommended for Android)
+                          OutlinedButton.icon(
+                            onPressed: _sharePrompt,
+                            icon: const Icon(Icons.share),
+                            label: const Text('Share'),
+                          ),
+                          const SizedBox(width: 8),
+                          // Copy button (fallback)
+                          FilledButton.icon(
+                            onPressed: _copyPrompt,
+                            icon: Icon(
+                              _isPromptCopied ? Icons.check : Icons.copy,
+                            ),
+                            label: Text(_isPromptCopied ? 'Copied!' : 'Copy'),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 12),
+                      // Tip about sharing
+                      Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: Theme.of(
+                            context,
+                          ).colorScheme.primary.withAlpha(25),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Row(
+                          children: [
+                            Icon(
+                              Icons.lightbulb_outline,
+                              size: 20,
+                              color: Theme.of(context).colorScheme.primary,
+                            ),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Text(
+                                'Tip: Use "Share" to send directly to ChatGPT or Claude. '
+                                'After getting a response, share it back to import.',
+                                style: Theme.of(context).textTheme.bodySmall
+                                    ?.copyWith(
+                                      color: Theme.of(
+                                        context,
+                                      ).colorScheme.primary,
+                                    ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      // Prompt preview
+                      Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: Theme.of(
+                            context,
+                          ).colorScheme.surfaceContainerHighest,
+                          borderRadius: BorderRadius.circular(8),
+                        ),
                         child: Text(
-                          _errorMessage!,
-                          style: const TextStyle(color: AppColors.error),
+                          _currentPrompt!.length > 300
+                              ? '${_currentPrompt!.substring(0, 300)}...'
+                              : _currentPrompt!,
+                          style: Theme.of(context).textTheme.bodySmall
+                              ?.copyWith(fontFamily: 'monospace'),
                         ),
                       ),
                     ],
@@ -1001,25 +980,88 @@ class _CopyPasteWorkflowScreenState
               ],
               const SizedBox(height: 24),
 
-              // Process button
-              SizedBox(
-                width: double.infinity,
-                child: FilledButton(
-                  onPressed: _isProcessing ? null : _processResponse,
-                  child: _isProcessing
-                      ? const SizedBox(
-                          width: 20,
-                          height: 20,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        )
-                      : const Text('Process Response'),
-                ),
+              // Step 3: Paste response
+              _StepHeader(
+                step: 3,
+                title: 'Paste AI response',
+                isActive: _isPromptCopied,
               ),
+              if (_isPromptCopied) ...[
+                const SizedBox(height: 12),
+                Row(
+                  children: [
+                    Expanded(
+                      child: TextField(
+                        controller: _responseController,
+                        decoration: const InputDecoration(
+                          labelText: 'AI Response (JSON)',
+                          hintText:
+                              'Paste the response from ChatGPT/Claude here...',
+                          border: OutlineInputBorder(),
+                        ),
+                        maxLines: 8,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                Row(
+                  children: [
+                    OutlinedButton.icon(
+                      onPressed: _pasteResponse,
+                      icon: const Icon(Icons.paste),
+                      label: const Text('Paste from Clipboard'),
+                    ),
+                    const Spacer(),
+                  ],
+                ),
+                if (_errorMessage != null) ...[
+                  const SizedBox(height: 8),
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: AppColors.error.withAlpha(25),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Row(
+                      children: [
+                        const Icon(
+                          Icons.error,
+                          color: AppColors.error,
+                          size: 20,
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            _errorMessage!,
+                            style: const TextStyle(color: AppColors.error),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+                const SizedBox(height: 24),
+
+                // Process button
+                SizedBox(
+                  width: double.infinity,
+                  child: FilledButton(
+                    onPressed: _isProcessing ? null : _processResponse,
+                    child: _isProcessing
+                        ? const SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          )
+                        : const Text('Process Response'),
+                  ),
+                ),
+              ],
             ],
-          ],
+          ),
         ),
       ),
-    ),
     );
   }
 
@@ -1102,7 +1144,7 @@ class _CopyPasteWorkflowScreenState
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 DropdownButtonFormField<int>(
-                  value: _selectedSkillId,
+                  initialValue: _selectedSkillId,
                   decoration: const InputDecoration(
                     labelText: 'Select Skill',
                     border: OutlineInputBorder(),
@@ -1126,14 +1168,18 @@ class _CopyPasteWorkflowScreenState
                   const SizedBox(height: 16),
                   Consumer(
                     builder: (context, ref, _) {
-                      final subSkills = ref.watch(subSkillsProvider(_selectedSkillId!));
+                      final subSkills = ref.watch(
+                        subSkillsProvider(_selectedSkillId!),
+                      );
                       return subSkills.when(
                         data: (subSkillList) {
                           if (subSkillList.isEmpty) {
                             return Container(
                               padding: const EdgeInsets.all(12),
                               decoration: BoxDecoration(
-                                color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                                color: Theme.of(
+                                  context,
+                                ).colorScheme.surfaceContainerHighest,
                                 borderRadius: BorderRadius.circular(8),
                               ),
                               child: Text(
@@ -1151,7 +1197,7 @@ class _CopyPasteWorkflowScreenState
                               ),
                               const SizedBox(height: 8),
                               DropdownButtonFormField<int?>(
-                                value: _selectedSubSkillId,
+                                initialValue: _selectedSubSkillId,
                                 decoration: const InputDecoration(
                                   labelText: 'Sub-skill (Optional)',
                                   border: OutlineInputBorder(),

@@ -69,7 +69,9 @@ class _PracticeSessionScreenState extends ConsumerState<PracticeSessionScreen> {
 
   Duration _getElapsedTime() {
     if (_startTime == null) return Duration.zero;
-    final now = _isPaused && _pausedTime != null ? _pausedTime! : DateTime.now();
+    final now = _isPaused && _pausedTime != null
+        ? _pausedTime!
+        : DateTime.now();
     return now.difference(_startTime!) - _pausedDuration;
   }
 
@@ -86,14 +88,16 @@ class _PracticeSessionScreenState extends ConsumerState<PracticeSessionScreen> {
           .startSession(widget.taskId!);
 
       // Complete the session with actual duration
-      await ref.read(practiceSessionsProvider.notifier).completeSession(
-        sessionId: sessionId,
-        durationSeconds: duration.inSeconds,
-        notes: _notesController.text.trim().isEmpty
-            ? null
-            : _notesController.text.trim(),
-        rating: _rating,
-      );
+      await ref
+          .read(practiceSessionsProvider.notifier)
+          .completeSession(
+            sessionId: sessionId,
+            durationSeconds: duration.inSeconds,
+            notes: _notesController.text.trim().isEmpty
+                ? null
+                : _notesController.text.trim(),
+            rating: _rating,
+          );
 
       // Record practice for streak
       await ref
@@ -180,195 +184,203 @@ class _PracticeSessionScreenState extends ConsumerState<PracticeSessionScreen> {
           ),
         ),
         body: skill.when(
-        data: (skillData) {
-          if (skillData == null) {
-            return const Center(child: Text('Skill not found'));
-          }
+          data: (skillData) {
+            if (skillData == null) {
+              return const Center(child: Text('Skill not found'));
+            }
 
-          final isTaskCompleted = task?.isCompleted ?? false;
+            final isTaskCompleted = task?.isCompleted ?? false;
 
-          return SingleChildScrollView(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Skill info
-                Text(
-                  skillData.name,
-                  style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(height: 8),
-
-                // Task info if available
-                if (task != null) ...[
-                  Container(
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: Theme.of(context).colorScheme.primaryContainer,
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            const Icon(Icons.task_alt, size: 20),
-                            const SizedBox(width: 8),
-                            Text(
-                              'Today\'s Task',
-                              style: Theme.of(context).textTheme.labelMedium,
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          task.title,
-                          style: Theme.of(context).textTheme.titleMedium,
-                        ),
-                        if (task.description != null) ...[
-                          const SizedBox(height: 4),
-                          Text(
-                            task.description!,
-                            style: Theme.of(context).textTheme.bodySmall,
-                          ),
-                        ],
-                        if (task.successCriteria.isNotEmpty) ...[
-                          const SizedBox(height: 12),
-                          Text(
-                            'Success Criteria:',
-                            style: Theme.of(context).textTheme.labelMedium,
-                          ),
-                          ...task.successCriteria.map(
-                            (c) => Padding(
-                              padding: const EdgeInsets.only(top: 4),
-                              child: Row(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  const Text('• '),
-                                  Expanded(child: Text(c)),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ],
-                      ],
+            return SingleChildScrollView(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Skill info
+                  Text(
+                    skillData.name,
+                    style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
                     ),
                   ),
-                  const SizedBox(height: 24),
-                ],
+                  const SizedBox(height: 8),
 
-                // Show completed status or timer
-                if (isTaskCompleted) ...[
-                  Container(
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: AppColors.success.withAlpha(25),
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: AppColors.success),
-                    ),
-                    child: Row(
-                      children: [
-                        const Icon(Icons.check_circle, color: AppColors.success),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
+                  // Task info if available
+                  if (task != null) ...[
+                    Container(
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: Theme.of(context).colorScheme.primaryContainer,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
                             children: [
+                              const Icon(Icons.task_alt, size: 20),
+                              const SizedBox(width: 8),
                               Text(
-                                'Task Completed',
-                                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                                  color: AppColors.success,
-                                  fontWeight: FontWeight.bold,
-                                ),
+                                'Today\'s Task',
+                                style: Theme.of(context).textTheme.labelMedium,
                               ),
-                              if (task?.completedAt != null)
-                                Text(
-                                  'Completed on ${_formatDate(task!.completedAt!)}',
-                                  style: Theme.of(context).textTheme.bodySmall,
-                                ),
                             ],
                           ),
-                        ),
-                      ],
+                          const SizedBox(height: 8),
+                          Text(
+                            task.title,
+                            style: Theme.of(context).textTheme.titleMedium,
+                          ),
+                          if (task.description != null) ...[
+                            const SizedBox(height: 4),
+                            Text(
+                              task.description!,
+                              style: Theme.of(context).textTheme.bodySmall,
+                            ),
+                          ],
+                          if (task.successCriteria.isNotEmpty) ...[
+                            const SizedBox(height: 12),
+                            Text(
+                              'Success Criteria:',
+                              style: Theme.of(context).textTheme.labelMedium,
+                            ),
+                            ...task.successCriteria.map(
+                              (c) => Padding(
+                                padding: const EdgeInsets.only(top: 4),
+                                child: Row(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    const Text('• '),
+                                    Expanded(child: Text(c)),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ],
+                        ],
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 24),
-                  Text(
-                    'Want to practice again?',
-                    style: Theme.of(context).textTheme.titleMedium,
-                  ),
-                  const SizedBox(height: 8),
-                  SizedBox(
-                    width: double.infinity,
-                    child: FilledButton.icon(
-                      onPressed: () {
-                        ref.read(tasksProvider.notifier).uncompleteTask(task!.id!);
-                        setState(() {
-                          _startPractice();
-                        });
-                      },
-                      icon: const Icon(Icons.replay),
-                      label: const Text('Practice Again'),
-                    ),
-                  ),
-                ] else ...[
-                  // Timer with pause/resume
-                  if (_isPracticing) ...[
-                    _PracticeTimerWithControls(
-                      startTime: _startTime!,
-                      getElapsedTime: _getElapsedTime,
-                      isPaused: _isPaused,
-                      onPause: _pausePractice,
-                      onResume: _resumePractice,
-                    ),
-                    const SizedBox(height: 32),
+                    const SizedBox(height: 24),
                   ],
 
-                  // Rating
-                  Text(
-                    'How did the practice feel?',
-                    style: Theme.of(context).textTheme.titleMedium,
-                  ),
-                  const SizedBox(height: 8),
-                  _RatingSelector(
-                    rating: _rating,
-                    onRatingChanged: (r) => setState(() => _rating = r),
-                  ),
-                  const SizedBox(height: 24),
-
-                  // Notes
-                  TextField(
-                    controller: _notesController,
-                    decoration: const InputDecoration(
-                      labelText: 'Notes (optional)',
-                      hintText: 'What did you learn? What was challenging?',
-                      border: OutlineInputBorder(),
+                  // Show completed status or timer
+                  if (isTaskCompleted) ...[
+                    Container(
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: AppColors.success.withAlpha(25),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: AppColors.success),
+                      ),
+                      child: Row(
+                        children: [
+                          const Icon(
+                            Icons.check_circle,
+                            color: AppColors.success,
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Task Completed',
+                                  style: Theme.of(context).textTheme.titleMedium
+                                      ?.copyWith(
+                                        color: AppColors.success,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                ),
+                                if (task?.completedAt != null)
+                                  Text(
+                                    'Completed on ${_formatDate(task!.completedAt!)}',
+                                    style: Theme.of(
+                                      context,
+                                    ).textTheme.bodySmall,
+                                  ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
-                    maxLines: 4,
-                    textCapitalization: TextCapitalization.sentences,
-                    enabled: !_isPaused,
-                  ),
-                  const SizedBox(height: 32),
-
-                  // End session button
-                  SizedBox(
-                    width: double.infinity,
-                    child: FilledButton.icon(
-                      onPressed: _isPaused ? null : _endPractice,
-                      icon: const Icon(Icons.check),
-                      label: const Text('End Practice'),
+                    const SizedBox(height: 24),
+                    Text(
+                      'Want to practice again?',
+                      style: Theme.of(context).textTheme.titleMedium,
                     ),
-                  ),
+                    const SizedBox(height: 8),
+                    SizedBox(
+                      width: double.infinity,
+                      child: FilledButton.icon(
+                        onPressed: () {
+                          ref
+                              .read(tasksProvider.notifier)
+                              .uncompleteTask(task!.id!);
+                          setState(() {
+                            _startPractice();
+                          });
+                        },
+                        icon: const Icon(Icons.replay),
+                        label: const Text('Practice Again'),
+                      ),
+                    ),
+                  ] else ...[
+                    // Timer with pause/resume
+                    if (_isPracticing) ...[
+                      _PracticeTimerWithControls(
+                        startTime: _startTime!,
+                        getElapsedTime: _getElapsedTime,
+                        isPaused: _isPaused,
+                        onPause: _pausePractice,
+                        onResume: _resumePractice,
+                      ),
+                      const SizedBox(height: 32),
+                    ],
+
+                    // Rating
+                    Text(
+                      'How did the practice feel?',
+                      style: Theme.of(context).textTheme.titleMedium,
+                    ),
+                    const SizedBox(height: 8),
+                    _RatingSelector(
+                      rating: _rating,
+                      onRatingChanged: (r) => setState(() => _rating = r),
+                    ),
+                    const SizedBox(height: 24),
+
+                    // Notes
+                    TextField(
+                      controller: _notesController,
+                      decoration: const InputDecoration(
+                        labelText: 'Notes (optional)',
+                        hintText: 'What did you learn? What was challenging?',
+                        border: OutlineInputBorder(),
+                      ),
+                      maxLines: 4,
+                      textCapitalization: TextCapitalization.sentences,
+                      enabled: !_isPaused,
+                    ),
+                    const SizedBox(height: 32),
+
+                    // End session button
+                    SizedBox(
+                      width: double.infinity,
+                      child: FilledButton.icon(
+                        onPressed: _isPaused ? null : _endPractice,
+                        icon: const Icon(Icons.check),
+                        label: const Text('End Practice'),
+                      ),
+                    ),
+                  ],
                 ],
-              ],
-            ),
-          );
-        },
-        loading: () => const LoadingIndicator(message: 'Loading...'),
-        error: (e, _) => Center(child: Text('Error: $e')),
-      ),
+              ),
+            );
+          },
+          loading: () => const LoadingIndicator(message: 'Loading...'),
+          error: (e, _) => Center(child: Text('Error: $e')),
+        ),
       ),
     );
   }
@@ -376,7 +388,7 @@ class _PracticeSessionScreenState extends ConsumerState<PracticeSessionScreen> {
   String _formatDate(DateTime date) {
     final now = DateTime.now();
     final difference = now.difference(date);
-    
+
     if (difference.inDays == 0) {
       return 'today';
     } else if (difference.inDays == 1) {
@@ -436,10 +448,12 @@ class _PracticeTimerWithControls extends StatefulWidget {
   });
 
   @override
-  State<_PracticeTimerWithControls> createState() => _PracticeTimerWithControlsState();
+  State<_PracticeTimerWithControls> createState() =>
+      _PracticeTimerWithControlsState();
 }
 
-class _PracticeTimerWithControlsState extends State<_PracticeTimerWithControls> {
+class _PracticeTimerWithControlsState
+    extends State<_PracticeTimerWithControls> {
   late Stream<int> _timerStream;
 
   @override
@@ -461,7 +475,10 @@ class _PracticeTimerWithControlsState extends State<_PracticeTimerWithControls> 
           child: Column(
             children: [
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 24),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 32,
+                  vertical: 24,
+                ),
                 decoration: BoxDecoration(
                   color: widget.isPaused
                       ? AppColors.warning.withAlpha(25)
@@ -477,15 +494,21 @@ class _PracticeTimerWithControlsState extends State<_PracticeTimerWithControls> 
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         if (widget.isPaused) ...[
-                          const Icon(Icons.pause_circle, color: AppColors.warning),
+                          const Icon(
+                            Icons.pause_circle,
+                            color: AppColors.warning,
+                          ),
                           const SizedBox(width: 8),
                         ],
                         Text(
                           '$minutes:$seconds',
-                          style: Theme.of(context).textTheme.displayLarge?.copyWith(
-                            fontWeight: FontWeight.bold,
-                            fontFeatures: [const FontFeature.tabularFigures()],
-                          ),
+                          style: Theme.of(context).textTheme.displayLarge
+                              ?.copyWith(
+                                fontWeight: FontWeight.bold,
+                                fontFeatures: [
+                                  const FontFeature.tabularFigures(),
+                                ],
+                              ),
                         ),
                       ],
                     ),

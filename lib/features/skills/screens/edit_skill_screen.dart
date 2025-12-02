@@ -43,9 +43,9 @@ class _EditSkillScreenState extends ConsumerState<EditSkillScreen> {
       setState(() => _isLoading = false);
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error loading skill: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Error loading skill: $e')));
         context.pop();
       }
     }
@@ -86,9 +86,9 @@ class _EditSkillScreenState extends ConsumerState<EditSkillScreen> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error updating skill: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Error updating skill: $e')));
       }
     } finally {
       if (mounted) {

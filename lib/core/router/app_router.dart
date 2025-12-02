@@ -67,7 +67,8 @@ final routerProvider = Provider<GoRouter>((ref) {
     redirect: (context, state) {
       final currentPath = state.matchedLocation;
       final isSplash = currentPath == AppPaths.splash;
-      final isOnboardingRoute = currentPath == AppPaths.onboarding ||
+      final isOnboardingRoute =
+          currentPath == AppPaths.onboarding ||
           currentPath == AppPaths.purposeSetup;
 
       return onboardingCompleted.when(
