@@ -329,17 +329,13 @@ class _CopyPasteWorkflowScreenState
   }
 
   void _generateStrugglePrompt() {
-    // TODO: Implement struggle analysis prompt
+    // Generate prompt for struggle analysis
     setState(() {
-      _currentPrompt = '''Analyze this struggle and provide wise feedback.
-
-Please respond with JSON in this format:
-{
-  "high_standards_message": "Your expectations are high, and that's good...",
-  "belief_message": "I believe you can achieve this because...",
-  "actionable_suggestions": ["Suggestion 1", "Suggestion 2"],
-  "encouragement": "Keep going because..."
-}''';
+      _currentPrompt = PromptTemplates.wiseFeedback(
+        skillName: 'your skill', // User will provide context in their description
+        struggleDescription: '[Describe your struggle here]',
+        taskTitle: 'your current task',
+      );
     });
   }
 
@@ -554,7 +550,30 @@ Please respond with JSON in this format:
   }
 
   Future<void> _processStruggleAnalysis() async {
-    // TODO: Parse JSON and show feedback
+    final response = _responseController.text.trim();
+    if (response.isEmpty) {
+      throw Exception('No response to parse');
+    }
+
+    // For now, just show the feedback
+    // Full implementation would parse and display structured feedback
+    if (mounted) {
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text('Feedback Received'),
+          content: SingleChildScrollView(
+            child: Text(response),
+          ),
+          actions: [
+            FilledButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('Got it!'),
+            ),
+          ],
+        ),
+      );
+    }
   }
 
   // -- BYOK Processing Methods --
@@ -691,7 +710,25 @@ Please respond with JSON in this format:
   }
 
   Future<void> _processStruggleAnalysisWithByok(ByokLlmService service) async {
-    // TODO: Implement struggle analysis with BYOK
+    // For now, show a message that this will be implemented
+    if (mounted) {
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text('Feature Coming Soon'),
+          content: const Text(
+            'Struggle analysis with BYOK will be available in the next update. '
+            'For now, please use the copy-paste workflow with ChatGPT.',
+          ),
+          actions: [
+            FilledButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('OK'),
+            ),
+          ],
+        ),
+      );
+    }
     throw UnimplementedError('Struggle analysis with BYOK not yet implemented');
   }
 
