@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:prompt_loop/core/router/app_router.dart';
 import 'package:prompt_loop/features/skills/providers/skills_provider.dart';
+import 'package:prompt_loop/features/practice/providers/practice_provider.dart';
 import 'package:prompt_loop/shared/widgets/app_card.dart';
 import 'package:prompt_loop/shared/widgets/empty_state.dart';
 import 'package:prompt_loop/shared/widgets/loading_indicator.dart';
@@ -46,25 +47,74 @@ class SkillsListScreen extends ConsumerWidget {
                     final skill = skillList[index];
                     return Padding(
                       padding: const EdgeInsets.only(bottom: 8),
-                      child: SkillCard(
-                        name: skill.name,
-                        level: skill.currentLevel.displayName,
-                        progress: 0.0, // TODO: Calculate progress
-                        onTap: () {
-                          context.goNamed(
-                            AppRoutes.skillDetail,
-                            pathParameters: {'id': skill.id.toString()},
+                      child: Consumer(
+                        builder: (context, ref, _) {
+                          final progress = ref.watch(
+                            skillProgressPercentProvider(skill.id!),
+                          );
+                          return progress.when(
+                            data: (percent) => SkillCard(
+                              name: skill.name,
+                              level: skill.currentLevel.displayName,
+                              progress: percent / 100,
+                              onTap: () {
+                                context.goNamed(
+                                  AppRoutes.skillDetail,
+                                  pathParameters: {'id': skill.id.toString()},
+                                );
+                              },
+                              trailing: IconButton(
+                                icon: const Icon(Icons.play_circle_outline),
+                                onPressed: () {
+                                  context.goNamed(
+                                    AppRoutes.practiceSession,
+                                    pathParameters: {'skillId': skill.id.toString()},
+                                  );
+                                },
+                              ),
+                            ),
+                            loading: () => SkillCard(
+                              name: skill.name,
+                              level: skill.currentLevel.displayName,
+                              progress: 0.0,
+                              onTap: () {
+                                context.goNamed(
+                                  AppRoutes.skillDetail,
+                                  pathParameters: {'id': skill.id.toString()},
+                                );
+                              },
+                              trailing: IconButton(
+                                icon: const Icon(Icons.play_circle_outline),
+                                onPressed: () {
+                                  context.goNamed(
+                                    AppRoutes.practiceSession,
+                                    pathParameters: {'skillId': skill.id.toString()},
+                                  );
+                                },
+                              ),
+                            ),
+                            error: (_, __) => SkillCard(
+                              name: skill.name,
+                              level: skill.currentLevel.displayName,
+                              progress: 0.0,
+                              onTap: () {
+                                context.goNamed(
+                                  AppRoutes.skillDetail,
+                                  pathParameters: {'id': skill.id.toString()},
+                                );
+                              },
+                              trailing: IconButton(
+                                icon: const Icon(Icons.play_circle_outline),
+                                onPressed: () {
+                                  context.goNamed(
+                                    AppRoutes.practiceSession,
+                                    pathParameters: {'skillId': skill.id.toString()},
+                                  );
+                                },
+                              ),
+                            ),
                           );
                         },
-                        trailing: IconButton(
-                          icon: const Icon(Icons.play_circle_outline),
-                          onPressed: () {
-                            context.goNamed(
-                              AppRoutes.practiceSession,
-                              pathParameters: {'skillId': skill.id.toString()},
-                            );
-                          },
-                        ),
                       ),
                     );
                   }, childCount: skillList.length),

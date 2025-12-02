@@ -21,7 +21,10 @@ class PracticeSessionScreen extends ConsumerStatefulWidget {
 
 class _PracticeSessionScreenState extends ConsumerState<PracticeSessionScreen> {
   DateTime? _startTime;
+  DateTime? _pausedTime;
+  Duration _pausedDuration = Duration.zero;
   bool _isPracticing = false;
+  bool _isPaused = false;
   int _rating = 3;
   final _notesController = TextEditingController();
 
@@ -41,14 +44,40 @@ class _PracticeSessionScreenState extends ConsumerState<PracticeSessionScreen> {
     setState(() {
       _startTime = DateTime.now();
       _isPracticing = true;
+      _isPaused = false;
     });
+  }
+
+  void _pausePractice() {
+    if (_isPracticing && !_isPaused) {
+      setState(() {
+        _pausedTime = DateTime.now();
+        _isPaused = true;
+      });
+    }
+  }
+
+  void _resumePractice() {
+    if (_isPracticing && _isPaused && _pausedTime != null) {
+      setState(() {
+        _pausedDuration += DateTime.now().difference(_pausedTime!);
+        _pausedTime = null;
+        _isPaused = false;
+      });
+    }
+  }
+
+  Duration _getElapsedTime() {
+    if (_startTime == null) return Duration.zero;
+    final now = _isPaused && _pausedTime != null ? _pausedTime! : DateTime.now();
+    return now.difference(_startTime!) - _pausedDuration;
   }
 
   Future<void> _endPractice() async {
     if (_startTime == null) return;
 
-    final endTime = DateTime.now();
-    final duration = endTime.difference(_startTime!);
+    // Get total duration excluding pauses
+    final duration = _getElapsedTime();
 
     try {
       // Start the session first
@@ -285,9 +314,15 @@ class _PracticeSessionScreenState extends ConsumerState<PracticeSessionScreen> {
                     ),
                   ),
                 ] else ...[
-                  // Timer
+                  // Timer with pause/resume
                   if (_isPracticing) ...[
-                    _PracticeTimer(startTime: _startTime!),
+                    _PracticeTimerWithControls(
+                      startTime: _startTime!,
+                      getElapsedTime: _getElapsedTime,
+                      isPaused: _isPaused,
+                      onPause: _pausePractice,
+                      onResume: _resumePractice,
+                    ),
                     const SizedBox(height: 32),
                   ],
 
@@ -313,6 +348,7 @@ class _PracticeSessionScreenState extends ConsumerState<PracticeSessionScreen> {
                     ),
                     maxLines: 4,
                     textCapitalization: TextCapitalization.sentences,
+                    enabled: !_isPaused,
                   ),
                   const SizedBox(height: 32),
 
@@ -320,7 +356,7 @@ class _PracticeSessionScreenState extends ConsumerState<PracticeSessionScreen> {
                   SizedBox(
                     width: double.infinity,
                     child: FilledButton.icon(
-                      onPressed: _endPractice,
+                      onPressed: _isPaused ? null : _endPractice,
                       icon: const Icon(Icons.check),
                       label: const Text('End Practice'),
                     ),
@@ -383,62 +419,107 @@ class _PracticeSessionScreenState extends ConsumerState<PracticeSessionScreen> {
   }
 }
 
-/// Timer widget for practice session.
-class _PracticeTimer extends StatefulWidget {
+/// Timer widget with pause/resume controls.
+class _PracticeTimerWithControls extends StatefulWidget {
   final DateTime startTime;
+  final Duration Function() getElapsedTime;
+  final bool isPaused;
+  final VoidCallback onPause;
+  final VoidCallback onResume;
 
-  const _PracticeTimer({required this.startTime});
+  const _PracticeTimerWithControls({
+    required this.startTime,
+    required this.getElapsedTime,
+    required this.isPaused,
+    required this.onPause,
+    required this.onResume,
+  });
 
   @override
-  State<_PracticeTimer> createState() => _PracticeTimerState();
+  State<_PracticeTimerWithControls> createState() => _PracticeTimerWithControlsState();
 }
 
-class _PracticeTimerState extends State<_PracticeTimer> {
-  late Stream<Duration> _timerStream;
+class _PracticeTimerWithControlsState extends State<_PracticeTimerWithControls> {
+  late Stream<int> _timerStream;
 
   @override
   void initState() {
     super.initState();
-    _timerStream = Stream.periodic(
-      const Duration(seconds: 1),
-      (_) => DateTime.now().difference(widget.startTime),
-    );
+    _timerStream = Stream.periodic(const Duration(seconds: 1), (i) => i);
   }
 
   @override
   Widget build(BuildContext context) {
-    return StreamBuilder<Duration>(
+    return StreamBuilder<int>(
       stream: _timerStream,
       builder: (context, snapshot) {
-        final duration = snapshot.data ?? Duration.zero;
+        final duration = widget.getElapsedTime();
         final minutes = duration.inMinutes.toString().padLeft(2, '0');
         final seconds = (duration.inSeconds % 60).toString().padLeft(2, '0');
 
         return Center(
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 24),
-            decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.surfaceContainerHighest,
-              borderRadius: BorderRadius.circular(16),
-            ),
-            child: Column(
-              children: [
-                Text(
-                  '$minutes:$seconds',
-                  style: Theme.of(context).textTheme.displayLarge?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    fontFeatures: [const FontFeature.tabularFigures()],
-                  ),
+          child: Column(
+            children: [
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 24),
+                decoration: BoxDecoration(
+                  color: widget.isPaused
+                      ? AppColors.warning.withAlpha(25)
+                      : Theme.of(context).colorScheme.surfaceContainerHighest,
+                  borderRadius: BorderRadius.circular(16),
+                  border: widget.isPaused
+                      ? Border.all(color: AppColors.warning, width: 2)
+                      : null,
                 ),
-                const SizedBox(height: 4),
-                Text(
-                  'Practice Time',
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  ),
+                child: Column(
+                  children: [
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        if (widget.isPaused) ...[
+                          const Icon(Icons.pause_circle, color: AppColors.warning),
+                          const SizedBox(width: 8),
+                        ],
+                        Text(
+                          '$minutes:$seconds',
+                          style: Theme.of(context).textTheme.displayLarge?.copyWith(
+                            fontWeight: FontWeight.bold,
+                            fontFeatures: [const FontFeature.tabularFigures()],
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      widget.isPaused ? 'Paused' : 'Practice Time',
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: widget.isPaused
+                            ? AppColors.warning
+                            : Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                  ],
                 ),
-              ],
-            ),
+              ),
+              const SizedBox(height: 16),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  if (widget.isPaused)
+                    FilledButton.icon(
+                      onPressed: widget.onResume,
+                      icon: const Icon(Icons.play_arrow),
+                      label: const Text('Resume'),
+                    )
+                  else
+                    OutlinedButton.icon(
+                      onPressed: widget.onPause,
+                      icon: const Icon(Icons.pause),
+                      label: const Text('Pause'),
+                    ),
+                ],
+              ),
+            ],
           ),
         );
       },

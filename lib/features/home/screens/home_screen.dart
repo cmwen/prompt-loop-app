@@ -114,14 +114,45 @@ class HomeScreen extends ConsumerWidget {
                       children: skillList
                           .take(3)
                           .map(
-                            (skill) => SkillCard(
-                              name: skill.name,
-                              level: skill.currentLevel.displayName,
-                              progress: 0.0, // TODO: Calculate progress
-                              onTap: () {
-                                context.goNamed(
-                                  AppRoutes.skillDetail,
-                                  pathParameters: {'id': skill.id.toString()},
+                            (skill) => Consumer(
+                              builder: (context, ref, _) {
+                                final progress = ref.watch(
+                                  skillProgressPercentProvider(skill.id!),
+                                );
+                                return progress.when(
+                                  data: (percent) => SkillCard(
+                                    name: skill.name,
+                                    level: skill.currentLevel.displayName,
+                                    progress: percent / 100,
+                                    onTap: () {
+                                      context.goNamed(
+                                        AppRoutes.skillDetail,
+                                        pathParameters: {'id': skill.id.toString()},
+                                      );
+                                    },
+                                  ),
+                                  loading: () => SkillCard(
+                                    name: skill.name,
+                                    level: skill.currentLevel.displayName,
+                                    progress: 0.0,
+                                    onTap: () {
+                                      context.goNamed(
+                                        AppRoutes.skillDetail,
+                                        pathParameters: {'id': skill.id.toString()},
+                                      );
+                                    },
+                                  ),
+                                  error: (_, __) => SkillCard(
+                                    name: skill.name,
+                                    level: skill.currentLevel.displayName,
+                                    progress: 0.0,
+                                    onTap: () {
+                                      context.goNamed(
+                                        AppRoutes.skillDetail,
+                                        pathParameters: {'id': skill.id.toString()},
+                                      );
+                                    },
+                                  ),
                                 );
                               },
                             ),

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:prompt_loop/core/router/app_router.dart';
 import 'package:prompt_loop/domain/entities/purpose.dart';
 import 'package:prompt_loop/features/purpose/providers/purpose_provider.dart';
 import 'package:prompt_loop/features/skills/providers/skills_provider.dart';
@@ -75,7 +76,11 @@ class _PurposeEditScreenState extends ConsumerState<PurposeEditScreen> {
             content: Text(isEditing ? 'Purpose updated' : 'Purpose saved'),
           ),
         );
-        context.pop();
+        // Navigate back to skill detail screen
+        context.goNamed(
+          AppRoutes.skillDetail,
+          pathParameters: {'id': widget.skillId.toString()},
+        );
       }
     } catch (e) {
       if (mounted) {
