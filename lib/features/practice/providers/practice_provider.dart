@@ -37,7 +37,7 @@ final todaysSessionsProvider = FutureProvider<List<PracticeSession>>((
   final repository = await ref.watch(practiceRepositoryProvider.future);
   final now = DateTime.now();
   final startOfDay = DateTime(now.year, now.month, now.day);
-  final endOfDay = startOfDay.add(const Duration(days: 1));
+  final endOfDay = DateTime(now.year, now.month, now.day, 23, 59, 59);
   return repository.getSessionsForDateRange(startOfDay, endOfDay);
 });
 
@@ -108,7 +108,8 @@ final weeklyPracticeTimeProvider = FutureProvider<Duration>((ref) async {
   final now = DateTime.now();
   final startOfWeek = now.subtract(Duration(days: now.weekday - 1));
   final start = DateTime(startOfWeek.year, startOfWeek.month, startOfWeek.day);
-  final sessions = await repository.getSessionsForDateRange(start, now);
+  final endOfToday = DateTime(now.year, now.month, now.day, 23, 59, 59);
+  final sessions = await repository.getSessionsForDateRange(start, endOfToday);
   final completedSessions = sessions.where((s) => s.completedAt != null);
   final totalSeconds = completedSessions.fold<int>(
     0,
@@ -212,5 +213,8 @@ class PracticeSessionsNotifier
     _ref.invalidate(todaysSessionsProvider);
     _ref.invalidate(todaysPracticeTimeProvider);
     _ref.invalidate(weeklyPracticeTimeProvider);
+    // Invalidate progress providers to update skill progress
+    _ref.invalidate(skillProgressPercentProvider);
+    _ref.invalidate(completedTasksCountProvider);
   }
 }

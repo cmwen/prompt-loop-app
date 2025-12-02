@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:prompt_loop/domain/entities/practice_session.dart';
 import 'package:prompt_loop/features/skills/providers/skills_provider.dart';
 import 'package:prompt_loop/features/tasks/providers/tasks_provider.dart';
 import 'package:prompt_loop/features/practice/providers/practice_provider.dart';
@@ -51,22 +50,21 @@ class _PracticeSessionScreenState extends ConsumerState<PracticeSessionScreen> {
     final endTime = DateTime.now();
     final duration = endTime.difference(_startTime!);
 
-    final session = PracticeSession(
-      taskId: widget.taskId!,
-      startedAt: _startTime!,
-      completedAt: endTime,
-      actualDurationSeconds: duration.inSeconds,
-      rating: _rating,
-      notes: _notesController.text.trim().isEmpty
-          ? null
-          : _notesController.text.trim(),
-      createdAt: DateTime.now(),
-    );
-
     try {
-      await ref
+      // Start the session first
+      final sessionId = await ref
           .read(practiceSessionsProvider.notifier)
-          .startSession(session.taskId);
+          .startSession(widget.taskId!);
+
+      // Complete the session with actual duration
+      await ref.read(practiceSessionsProvider.notifier).completeSession(
+        sessionId: sessionId,
+        durationSeconds: duration.inSeconds,
+        notes: _notesController.text.trim().isEmpty
+            ? null
+            : _notesController.text.trim(),
+        rating: _rating,
+      );
 
       // Record practice for streak
       await ref

@@ -247,11 +247,24 @@ class PracticeRepositoryImpl implements PracticeRepository {
 
   @override
   Future<double> getSkillProgressPercent(int skillId) async {
-    final total = await getTotalTasksCount(skillId);
-    if (total == 0) return 0.0;
+    // Calculate progress based on completed practice sessions vs total tasks
+    final totalTasks = await getTotalTasksCount(skillId);
+    if (totalTasks == 0) return 0.0;
     
-    final completed = await getCompletedTasksCount(skillId);
-    return ((completed / total) * 100).clamp(0, 100);
+    // Count unique tasks that have completed practice sessions
+    final result = await _db.rawQuery(
+      '''
+      SELECT COUNT(DISTINCT ps.${DbConstants.colTaskId}) as completed_count
+      FROM ${DbConstants.tablePracticeSessions} ps
+      JOIN ${DbConstants.tableTasks} t ON ps.${DbConstants.colTaskId} = t.${DbConstants.colId}
+      WHERE t.${DbConstants.colSkillId} = ?
+      AND ps.${DbConstants.colCompletedAt} IS NOT NULL
+    ''',
+      [skillId],
+    );
+    
+    final completedCount = (result.first['completed_count'] as int?) ?? 0;
+    return ((completedCount / totalTasks) * 100).clamp(0, 100);
   }
 
   @override
