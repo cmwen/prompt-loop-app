@@ -63,5 +63,8 @@ abstract class PracticeRepository {
   Future<double> getSkillProgressPercent(int skillId);
 
   /// Get daily progress data for a skill
-  Future<List<Map<String, dynamic>>> getDailyProgressData(int skillId, int daysBack);
+  Future<List<Map<String, dynamic>>> getDailyProgressData(
+    int skillId,
+    int daysBack,
+  );
 }

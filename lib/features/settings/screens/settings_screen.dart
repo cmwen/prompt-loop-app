@@ -257,9 +257,7 @@ class SettingsScreen extends ConsumerWidget {
                     child: ListTile(
                       leading: const Icon(Icons.download_outlined),
                       title: const Text('Export Data'),
-                      subtitle: const Text(
-                        'Export all your data as JSON',
-                      ),
+                      subtitle: const Text('Export all your data as JSON'),
                       trailing: const Icon(Icons.chevron_right),
                       onTap: () => _exportData(context, ref),
                     ),
@@ -309,7 +307,8 @@ class SettingsScreen extends ConsumerWidget {
                           future: PackageInfo.fromPlatform(),
                           builder: (context, snapshot) {
                             final version = snapshot.data?.version ?? '1.0.0';
-                            final buildNumber = snapshot.data?.buildNumber ?? '1';
+                            final buildNumber =
+                                snapshot.data?.buildNumber ?? '1';
                             return ListTile(
                               leading: const Icon(Icons.info_outline),
                               title: const Text('Version'),
@@ -442,9 +441,9 @@ class SettingsScreen extends ConsumerWidget {
                     Expanded(
                       child: Text(
                         validationError!,
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: AppColors.error,
-                        ),
+                        style: Theme.of(
+                          context,
+                        ).textTheme.bodySmall?.copyWith(color: AppColors.error),
                       ),
                     ),
                   ],
@@ -485,8 +484,9 @@ class SettingsScreen extends ConsumerWidget {
                   ? null
                   : () async {
                       if (controller.text.isEmpty) {
-                        setState(() =>
-                            validationError = 'Please enter an API key');
+                        setState(
+                          () => validationError = 'Please enter an API key',
+                        );
                         return;
                       }
 
@@ -506,7 +506,7 @@ class SettingsScreen extends ConsumerWidget {
                           });
                           return;
                         }
-                        
+
                         final service = ByokLlmService(
                           apiKey: controller.text.trim(),
                           provider: settings.llmProvider,
@@ -605,41 +605,57 @@ class SettingsScreen extends ConsumerWidget {
         'export_date': DateTime.now().toIso8601String(),
         'app_version': '1.0.3',
         'data': {
-          'skills': skills.map((s) => {
-            'id': s.id,
-            'name': s.name,
-            'description': s.description,
-            'current_level': s.currentLevel.name,
-            'target_level': s.targetLevel?.name,
-            'created_at': s.createdAt.toIso8601String(),
-          }).toList(),
-          'tasks': tasks.map((t) => {
-            'id': t.id,
-            'skill_id': t.skillId,
-            'title': t.title,
-            'description': t.description,
-            'duration_minutes': t.durationMinutes,
-            'difficulty': t.difficulty,
-            'is_completed': t.isCompleted,
-            'completed_at': t.completedAt?.toIso8601String(),
-            'created_at': t.createdAt.toIso8601String(),
-          }).toList(),
-          'practice_sessions': sessions.map((s) => {
-            'id': s.id,
-            'task_id': s.taskId,
-            'started_at': s.startedAt.toIso8601String(),
-            'completed_at': s.completedAt?.toIso8601String(),
-            'duration_seconds': s.actualDurationSeconds,
-            'rating': s.rating,
-            'notes': s.notes,
-          }).toList(),
-          'purposes': purposes.map((p) => {
-            'id': p.id,
-            'skill_id': p.skillId,
-            'statement': p.statement,
-            'category': p.category.name,
-            'created_at': p.createdAt.toIso8601String(),
-          }).toList(),
+          'skills': skills
+              .map(
+                (s) => {
+                  'id': s.id,
+                  'name': s.name,
+                  'description': s.description,
+                  'current_level': s.currentLevel.name,
+                  'target_level': s.targetLevel?.name,
+                  'created_at': s.createdAt.toIso8601String(),
+                },
+              )
+              .toList(),
+          'tasks': tasks
+              .map(
+                (t) => {
+                  'id': t.id,
+                  'skill_id': t.skillId,
+                  'title': t.title,
+                  'description': t.description,
+                  'duration_minutes': t.durationMinutes,
+                  'difficulty': t.difficulty,
+                  'is_completed': t.isCompleted,
+                  'completed_at': t.completedAt?.toIso8601String(),
+                  'created_at': t.createdAt.toIso8601String(),
+                },
+              )
+              .toList(),
+          'practice_sessions': sessions
+              .map(
+                (s) => {
+                  'id': s.id,
+                  'task_id': s.taskId,
+                  'started_at': s.startedAt.toIso8601String(),
+                  'completed_at': s.completedAt?.toIso8601String(),
+                  'duration_seconds': s.actualDurationSeconds,
+                  'rating': s.rating,
+                  'notes': s.notes,
+                },
+              )
+              .toList(),
+          'purposes': purposes
+              .map(
+                (p) => {
+                  'id': p.id,
+                  'skill_id': p.skillId,
+                  'statement': p.statement,
+                  'category': p.category.name,
+                  'created_at': p.createdAt.toIso8601String(),
+                },
+              )
+              .toList(),
         },
       };
 
@@ -662,7 +678,8 @@ class SettingsScreen extends ConsumerWidget {
       await Share.shareXFiles(
         [XFile(file.path)],
         subject: 'Prompt Loop Data Export',
-        text: 'Your Prompt Loop data export from ${DateFormat('yyyy-MM-dd').format(DateTime.now())}',
+        text:
+            'Your Prompt Loop data export from ${DateFormat('yyyy-MM-dd').format(DateTime.now())}',
       );
 
       if (context.mounted) {
@@ -694,16 +711,16 @@ class SettingsScreen extends ConsumerWidget {
         await launchUrl(url, mode: LaunchMode.externalApplication);
       } else {
         if (context.mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Could not open $urlString')),
-          );
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text('Could not open $urlString')));
         }
       }
     } catch (e) {
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error opening link: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Error opening link: $e')));
       }
     }
   }

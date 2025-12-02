@@ -127,7 +127,9 @@ class HomeScreen extends ConsumerWidget {
                                     onTap: () {
                                       context.goNamed(
                                         AppRoutes.skillDetail,
-                                        pathParameters: {'id': skill.id.toString()},
+                                        pathParameters: {
+                                          'id': skill.id.toString(),
+                                        },
                                       );
                                     },
                                   ),
@@ -138,7 +140,9 @@ class HomeScreen extends ConsumerWidget {
                                     onTap: () {
                                       context.goNamed(
                                         AppRoutes.skillDetail,
-                                        pathParameters: {'id': skill.id.toString()},
+                                        pathParameters: {
+                                          'id': skill.id.toString(),
+                                        },
                                       );
                                     },
                                   ),
@@ -149,7 +153,9 @@ class HomeScreen extends ConsumerWidget {
                                     onTap: () {
                                       context.goNamed(
                                         AppRoutes.skillDetail,
-                                        pathParameters: {'id': skill.id.toString()},
+                                        pathParameters: {
+                                          'id': skill.id.toString(),
+                                        },
                                       );
                                     },
                                   ),

@@ -230,7 +230,7 @@ class PracticeRepositoryImpl implements PracticeRepository {
   Future<int> getCompletedTasksCountForDay(int skillId, DateTime date) async {
     final startOfDay = DateTime(date.year, date.month, date.day);
     final endOfDay = startOfDay.add(const Duration(days: 1));
-    
+
     final result = await _db.rawQuery(
       '''
       SELECT COUNT(*) as count
@@ -250,7 +250,7 @@ class PracticeRepositoryImpl implements PracticeRepository {
     // Calculate progress based on completed practice sessions vs total tasks
     final totalTasks = await getTotalTasksCount(skillId);
     if (totalTasks == 0) return 0.0;
-    
+
     // Count unique tasks that have completed practice sessions
     final result = await _db.rawQuery(
       '''
@@ -262,7 +262,7 @@ class PracticeRepositoryImpl implements PracticeRepository {
     ''',
       [skillId],
     );
-    
+
     final completedCount = (result.first['completed_count'] as int?) ?? 0;
     return ((completedCount / totalTasks) * 100).clamp(0, 100);
   }
@@ -274,7 +274,7 @@ class PracticeRepositoryImpl implements PracticeRepository {
   ) async {
     final endDate = DateTime.now();
     final startDate = endDate.subtract(Duration(days: daysBack));
-    
+
     final result = await _db.rawQuery(
       '''
       SELECT 
@@ -292,7 +292,7 @@ class PracticeRepositoryImpl implements PracticeRepository {
     ''',
       [skillId, startDate.toIsoString(), endDate.toIsoString()],
     );
-    
+
     return result;
   }
 

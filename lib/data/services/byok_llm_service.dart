@@ -62,13 +62,13 @@ class ByokLlmService implements LlmService {
     try {
       // Make a simple test request
       final messages = [
-        ChatMessage.humanText('Say "OK" if you can read this.')
+        ChatMessage.humanText('Say "OK" if you can read this.'),
       ];
-      
-      final response = await _openAiClient!.invoke(
-        PromptValue.chat(messages),
-      ).timeout(const Duration(seconds: 10));
-      
+
+      final response = await _openAiClient!
+          .invoke(PromptValue.chat(messages))
+          .timeout(const Duration(seconds: 10));
+
       return response.output.content.isNotEmpty;
     } catch (e) {
       // API key is invalid or request failed

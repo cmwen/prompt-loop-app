@@ -18,9 +18,7 @@ class PurposesListScreen extends ConsumerWidget {
     final skills = ref.watch(skillsProvider);
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('My Purposes'),
-      ),
+      appBar: AppBar(title: const Text('My Purposes')),
       body: skills.when(
         data: (skillList) {
           if (skillList.isEmpty) {
@@ -74,10 +72,7 @@ class PurposesListScreen extends ConsumerWidget {
               }
 
               final skill = skillList[index - 1];
-              return _PurposeCard(
-                skillId: skill.id!,
-                skillName: skill.name,
-              );
+              return _PurposeCard(skillId: skill.id!, skillName: skill.name);
             },
           );
         },
@@ -92,10 +87,7 @@ class _PurposeCard extends ConsumerWidget {
   final int skillId;
   final String skillName;
 
-  const _PurposeCard({
-    required this.skillId,
-    required this.skillName,
-  });
+  const _PurposeCard({required this.skillId, required this.skillName});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -162,9 +154,8 @@ class _PurposeCard extends ConsumerWidget {
           SizedBox(
             width: double.infinity,
             child: OutlinedButton.icon(
-              onPressed: () => context.push(
-                '${AppPaths.purposeEdit}?skillId=$skillId',
-              ),
+              onPressed: () =>
+                  context.push('${AppPaths.purposeEdit}?skillId=$skillId'),
               icon: const Icon(Icons.add),
               label: const Text('Add Purpose'),
             ),
@@ -174,7 +165,11 @@ class _PurposeCard extends ConsumerWidget {
     );
   }
 
-  Widget _buildPurposeCard(BuildContext context, WidgetRef ref, Purpose purpose) {
+  Widget _buildPurposeCard(
+    BuildContext context,
+    WidgetRef ref,
+    Purpose purpose,
+  ) {
     final dateFormat = DateFormat('MMM d, yyyy');
 
     return AppCard(
@@ -211,9 +206,9 @@ class _PurposeCard extends ConsumerWidget {
             ),
             child: Text(
               '"${purpose.statement}"',
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                fontStyle: FontStyle.italic,
-              ),
+              style: Theme.of(
+                context,
+              ).textTheme.bodyMedium?.copyWith(fontStyle: FontStyle.italic),
             ),
           ),
           const SizedBox(height: 12),
@@ -252,9 +247,7 @@ class _PurposeCard extends ConsumerWidget {
                 ),
                 label: Text(
                   'Delete',
-                  style: TextStyle(
-                    color: Theme.of(context).colorScheme.error,
-                  ),
+                  style: TextStyle(color: Theme.of(context).colorScheme.error),
                 ),
               ),
             ],
@@ -273,13 +266,15 @@ class _PurposeCard extends ConsumerWidget {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text('Are you sure you want to delete this purpose statement?'),
+            const Text(
+              'Are you sure you want to delete this purpose statement?',
+            ),
             const SizedBox(height: 12),
             Text(
               '"${purpose.statement}"',
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                fontStyle: FontStyle.italic,
-              ),
+              style: Theme.of(
+                context,
+              ).textTheme.bodyMedium?.copyWith(fontStyle: FontStyle.italic),
             ),
             const SizedBox(height: 12),
             Text(
@@ -297,10 +292,9 @@ class _PurposeCard extends ConsumerWidget {
           ),
           FilledButton(
             onPressed: () async {
-              await ref.read(purposesProvider.notifier).deletePurpose(
-                purpose.id!,
-                purpose.skillId,
-              );
+              await ref
+                  .read(purposesProvider.notifier)
+                  .deletePurpose(purpose.id!, purpose.skillId);
               if (context.mounted) {
                 Navigator.of(context).pop();
                 ScaffoldMessenger.of(context).showSnackBar(

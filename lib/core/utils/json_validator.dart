@@ -266,7 +266,8 @@ class JsonValidator {
         success: false,
         error: 'No JSON content found in response',
         steps: steps,
-        suggestion: 'Make sure the AI response contains a JSON object starting with { and ending with }',
+        suggestion:
+            'Make sure the AI response contains a JSON object starting with { and ending with }',
       );
     }
 
@@ -277,22 +278,21 @@ class JsonValidator {
     try {
       final parsed = jsonDecode(cleaned) as Map<String, dynamic>;
       steps.add('JSON parsed successfully');
-      return JsonParseResult(
-        success: true,
-        data: parsed,
-        steps: steps,
-      );
+      return JsonParseResult(success: true, data: parsed, steps: steps);
     } on FormatException catch (e) {
       final errorMessage = e.message;
       String suggestion = 'Check that the JSON is properly formatted';
 
       // Provide helpful suggestions based on common errors
       if (errorMessage.contains('Unexpected character')) {
-        suggestion = 'The response may contain extra text. Try asking the AI to respond with ONLY JSON, no additional text.';
+        suggestion =
+            'The response may contain extra text. Try asking the AI to respond with ONLY JSON, no additional text.';
       } else if (errorMessage.contains('Unterminated string')) {
-        suggestion = 'A string value is not properly closed with quotes. Check for missing " characters.';
+        suggestion =
+            'A string value is not properly closed with quotes. Check for missing " characters.';
       } else if (errorMessage.contains('Expected')) {
-        suggestion = 'The JSON structure is incomplete. Make sure you copied the entire response.';
+        suggestion =
+            'The JSON structure is incomplete. Make sure you copied the entire response.';
       }
 
       return JsonParseResult(
@@ -307,7 +307,8 @@ class JsonValidator {
         success: false,
         error: 'Failed to parse: $e',
         steps: steps,
-        suggestion: 'An unexpected error occurred. Try copying the response again.',
+        suggestion:
+            'An unexpected error occurred. Try copying the response again.',
         rawCleaned: cleaned,
       );
     }
