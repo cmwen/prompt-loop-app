@@ -23,7 +23,7 @@ final tasksBySubSkillProvider = FutureProvider.family<List<Task>, int>((
   subSkillId,
 ) async {
   final repository = await ref.watch(taskRepositoryProvider.future);
-  return repository.getTasksForSkill(subSkillId); // TODO: Filter by subSkill
+  return repository.getTasksForSubSkill(subSkillId);
 });
 
 /// Provider for today's tasks.

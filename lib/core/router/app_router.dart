@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:prompt_loop/features/settings/providers/settings_provider.dart';
 import 'package:prompt_loop/features/home/screens/home_screen.dart';
+import 'package:prompt_loop/features/home/screens/notifications_screen.dart';
 import 'package:prompt_loop/features/skills/screens/skills_list_screen.dart';
 import 'package:prompt_loop/features/skills/screens/skill_detail_screen.dart';
 import 'package:prompt_loop/features/skills/screens/add_skill_screen.dart';
@@ -25,6 +26,7 @@ class AppRoutes {
   static const String onboarding = 'onboarding';
   static const String purposeSetup = 'purpose-setup';
   static const String home = 'home';
+  static const String notifications = 'notifications';
   static const String skills = 'skills';
   static const String skillDetail = 'skill-detail';
   static const String addSkill = 'add-skill';
@@ -44,6 +46,7 @@ class AppPaths {
   static const String onboarding = '/onboarding';
   static const String purposeSetup = '/purpose-setup';
   static const String home = '/';
+  static const String notifications = '/notifications';
   static const String skills = '/skills';
   static const String skillDetail = '/skills/:id';
   static const String addSkill = '/skills/add';
@@ -175,6 +178,13 @@ final routerProvider = Provider<GoRouter>((ref) {
             builder: (context, state) => const SettingsScreen(),
           ),
         ],
+      ),
+
+      // Notifications screen (full screen, outside shell)
+      GoRoute(
+        name: AppRoutes.notifications,
+        path: AppPaths.notifications,
+        builder: (context, state) => const NotificationsScreen(),
       ),
 
       // Practice session (full screen, outside shell)

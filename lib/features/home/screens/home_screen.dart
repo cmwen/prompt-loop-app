@@ -7,6 +7,7 @@ import 'package:prompt_loop/features/skills/providers/skills_provider.dart';
 import 'package:prompt_loop/features/tasks/providers/tasks_provider.dart';
 import 'package:prompt_loop/features/practice/providers/practice_provider.dart';
 import 'package:prompt_loop/features/purpose/providers/purpose_provider.dart';
+import 'package:prompt_loop/services/notification_service.dart';
 import 'package:prompt_loop/shared/widgets/app_card.dart';
 import 'package:prompt_loop/shared/widgets/loading_indicator.dart';
 import 'package:prompt_loop/shared/widgets/empty_state.dart';
@@ -20,6 +21,7 @@ class HomeScreen extends ConsumerWidget {
     final skills = ref.watch(skillsProvider);
     final todaysTasks = ref.watch(todaysTasksProvider);
     final todaysPracticeTime = ref.watch(todaysPracticeTimeProvider);
+    final unreadCount = ref.watch(unreadNotificationCountProvider);
 
     return Scaffold(
       body: CustomScrollView(
@@ -27,11 +29,46 @@ class HomeScreen extends ConsumerWidget {
           SliverAppBar.large(
             title: const Text('Prompt Loop'),
             actions: [
-              IconButton(
-                icon: const Icon(Icons.notifications_outlined),
-                onPressed: () {
-                  // TODO: Show notifications
-                },
+              Stack(
+                children: [
+                  IconButton(
+                    icon: const Icon(Icons.notifications_outlined),
+                    onPressed: () {
+                      context.goNamed(AppRoutes.notifications);
+                    },
+                  ),
+                  unreadCount.when(
+                    data: (count) {
+                      if (count == 0) return const SizedBox.shrink();
+                      return Positioned(
+                        right: 6,
+                        top: 6,
+                        child: Container(
+                          padding: const EdgeInsets.all(4),
+                          decoration: BoxDecoration(
+                            color: Theme.of(context).colorScheme.error,
+                            shape: BoxShape.circle,
+                          ),
+                          constraints: const BoxConstraints(
+                            minWidth: 18,
+                            minHeight: 18,
+                          ),
+                          child: Text(
+                            count > 9 ? '9+' : count.toString(),
+                            style: Theme.of(context).textTheme.labelSmall
+                                ?.copyWith(
+                                  color: Theme.of(context).colorScheme.onError,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
+                      );
+                    },
+                    loading: () => const SizedBox.shrink(),
+                    error: (_, __) => const SizedBox.shrink(),
+                  ),
+                ],
               ),
             ],
           ),

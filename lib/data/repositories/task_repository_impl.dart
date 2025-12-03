@@ -42,6 +42,22 @@ class TaskRepositoryImpl implements TaskRepository {
   }
 
   @override
+  Future<List<Task>> getTasksForSubSkill(int subSkillId) async {
+    final maps = await _db.rawQuery(
+      '''
+      SELECT t.*, s.${DbConstants.colName} as skill_name, ss.${DbConstants.colName} as sub_skill_name
+      FROM ${DbConstants.tableTasks} t
+      LEFT JOIN ${DbConstants.tableSkills} s ON t.${DbConstants.colSkillId} = s.${DbConstants.colId}
+      LEFT JOIN ${DbConstants.tableSubSkills} ss ON t.${DbConstants.colSubSkillId} = ss.${DbConstants.colId}
+      WHERE t.${DbConstants.colSubSkillId} = ?
+      ORDER BY t.${DbConstants.colCreatedAt} DESC
+    ''',
+      [subSkillId],
+    );
+    return maps.map(_mapToTask).toList();
+  }
+
+  @override
   Future<List<Task>> getTasksForDate(DateTime date) async {
     final dateStr = date.toDateString();
     final maps = await _db.rawQuery(
