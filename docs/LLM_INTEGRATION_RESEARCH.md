@@ -209,12 +209,12 @@ Given the existing `langchain` and `langchain_openai` setup, **use the LangChain
 ```yaml
 dependencies:
   # LLM Integration (existing)
-  langchain: ^0.7.0
-  langchain_openai: ^0.7.0
+  langchain: ^0.8.0+1
+  langchain_openai: ^0.8.0+1
   
   # LLM Integration (new - add these)
-  langchain_google: ^0.7.0        # For Google Gemini
-  langchain_anthropic: ^0.1.0     # For Anthropic Claude
+  langchain_google: ^0.7.0+1        # For Google Gemini
+  langchain_anthropic: ^0.3.0+1     # For Anthropic Claude
 ```
 
 ### 3.3 Implementation Strategy
