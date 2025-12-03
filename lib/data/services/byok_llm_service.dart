@@ -21,18 +21,34 @@ class ByokLlmService implements LlmService {
   final LlmProvider provider;
   final String? model;
 
-  ChatOpenAI? _openAiClient;
-  ChatGoogleGenerativeAI? _googleClient;
-  ChatAnthropic? _anthropicClient;
+  final ChatOpenAI? _openAiClient;
+  final ChatGoogleGenerativeAI? _googleClient;
+  final ChatAnthropic? _anthropicClient;
 
-  ByokLlmService({required this.apiKey, required this.provider, this.model}) {
-    _initializeClient();
-  }
+  ByokLlmService._({
+    required this.apiKey,
+    required this.provider,
+    this.model,
+    ChatOpenAI? openAiClient,
+    ChatGoogleGenerativeAI? googleClient,
+    ChatAnthropic? anthropicClient,
+  })  : _openAiClient = openAiClient,
+        _googleClient = googleClient,
+        _anthropicClient = anthropicClient;
 
-  void _initializeClient() {
+  /// Creates a ByokLlmService with the appropriate client for the provider.
+  factory ByokLlmService({
+    required String apiKey,
+    required LlmProvider provider,
+    String? model,
+  }) {
+    ChatOpenAI? openAiClient;
+    ChatGoogleGenerativeAI? googleClient;
+    ChatAnthropic? anthropicClient;
+
     switch (provider) {
       case LlmProvider.openai:
-        _openAiClient = ChatOpenAI(
+        openAiClient = ChatOpenAI(
           apiKey: apiKey,
           defaultOptions: ChatOpenAIOptions(
             model: model ?? 'gpt-4o-mini',
@@ -41,7 +57,7 @@ class ByokLlmService implements LlmService {
         );
         break;
       case LlmProvider.google:
-        _googleClient = ChatGoogleGenerativeAI(
+        googleClient = ChatGoogleGenerativeAI(
           apiKey: apiKey,
           defaultOptions: ChatGoogleGenerativeAIOptions(
             model: model ?? 'gemini-1.5-flash',
@@ -50,7 +66,7 @@ class ByokLlmService implements LlmService {
         );
         break;
       case LlmProvider.anthropic:
-        _anthropicClient = ChatAnthropic(
+        anthropicClient = ChatAnthropic(
           apiKey: apiKey,
           defaultOptions: ChatAnthropicOptions(
             model: model ?? 'claude-3-5-sonnet-20241022',
@@ -59,6 +75,15 @@ class ByokLlmService implements LlmService {
         );
         break;
     }
+
+    return ByokLlmService._(
+      apiKey: apiKey,
+      provider: provider,
+      model: model,
+      openAiClient: openAiClient,
+      googleClient: googleClient,
+      anthropicClient: anthropicClient,
+    );
   }
 
   /// Returns the active chat model based on the current provider.
@@ -73,6 +98,16 @@ class ByokLlmService implements LlmService {
     }
   }
 
+  /// Returns the active client or throws an error if not available.
+  /// Use this to reduce null-check duplication across methods.
+  BaseChatModel _requireActiveClient() {
+    final client = _getActiveClient();
+    if (client == null) {
+      throw StateError('No LLM client available for provider: ${provider.name}');
+    }
+    return client;
+  }
+
   @override
   String get modeName => 'BYOK (${provider.name})';
 
@@ -84,8 +119,7 @@ class ByokLlmService implements LlmService {
     if (!isAvailable) return false;
 
     try {
-      final client = _getActiveClient();
-      if (client == null) return false;
+      final client = _requireActiveClient();
 
       // Make a simple test request
       final messages = [
@@ -112,10 +146,7 @@ class ByokLlmService implements LlmService {
     }
 
     try {
-      final client = _getActiveClient();
-      if (client == null) {
-        return LlmResult.failure('No LLM client available');
-      }
+      final client = _requireActiveClient();
 
       final prompt = PromptTemplates.skillAnalysis(
         skillName: request.skillDescription,
@@ -143,10 +174,7 @@ class ByokLlmService implements LlmService {
     }
 
     try {
-      final client = _getActiveClient();
-      if (client == null) {
-        return LlmResult.failure('No LLM client available');
-      }
+      final client = _requireActiveClient();
 
       final prompt = PromptTemplates.taskGeneration(
         skillName: request.skill.name,
@@ -175,10 +203,7 @@ class ByokLlmService implements LlmService {
     }
 
     try {
-      final client = _getActiveClient();
-      if (client == null) {
-        return LlmResult.failure('No LLM client available');
-      }
+      final client = _requireActiveClient();
 
       final prompt = PromptTemplates.wiseFeedback(
         skillName: request.skillName,
