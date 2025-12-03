@@ -34,7 +34,7 @@ packages:
     source: hosted
     version: "0.13.4"
   anthropic_sdk_dart:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: anthropic_sdk_dart
       sha256: ea5775add9f3f9a92f9f2d28eb655fa72708cbbcf30df9ea1630eb92eeda0549
@@ -665,7 +665,7 @@ packages:
     source: hosted
     version: "1.0.4"
   openai_dart:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: openai_dart
       sha256: "9c74e1ff38243c8987890d9fe4d03f5298352576d4db3a90402625f3f21e2164"

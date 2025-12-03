@@ -2,11 +2,13 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:anthropic_sdk_dart/anthropic_sdk_dart.dart' as anthropic;
 import 'package:googleai_dart/googleai_dart.dart' as google_ai;
 import 'package:langchain/langchain.dart';
 import 'package:langchain_anthropic/langchain_anthropic.dart';
 import 'package:langchain_google/langchain_google.dart';
 import 'package:langchain_openai/langchain_openai.dart';
+import 'package:openai_dart/openai_dart.dart' as openai;
 import 'package:prompt_loop/core/constants/llm_constants.dart';
 import 'package:prompt_loop/core/utils/json_validator.dart';
 import 'package:prompt_loop/domain/entities/skill.dart';
@@ -162,28 +164,11 @@ class ByokLlmService implements LlmService {
         'Rate limited. Please try again later.',
       );
     } on google_ai.ApiException catch (e) {
-      switch (e.code) {
-        case 401:
-          return const ApiKeyValidationResult.failure(
-            'Invalid API key. Please check your API key is correct.',
-          );
-        case 400:
-          return const ApiKeyValidationResult.failure(
-            'Bad request. Please verify your API key format.',
-          );
-        case 403:
-          return const ApiKeyValidationResult.failure(
-            'Permission denied. Your API key may not have access to this model.',
-          );
-        case 404:
-          return const ApiKeyValidationResult.failure(
-            'Model not found. Please check the model name in settings.',
-          );
-        default:
-          return ApiKeyValidationResult.failure(
-            'API error (${e.code}): ${e.message}',
-          );
-      }
+      return _handleApiError(e.code, e.message);
+    } on openai.OpenAIClientException catch (e) {
+      return _handleApiError(e.code, e.message);
+    } on anthropic.AnthropicClientException catch (e) {
+      return _handleApiError(e.code, e.message);
     } on google_ai.TimeoutException {
       return const ApiKeyValidationResult.failure(
         'Request timed out. Please check your internet connection.',
@@ -193,20 +178,49 @@ class ByokLlmService implements LlmService {
         'Request timed out. Please check your internet connection.',
       );
     } on SocketException {
-      return const ApiKeyValidationResult.failure(
-        'Network error. Please check your internet connection.',
-      );
+      return _networkError();
     } on HandshakeException {
-      return const ApiKeyValidationResult.failure(
-        'Network error. Please check your internet connection.',
-      );
+      return _networkError();
     } on TlsException {
-      return const ApiKeyValidationResult.failure(
-        'Network error. Please check your internet connection.',
-      );
+      return _networkError();
     } catch (e) {
       return ApiKeyValidationResult.failure('Validation failed: $e');
     }
+  }
+
+  /// Handles API errors based on HTTP status code
+  ApiKeyValidationResult _handleApiError(int? code, String message) {
+    switch (code) {
+      case 401:
+        return const ApiKeyValidationResult.failure(
+          'Invalid API key. Please check your API key is correct.',
+        );
+      case 400:
+        return const ApiKeyValidationResult.failure(
+          'Bad request. Please verify your API key format.',
+        );
+      case 403:
+        return const ApiKeyValidationResult.failure(
+          'Permission denied. Your API key may not have access to this model.',
+        );
+      case 404:
+        return const ApiKeyValidationResult.failure(
+          'Model not found. Please check the model name in settings.',
+        );
+      case 429:
+        return const ApiKeyValidationResult.failure(
+          'Rate limited. Please try again later.',
+        );
+      default:
+        return ApiKeyValidationResult.failure('API error ($code): $message');
+    }
+  }
+
+  /// Returns a network error result
+  ApiKeyValidationResult _networkError() {
+    return const ApiKeyValidationResult.failure(
+      'Network error. Please check your internet connection.',
+    );
   }
 
   @override
