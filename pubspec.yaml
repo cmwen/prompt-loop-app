@@ -45,6 +45,7 @@ dependencies:
   langchain_openai: ^0.8.0+1
   langchain_google: ^0.7.0+1
   langchain_anthropic: ^0.3.0+1
+  googleai_dart: ^1.1.0
   
   # HTTP
   http: ^1.6.0

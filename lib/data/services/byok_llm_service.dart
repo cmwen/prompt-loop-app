@@ -1,5 +1,8 @@
+import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
 
+import 'package:googleai_dart/googleai_dart.dart' as google_ai;
 import 'package:langchain/langchain.dart';
 import 'package:langchain_anthropic/langchain_anthropic.dart';
 import 'package:langchain_google/langchain_google.dart';
@@ -11,6 +14,18 @@ import 'package:prompt_loop/domain/entities/sub_skill.dart';
 import 'package:prompt_loop/domain/entities/task.dart';
 import 'package:prompt_loop/domain/entities/app_settings.dart';
 import 'package:prompt_loop/domain/services/llm_service.dart';
+
+/// Result of API key validation
+class ApiKeyValidationResult {
+  final bool isValid;
+  final String? errorMessage;
+
+  const ApiKeyValidationResult.success()
+      : isValid = true,
+        errorMessage = null;
+
+  const ApiKeyValidationResult.failure(this.errorMessage) : isValid = false;
+}
 
 /// BYOK (Bring Your Own Key) LLM service for direct API integration.
 ///
@@ -117,8 +132,12 @@ class ByokLlmService implements LlmService {
   bool get isAvailable => apiKey.isNotEmpty && _getActiveClient() != null;
 
   /// Validates the API key by making a test request
-  Future<bool> validateApiKey() async {
-    if (!isAvailable) return false;
+  Future<ApiKeyValidationResult> validateApiKey() async {
+    if (!isAvailable) {
+      return const ApiKeyValidationResult.failure(
+        'API key is empty or service not configured',
+      );
+    }
 
     try {
       final client = _requireActiveClient();
@@ -132,10 +151,61 @@ class ByokLlmService implements LlmService {
           .invoke(PromptValue.chat(messages))
           .timeout(const Duration(seconds: 10));
 
-      return response.output.content.isNotEmpty;
+      if (response.output.content.isNotEmpty) {
+        return const ApiKeyValidationResult.success();
+      }
+      return const ApiKeyValidationResult.failure(
+        'API returned empty response',
+      );
+    } on google_ai.RateLimitException {
+      return const ApiKeyValidationResult.failure(
+        'Rate limited. Please try again later.',
+      );
+    } on google_ai.ApiException catch (e) {
+      switch (e.code) {
+        case 401:
+          return const ApiKeyValidationResult.failure(
+            'Invalid API key. Please check your API key is correct.',
+          );
+        case 400:
+          return const ApiKeyValidationResult.failure(
+            'Bad request. Please verify your API key format.',
+          );
+        case 403:
+          return const ApiKeyValidationResult.failure(
+            'Permission denied. Your API key may not have access to this model.',
+          );
+        case 404:
+          return const ApiKeyValidationResult.failure(
+            'Model not found. Please check the model name in settings.',
+          );
+        default:
+          return ApiKeyValidationResult.failure(
+            'API error (${e.code}): ${e.message}',
+          );
+      }
+    } on google_ai.TimeoutException {
+      return const ApiKeyValidationResult.failure(
+        'Request timed out. Please check your internet connection.',
+      );
+    } on TimeoutException {
+      return const ApiKeyValidationResult.failure(
+        'Request timed out. Please check your internet connection.',
+      );
+    } on SocketException {
+      return const ApiKeyValidationResult.failure(
+        'Network error. Please check your internet connection.',
+      );
+    } on HandshakeException {
+      return const ApiKeyValidationResult.failure(
+        'Network error. Please check your internet connection.',
+      );
+    } on TlsException {
+      return const ApiKeyValidationResult.failure(
+        'Network error. Please check your internet connection.',
+      );
     } catch (e) {
-      // API key is invalid or request failed
-      return false;
+      return ApiKeyValidationResult.failure('Validation failed: $e');
     }
   }
 

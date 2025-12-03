@@ -513,13 +513,13 @@ class SettingsScreen extends ConsumerWidget {
                           model: settings.llmModel,
                         );
 
-                        final isValid = await service.validateApiKey();
+                        final result = await service.validateApiKey();
 
-                        if (!isValid) {
+                        if (!result.isValid) {
                           setState(() {
                             isValidating = false;
                             validationError =
-                                'Invalid API key or connection failed';
+                                result.errorMessage ?? 'Validation failed';
                           });
                           return;
                         }

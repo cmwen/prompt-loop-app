@@ -433,7 +433,7 @@ packages:
     source: hosted
     version: "0.3.3+1"
   googleai_dart:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: googleai_dart
       sha256: "42d4d258949737a84c51f1af28a798cca2953d871840b91d10c1918723726b3c"
