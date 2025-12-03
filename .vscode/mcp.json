@@ -7,6 +7,13 @@
 				"-y",
 				"@upstash/context7-mcp@latest"
 			]
+		},
+		"dart and flutter mcp": {
+			"type": "stdio",
+			"command": "dart",
+			"args": [
+				"mcp-server"
+			]
 		}
 	},
 	"inputs": []
