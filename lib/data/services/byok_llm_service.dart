@@ -32,9 +32,9 @@ class ByokLlmService implements LlmService {
     ChatOpenAI? openAiClient,
     ChatGoogleGenerativeAI? googleClient,
     ChatAnthropic? anthropicClient,
-  })  : _openAiClient = openAiClient,
-        _googleClient = googleClient,
-        _anthropicClient = anthropicClient;
+  }) : _openAiClient = openAiClient,
+       _googleClient = googleClient,
+       _anthropicClient = anthropicClient;
 
   /// Creates a ByokLlmService with the appropriate client for the provider.
   factory ByokLlmService({
@@ -103,7 +103,9 @@ class ByokLlmService implements LlmService {
   BaseChatModel _requireActiveClient() {
     final client = _getActiveClient();
     if (client == null) {
-      throw StateError('No LLM client available for provider: ${provider.name}');
+      throw StateError(
+        'No LLM client available for provider: ${provider.name}',
+      );
     }
     return client;
   }
