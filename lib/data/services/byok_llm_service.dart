@@ -22,9 +22,7 @@ class ApiKeyValidationResult {
   final bool isValid;
   final String? errorMessage;
 
-  const ApiKeyValidationResult.success()
-      : isValid = true,
-        errorMessage = null;
+  const ApiKeyValidationResult.success() : isValid = true, errorMessage = null;
 
   const ApiKeyValidationResult.failure(this.errorMessage) : isValid = false;
 }
