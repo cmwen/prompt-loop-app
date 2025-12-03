@@ -1,6 +1,8 @@
 import 'dart:convert';
 
 import 'package:langchain/langchain.dart';
+import 'package:langchain_anthropic/langchain_anthropic.dart';
+import 'package:langchain_google/langchain_google.dart';
 import 'package:langchain_openai/langchain_openai.dart';
 import 'package:prompt_loop/core/constants/llm_constants.dart';
 import 'package:prompt_loop/core/utils/json_validator.dart';
@@ -19,16 +21,34 @@ class ByokLlmService implements LlmService {
   final LlmProvider provider;
   final String? model;
 
-  late final ChatOpenAI? _openAiClient;
+  final ChatOpenAI? _openAiClient;
+  final ChatGoogleGenerativeAI? _googleClient;
+  final ChatAnthropic? _anthropicClient;
 
-  ByokLlmService({required this.apiKey, required this.provider, this.model}) {
-    _initializeClient();
-  }
+  ByokLlmService._({
+    required this.apiKey,
+    required this.provider,
+    this.model,
+    ChatOpenAI? openAiClient,
+    ChatGoogleGenerativeAI? googleClient,
+    ChatAnthropic? anthropicClient,
+  }) : _openAiClient = openAiClient,
+       _googleClient = googleClient,
+       _anthropicClient = anthropicClient;
 
-  void _initializeClient() {
+  /// Creates a ByokLlmService with the appropriate client for the provider.
+  factory ByokLlmService({
+    required String apiKey,
+    required LlmProvider provider,
+    String? model,
+  }) {
+    ChatOpenAI? openAiClient;
+    ChatGoogleGenerativeAI? googleClient;
+    ChatAnthropic? anthropicClient;
+
     switch (provider) {
       case LlmProvider.openai:
-        _openAiClient = ChatOpenAI(
+        openAiClient = ChatOpenAI(
           apiKey: apiKey,
           defaultOptions: ChatOpenAIOptions(
             model: model ?? 'gpt-4o-mini',
@@ -37,35 +57,78 @@ class ByokLlmService implements LlmService {
         );
         break;
       case LlmProvider.google:
-        // Google AI would use different package
-        // For now, we'll mark as unavailable
-        _openAiClient = null;
+        googleClient = ChatGoogleGenerativeAI(
+          apiKey: apiKey,
+          defaultOptions: ChatGoogleGenerativeAIOptions(
+            model: model ?? 'gemini-1.5-flash',
+            temperature: 0.7,
+          ),
+        );
         break;
       case LlmProvider.anthropic:
-        // Anthropic would use different package
-        // For now, we'll mark as unavailable
-        _openAiClient = null;
+        anthropicClient = ChatAnthropic(
+          apiKey: apiKey,
+          defaultOptions: ChatAnthropicOptions(
+            model: model ?? 'claude-3-5-sonnet-20241022',
+            temperature: 0.7,
+          ),
+        );
         break;
     }
+
+    return ByokLlmService._(
+      apiKey: apiKey,
+      provider: provider,
+      model: model,
+      openAiClient: openAiClient,
+      googleClient: googleClient,
+      anthropicClient: anthropicClient,
+    );
+  }
+
+  /// Returns the active chat model based on the current provider.
+  BaseChatModel? _getActiveClient() {
+    switch (provider) {
+      case LlmProvider.openai:
+        return _openAiClient;
+      case LlmProvider.google:
+        return _googleClient;
+      case LlmProvider.anthropic:
+        return _anthropicClient;
+    }
+  }
+
+  /// Returns the active client or throws an error if not available.
+  /// Use this to reduce null-check duplication across methods.
+  BaseChatModel _requireActiveClient() {
+    final client = _getActiveClient();
+    if (client == null) {
+      throw StateError(
+        'No LLM client available for provider: ${provider.name}',
+      );
+    }
+    return client;
   }
 
   @override
   String get modeName => 'BYOK (${provider.name})';
 
   @override
-  bool get isAvailable => apiKey.isNotEmpty && _openAiClient != null;
+  bool get isAvailable => apiKey.isNotEmpty && _getActiveClient() != null;
 
   /// Validates the API key by making a test request
   Future<bool> validateApiKey() async {
     if (!isAvailable) return false;
 
     try {
+      final client = _requireActiveClient();
+
       // Make a simple test request
       final messages = [
         ChatMessage.humanText('Say "OK" if you can read this.'),
       ];
 
-      final response = await _openAiClient!
+      final response = await client
           .invoke(PromptValue.chat(messages))
           .timeout(const Duration(seconds: 10));
 
@@ -85,6 +148,8 @@ class ByokLlmService implements LlmService {
     }
 
     try {
+      final client = _requireActiveClient();
+
       final prompt = PromptTemplates.skillAnalysis(
         skillName: request.skillDescription,
         userContext: request.toPromptContext(),
@@ -93,7 +158,7 @@ class ByokLlmService implements LlmService {
 
       final messages = [ChatMessage.humanText(prompt)];
 
-      final response = await _openAiClient!.invoke(PromptValue.chat(messages));
+      final response = await client.invoke(PromptValue.chat(messages));
       final content = response.output.content;
 
       return _parseSkillAnalysisResponse(content);
@@ -111,6 +176,8 @@ class ByokLlmService implements LlmService {
     }
 
     try {
+      final client = _requireActiveClient();
+
       final prompt = PromptTemplates.taskGeneration(
         skillName: request.skill.name,
         subSkillName: request.subSkills.firstOrNull?.name ?? '',
@@ -120,7 +187,7 @@ class ByokLlmService implements LlmService {
 
       final messages = [ChatMessage.humanText(prompt)];
 
-      final response = await _openAiClient!.invoke(PromptValue.chat(messages));
+      final response = await client.invoke(PromptValue.chat(messages));
       final content = response.output.content;
 
       return _parseTaskGenerationResponse(content);
@@ -138,6 +205,8 @@ class ByokLlmService implements LlmService {
     }
 
     try {
+      final client = _requireActiveClient();
+
       final prompt = PromptTemplates.wiseFeedback(
         skillName: request.skillName,
         struggleDescription: request.struggleDescription,
@@ -146,7 +215,7 @@ class ByokLlmService implements LlmService {
 
       final messages = [ChatMessage.humanText(prompt)];
 
-      final response = await _openAiClient!.invoke(PromptValue.chat(messages));
+      final response = await client.invoke(PromptValue.chat(messages));
       final content = response.output.content;
 
       return _parseWiseFeedbackResponse(content);
