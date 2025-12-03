@@ -65,18 +65,23 @@
 **Workaround**: Users scroll to find skills
 
 ### Notifications
-**Status**: TODO comment exists, not implemented
+**Status**: ✅ Basic Implementation Complete
 
-**Location**: `lib/features/home/screens/home_screen.dart:// TODO: Show notifications`
+**Location**: 
+- `lib/services/notification_service.dart`
+- `lib/features/home/screens/notifications_screen.dart`
 
-**What's Needed**:
-- Daily reminder notifications
-- Practice streak reminders
-- Task due date reminders
+**What's Implemented**:
+- Task reminder notifications
+- Streak reminder notifications  
+- Practice reminder notifications
+- Notifications screen with mark as read
+- Badge count on home screen
 
-**Priority**: Medium (enhances engagement)
-
-**Workaround**: None, users rely on self-motivation
+**What's Remaining for Future**:
+- Push notifications (requires flutter_local_notifications)
+- Scheduled reminders
+- Notification settings/preferences
 
 ## ❌ Not Implemented (Deferred)
 
@@ -108,17 +113,31 @@
 - Ensure proper error handling
 
 ### Task Filtering by Sub-Skill
-**Status**: TODO comment exists
+**Status**: ✅ Implemented
 
 **Location**: `lib/features/tasks/providers/tasks_provider.dart`
 
-**Current Behavior**: Returns all tasks for a skill
+**Implementation**:
+- Added `getTasksForSubSkill(int subSkillId)` method to `TaskRepository` interface
+- Implemented in `TaskRepositoryImpl` with proper SQL query filtering by `sub_skill_id`
+- Updated `tasksBySubSkillProvider` to use the new method
 
-**Expected Behavior**: Filter by specific sub-skill
+### Notifications
+**Status**: ✅ Implemented (Basic)
 
-**Priority**: Low
+**Location**: 
+- `lib/services/notification_service.dart` - Service and providers
+- `lib/domain/entities/notification_item.dart` - Entity
+- `lib/features/home/screens/notifications_screen.dart` - UI Screen
 
-**Workaround**: Manual filtering by user
+**Implementation**:
+- Created `NotificationItem` entity with types: taskReminder, streakReminder, practiceReminder
+- Created `NotificationService` that generates notifications based on:
+  - Incomplete tasks for today
+  - Streak reminders when no practice today
+  - Practice reminders when practiced less than 30 minutes
+- Added notifications screen accessible from home screen icon
+- Added unread notification count badge on home screen
 
 ## 📋 Feature Completion Checklist
 
@@ -136,16 +155,16 @@
 - [x] Pause/resume
 - [ ] Struggle analysis (partial - 50%)
 
-### Medium Priority - 70% ✅
+### Medium Priority - 85% ✅
 - [x] Purpose statements
 - [x] Streak tracking
-- [ ] Notifications (0%)
+- [x] Notifications (basic - 70%)
 - [ ] Google AI provider (0%)
 - [ ] Anthropic provider (0%)
 
-### Low Priority - 40% ✅
+### Low Priority - 55% ✅
 - [ ] Search functionality (0%)
-- [ ] Task filtering by sub-skill (0%)
+- [x] Task filtering by sub-skill (100%)
 - [ ] Batch operations (0%)
 - [ ] Usage analytics (0%)
 

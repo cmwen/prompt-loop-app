@@ -8,6 +8,9 @@ abstract class TaskRepository {
   /// Get all tasks for a skill
   Future<List<Task>> getTasksForSkill(int skillId);
 
+  /// Get all tasks for a sub-skill
+  Future<List<Task>> getTasksForSubSkill(int subSkillId);
+
   /// Get tasks scheduled for a specific date
   Future<List<Task>> getTasksForDate(DateTime date);
 
