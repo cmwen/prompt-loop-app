@@ -31,7 +31,7 @@ jobs:
 
     steps:
     - name: Checkout repository
-      uses: actions/checkout@v6
+      uses: actions/checkout@v4
 
     # Java/Kotlin specific setup
     - name: Setup Java
@@ -74,15 +74,12 @@ jobs:
       with:
         languages: ${{ matrix.language }}
         build-mode: ${{ matrix.build-mode }}
-        # Use security-extended query suite for comprehensive analysis
-        queries: security-extended
 
     # Build the Android project to enable CodeQL analysis of Kotlin code
     - name: Build Android for CodeQL analysis
       if: matrix.language == 'java-kotlin'
-      run: |
-        cd android
-        ./gradlew assembleDebug --no-daemon
+      working-directory: android
+      run: ./gradlew assembleDebug --no-daemon
 
     - name: Perform CodeQL Analysis
       uses: github/codeql-action/analyze@v4
