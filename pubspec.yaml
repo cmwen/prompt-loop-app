@@ -88,9 +88,9 @@ dev_dependencies:
 flutter_launcher_icons:
   android: true
   ios: true
-  image_path: "assets/icons/prompt_loop_icon.svg"
+  image_path: "assets/icons/prompt_loop_icon.png"
   adaptive_icon_background: "#60A5FA"
-  adaptive_icon_foreground: "assets/icons/prompt_loop_icon.svg"
+  adaptive_icon_foreground: "assets/icons/prompt_loop_icon.png"
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
