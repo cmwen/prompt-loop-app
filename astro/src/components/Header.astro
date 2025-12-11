@@ -1,16 +1,45 @@
 ---
 const { title } = Astro.props;
+const base = import.meta.env.BASE_URL || '/';
+
+// Derive the current pathname server-side and normalize trailing slashes
+const getPathname = () => {
+  try {
+    const req = Astro.request;
+    if (!req) return base;
+    const p = new URL(req.url).pathname;
+    return p || base;
+  } catch (e) {
+    return base;
+  }
+};
+
+const normalize = (p) => {
+  if (!p) return '/';
+  return p.endsWith('/') ? p : `${p}/`;
+};
+
+const current = normalize(getPathname());
+
+const href = {
+  home: normalize(base),
+  about: normalize(`${base}about`),
+  install: normalize(`${base}install`),
+  releases: normalize(`${base}releases`),
+};
+
+const activeClass = (h) => (current === h ? 'active' : '');
 ---
 <header class="site-title">
   <div class="logo">PL</div>
   <div>
     <h1>{title}</h1>
-    <p class="lead">AI-powered skill development through deliberate practice loops</p>
+    <p class="lead">AI-powered skill development app — Prompt Loop</p>
     <nav class="nav">
-      <a href="/prompt-loop-app/" class="active">Home</a>
-      <a href="/prompt-loop-app/about">About</a>
-      <a href="/prompt-loop-app/install">Install</a>
-      <a href="/prompt-loop-app/releases">Releases</a>
+      <a href={href.home} class={activeClass(href.home)}>Home</a>
+      <a href={href.about} class={activeClass(href.about)}>About</a>
+      <a href={href.install} class={activeClass(href.install)}>Install</a>
+      <a href={href.releases} class={activeClass(href.releases)}>Releases</a>
       <a href="https://github.com/cmwen/prompt-loop-app" target="_blank" rel="noopener">Repository</a>
     </nav>
   </div>
