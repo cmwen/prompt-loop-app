@@ -19,5 +19,5 @@ const REPO_NAME = 'prompt-loop-app';
 
 export default defineConfig({
   site: `https://${GITHUB_USERNAME}.github.io`,
-  base: `/${REPO_NAME}`,
+  base: `/${REPO_NAME}/`,
 });
