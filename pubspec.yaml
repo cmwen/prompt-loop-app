@@ -61,6 +61,7 @@ dependencies:
   
   # URL Launcher
   url_launcher: ^6.3.1
+  flutter_launcher_icons: ^0.14.4
 
 dev_dependencies:
   flutter_test:
@@ -75,7 +76,6 @@ dev_dependencies:
   mocktail: ^1.0.4
 
   # Icon Generation
-  flutter_launcher_icons: ^0.13.1
 
   # The "flutter_lints" package below contains a set of recommended lints to
   # encourage good coding practices. The lint set provided by the package is
@@ -84,12 +84,13 @@ dev_dependencies:
   # rules and activating additional ones.
   flutter_lints: ^6.0.0
 
-# Icon configuration
+# Icon configuration (use generated SVG in assets/icons)
 flutter_launcher_icons:
   android: true
-  image_path: "assets/icon/app_icon.png"
-  adaptive_icon_background: "#0EA5E9"
-  adaptive_icon_foreground: "assets/icon/app_icon_foreground.png"
+  ios: true
+  image_path: "assets/icons/prompt_loop_icon.svg"
+  adaptive_icon_background: "#60A5FA"
+  adaptive_icon_foreground: "assets/icons/prompt_loop_icon.svg"
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec

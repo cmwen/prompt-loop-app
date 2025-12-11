@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="1024" height="1024" viewBox="0 0 1024 1024" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="titleDesc">
+  <title id="titleDesc">Prompt Loop app icon — circular practice loop</title>
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#60A5FA" />
+      <stop offset="100%" stop-color="#1E3A8A" />
+    </linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="18" stdDeviation="30" flood-color="#000" flood-opacity="0.18"/>
+    </filter>
+  </defs>
+
+  <!-- background rounded square (transparent fill to keep icon shape) -->
+  <rect x="64" y="64" width="896" height="896" rx="192" fill="transparent"/>
+
+  <!-- outer loop (stroke) -->
+  <g filter="url(#shadow)">
+    <path d="M256 512
+             C256 352 352 256 512 256
+             C672 256 768 352 768 512
+             C768 608 720 688 648 728"
+          fill="none"
+          stroke="url(#g)"
+          stroke-width="84"
+          stroke-linecap="round"
+          stroke-linejoin="round"/>
+  </g>
+
+  <!-- arrowhead -->
+  <path d="M660 716 L740 780 L708 724 Z"
+        fill="#1E3A8A" opacity="0.95" transform="rotate(-16 708 740)"/>
+
+  <!-- inner loop (accent) -->
+  <path d="M336 512
+           C336 416 416 336 512 336
+           C608 336 688 416 688 512
+           C688 560 664 602 628 632"
+        fill="none"
+        stroke="#93C5FD"
+        stroke-width="48"
+        stroke-linecap="round"
+        stroke-linejoin="round"/>
+
+  <!-- center dot hint (represents focus/practice) -->
+  <circle cx="512" cy="512" r="56" fill="#0F172A" opacity="0.9" />
+
+  <!-- subtle ring around center -->
+  <circle cx="512" cy="512" r="96" fill="none" stroke="#BFDBFE" stroke-width="6" opacity="0.32" />
+
+  <!-- accessibility: invisible rect to ensure square touch target -->
+  <rect x="0" y="0" width="1024" height="1024" fill="transparent"/>
+</svg>
