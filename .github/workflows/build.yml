@@ -45,7 +45,7 @@ jobs:
     
     # Cache pub dependencies for faster builds
     - name: Cache Flutter packages
-      uses: actions/cache@v4
+      uses: actions/cache@v5
       with:
         path: |
           ~/.pub-cache
@@ -91,14 +91,14 @@ jobs:
       run: flutter build appbundle --release
     
     - name: Upload APK
-      uses: actions/upload-artifact@v5
+      uses: actions/upload-artifact@v6
       with:
         name: android-apk
         path: build/app/outputs/flutter-apk/app-release.apk
         retention-days: 7
     
     - name: Upload App Bundle
-      uses: actions/upload-artifact@v5
+      uses: actions/upload-artifact@v6
       with:
         name: android-bundle
         path: build/app/outputs/bundle/release/app-release.aab
