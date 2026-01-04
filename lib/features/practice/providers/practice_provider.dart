@@ -6,12 +6,10 @@ import 'package:prompt_loop/domain/entities/struggle_entry.dart';
 
 /// Provider for all practice sessions.
 final practiceSessionsProvider =
-    StateNotifierProvider<
+    NotifierProvider<
       PracticeSessionsNotifier,
       AsyncValue<List<PracticeSession>>
-    >((ref) {
-      return PracticeSessionsNotifier(ref);
-    });
+    >(PracticeSessionsNotifier.new);
 
 /// Provider for practice sessions by task.
 final sessionsByTaskProvider =
@@ -133,17 +131,17 @@ final weeklyPracticeTimeProvider = FutureProvider<Duration>((ref) async {
 
 /// Practice sessions state notifier.
 class PracticeSessionsNotifier
-    extends StateNotifier<AsyncValue<List<PracticeSession>>> {
-  final Ref _ref;
-
-  PracticeSessionsNotifier(this._ref) : super(const AsyncValue.loading()) {
+    extends Notifier<AsyncValue<List<PracticeSession>>> {
+  @override
+  AsyncValue<List<PracticeSession>> build() {
     loadSessions();
+    return const AsyncValue.loading();
   }
 
   Future<void> loadSessions() async {
     try {
       state = const AsyncValue.loading();
-      final repository = await _ref.read(practiceRepositoryProvider.future);
+      final repository = await ref.read(practiceRepositoryProvider.future);
       // Get sessions from the last 30 days by default
       final now = DateTime.now();
       final thirtyDaysAgo = now.subtract(const Duration(days: 30));
@@ -159,7 +157,7 @@ class PracticeSessionsNotifier
 
   Future<int> startSession(int taskId) async {
     try {
-      final repository = await _ref.read(practiceRepositoryProvider.future);
+      final repository = await ref.read(practiceRepositoryProvider.future);
       final id = await repository.startSession(taskId);
       await loadSessions();
       _invalidateRelatedProviders(taskId);
@@ -177,7 +175,7 @@ class PracticeSessionsNotifier
     List<String>? criteriaMet,
   }) async {
     try {
-      final repository = await _ref.read(practiceRepositoryProvider.future);
+      final repository = await ref.read(practiceRepositoryProvider.future);
       await repository.completeSession(
         sessionId: sessionId,
         durationSeconds: durationSeconds,
@@ -198,13 +196,13 @@ class PracticeSessionsNotifier
     String? wiseFeedback,
   }) async {
     try {
-      final repository = await _ref.read(practiceRepositoryProvider.future);
+      final repository = await ref.read(practiceRepositoryProvider.future);
       final id = await repository.saveStruggleEntry(
         sessionId: sessionId,
         content: content,
         wiseFeedback: wiseFeedback,
       );
-      _ref.invalidate(struggleEntriesBySessionProvider(sessionId));
+      ref.invalidate(struggleEntriesBySessionProvider(sessionId));
       return id;
     } catch (e) {
       rethrow;
@@ -213,21 +211,21 @@ class PracticeSessionsNotifier
 
   Future<void> recordPracticeForStreak(int skillId) async {
     try {
-      final repository = await _ref.read(practiceRepositoryProvider.future);
+      final repository = await ref.read(practiceRepositoryProvider.future);
       await repository.recordPracticeForStreak(skillId);
-      _ref.invalidate(streakProvider(skillId));
+      ref.invalidate(streakProvider(skillId));
     } catch (e) {
       rethrow;
     }
   }
 
   void _invalidateRelatedProviders(int taskId) {
-    _ref.invalidate(sessionsByTaskProvider(taskId));
-    _ref.invalidate(todaysSessionsProvider);
-    _ref.invalidate(todaysPracticeTimeProvider);
-    _ref.invalidate(weeklyPracticeTimeProvider);
+    ref.invalidate(sessionsByTaskProvider(taskId));
+    ref.invalidate(todaysSessionsProvider);
+    ref.invalidate(todaysPracticeTimeProvider);
+    ref.invalidate(weeklyPracticeTimeProvider);
     // Invalidate progress providers to update skill progress
-    _ref.invalidate(skillProgressPercentProvider);
-    _ref.invalidate(completedTasksCountProvider);
+    ref.invalidate(skillProgressPercentProvider);
+    ref.invalidate(completedTasksCountProvider);
   }
 }

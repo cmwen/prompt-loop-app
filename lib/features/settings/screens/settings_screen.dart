@@ -433,10 +433,10 @@ class SettingsScreen extends ConsumerWidget {
       final sessionsValue = ref.read(practiceSessionsProvider);
       final purposesValue = ref.read(purposesProvider);
 
-      final skills = skillsValue.valueOrNull ?? [];
-      final tasks = tasksValue.valueOrNull ?? [];
-      final sessions = sessionsValue.valueOrNull ?? [];
-      final purposes = purposesValue.valueOrNull ?? [];
+      final skills = skillsValue.value ?? [];
+      final tasks = tasksValue.value ?? [];
+      final sessions = sessionsValue.value ?? [];
+      final purposes = purposesValue.value ?? [];
 
       final exportData = {
         'export_version': '1.0',

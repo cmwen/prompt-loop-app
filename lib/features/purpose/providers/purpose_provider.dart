@@ -4,9 +4,9 @@ import 'package:prompt_loop/domain/entities/purpose.dart';
 
 /// Provider for all purposes.
 final purposesProvider =
-    StateNotifierProvider<PurposesNotifier, AsyncValue<List<Purpose>>>((ref) {
-      return PurposesNotifier(ref);
-    });
+    NotifierProvider<PurposesNotifier, AsyncValue<List<Purpose>>>(
+      PurposesNotifier.new,
+    );
 
 /// Provider for purpose by skill.
 final purposeBySkillProvider = FutureProvider.family<Purpose?, int>((
@@ -47,17 +47,17 @@ class PurposeStats {
 }
 
 /// Purposes state notifier.
-class PurposesNotifier extends StateNotifier<AsyncValue<List<Purpose>>> {
-  final Ref _ref;
-
-  PurposesNotifier(this._ref) : super(const AsyncValue.loading()) {
+class PurposesNotifier extends Notifier<AsyncValue<List<Purpose>>> {
+  @override
+  AsyncValue<List<Purpose>> build() {
     loadPurposes();
+    return const AsyncValue.loading();
   }
 
   Future<void> loadPurposes() async {
     try {
       state = const AsyncValue.loading();
-      final repository = await _ref.read(purposeRepositoryProvider.future);
+      final repository = await ref.read(purposeRepositoryProvider.future);
       final purposes = await repository.getAllPurposes();
       state = AsyncValue.data(purposes);
     } catch (e, st) {
@@ -67,10 +67,10 @@ class PurposesNotifier extends StateNotifier<AsyncValue<List<Purpose>>> {
 
   Future<int> createPurpose(Purpose purpose) async {
     try {
-      final repository = await _ref.read(purposeRepositoryProvider.future);
+      final repository = await ref.read(purposeRepositoryProvider.future);
       final id = await repository.savePurpose(purpose);
       await loadPurposes();
-      _ref.invalidate(purposeBySkillProvider(purpose.skillId));
+      ref.invalidate(purposeBySkillProvider(purpose.skillId));
       return id;
     } catch (e) {
       rethrow;
@@ -79,10 +79,10 @@ class PurposesNotifier extends StateNotifier<AsyncValue<List<Purpose>>> {
 
   Future<void> updatePurpose(Purpose purpose) async {
     try {
-      final repository = await _ref.read(purposeRepositoryProvider.future);
+      final repository = await ref.read(purposeRepositoryProvider.future);
       await repository.updatePurpose(purpose);
       await loadPurposes();
-      _ref.invalidate(purposeBySkillProvider(purpose.skillId));
+      ref.invalidate(purposeBySkillProvider(purpose.skillId));
     } catch (e) {
       rethrow;
     }
@@ -90,10 +90,10 @@ class PurposesNotifier extends StateNotifier<AsyncValue<List<Purpose>>> {
 
   Future<void> deletePurpose(int id, int skillId) async {
     try {
-      final repository = await _ref.read(purposeRepositoryProvider.future);
+      final repository = await ref.read(purposeRepositoryProvider.future);
       await repository.deletePurpose(id);
       await loadPurposes();
-      _ref.invalidate(purposeBySkillProvider(skillId));
+      ref.invalidate(purposeBySkillProvider(skillId));
     } catch (e) {
       rethrow;
     }

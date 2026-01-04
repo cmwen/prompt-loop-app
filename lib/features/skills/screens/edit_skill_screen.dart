@@ -30,7 +30,7 @@ class _EditSkillScreenState extends ConsumerState<EditSkillScreen> {
 
   Future<void> _loadSkill() async {
     try {
-      final skills = ref.read(skillsProvider).valueOrNull ?? [];
+      final skills = ref.read(skillsProvider).value ?? [];
       final skill = skills.firstWhere(
         (s) => s.id == widget.skillId,
         orElse: () => throw Exception('Skill not found'),
@@ -64,7 +64,7 @@ class _EditSkillScreenState extends ConsumerState<EditSkillScreen> {
     setState(() => _isSaving = true);
 
     try {
-      final skills = ref.read(skillsProvider).valueOrNull ?? [];
+      final skills = ref.read(skillsProvider).value ?? [];
       final currentSkill = skills.firstWhere((s) => s.id == widget.skillId);
 
       final updatedSkill = currentSkill.copyWith(

@@ -5,9 +5,9 @@ import 'package:prompt_loop/domain/entities/sub_skill.dart';
 
 /// Provider for the list of all active skills.
 final skillsProvider =
-    StateNotifierProvider<SkillsNotifier, AsyncValue<List<Skill>>>((ref) {
-      return SkillsNotifier(ref);
-    });
+    NotifierProvider<SkillsNotifier, AsyncValue<List<Skill>>>(
+      SkillsNotifier.new,
+    );
 
 /// Provider for a single skill by ID.
 final skillByIdProvider = Provider.family<AsyncValue<Skill?>, int>((ref, id) {
@@ -29,17 +29,17 @@ final subSkillsProvider = FutureProvider.family<List<SubSkill>, int>((
 });
 
 /// Skills state notifier.
-class SkillsNotifier extends StateNotifier<AsyncValue<List<Skill>>> {
-  final Ref _ref;
-
-  SkillsNotifier(this._ref) : super(const AsyncValue.loading()) {
+class SkillsNotifier extends Notifier<AsyncValue<List<Skill>>> {
+  @override
+  AsyncValue<List<Skill>> build() {
     loadSkills();
+    return const AsyncValue.loading();
   }
 
   Future<void> loadSkills() async {
     try {
       state = const AsyncValue.loading();
-      final repository = await _ref.read(skillRepositoryProvider.future);
+      final repository = await ref.read(skillRepositoryProvider.future);
       final skills = await repository.getAllSkills();
       state = AsyncValue.data(skills);
     } catch (e, st) {
@@ -49,7 +49,7 @@ class SkillsNotifier extends StateNotifier<AsyncValue<List<Skill>>> {
 
   Future<int> createSkill(Skill skill) async {
     try {
-      final repository = await _ref.read(skillRepositoryProvider.future);
+      final repository = await ref.read(skillRepositoryProvider.future);
       final id = await repository.createSkill(skill);
       await loadSkills();
       return id;
@@ -60,7 +60,7 @@ class SkillsNotifier extends StateNotifier<AsyncValue<List<Skill>>> {
 
   Future<void> updateSkill(Skill skill) async {
     try {
-      final repository = await _ref.read(skillRepositoryProvider.future);
+      final repository = await ref.read(skillRepositoryProvider.future);
       await repository.updateSkill(skill);
       await loadSkills();
     } catch (e) {
@@ -70,7 +70,7 @@ class SkillsNotifier extends StateNotifier<AsyncValue<List<Skill>>> {
 
   Future<void> deleteSkill(int id) async {
     try {
-      final repository = await _ref.read(skillRepositoryProvider.future);
+      final repository = await ref.read(skillRepositoryProvider.future);
       await repository.deleteSkill(id);
       await loadSkills();
     } catch (e) {
@@ -80,7 +80,7 @@ class SkillsNotifier extends StateNotifier<AsyncValue<List<Skill>>> {
 
   Future<void> archiveSkill(int id) async {
     try {
-      final repository = await _ref.read(skillRepositoryProvider.future);
+      final repository = await ref.read(skillRepositoryProvider.future);
       await repository.archiveSkill(id);
       await loadSkills();
     } catch (e) {
@@ -90,10 +90,10 @@ class SkillsNotifier extends StateNotifier<AsyncValue<List<Skill>>> {
 
   Future<int> createSubSkill(SubSkill subSkill) async {
     try {
-      final repository = await _ref.read(skillRepositoryProvider.future);
+      final repository = await ref.read(skillRepositoryProvider.future);
       final id = await repository.createSubSkill(subSkill);
       // Invalidate sub-skills provider for this skill
-      _ref.invalidate(subSkillsProvider(subSkill.skillId));
+      ref.invalidate(subSkillsProvider(subSkill.skillId));
       return id;
     } catch (e) {
       rethrow;
@@ -102,9 +102,9 @@ class SkillsNotifier extends StateNotifier<AsyncValue<List<Skill>>> {
 
   Future<void> updateSubSkill(SubSkill subSkill) async {
     try {
-      final repository = await _ref.read(skillRepositoryProvider.future);
+      final repository = await ref.read(skillRepositoryProvider.future);
       await repository.updateSubSkill(subSkill);
-      _ref.invalidate(subSkillsProvider(subSkill.skillId));
+      ref.invalidate(subSkillsProvider(subSkill.skillId));
     } catch (e) {
       rethrow;
     }
@@ -112,9 +112,9 @@ class SkillsNotifier extends StateNotifier<AsyncValue<List<Skill>>> {
 
   Future<void> deleteSubSkill(int id, int skillId) async {
     try {
-      final repository = await _ref.read(skillRepositoryProvider.future);
+      final repository = await ref.read(skillRepositoryProvider.future);
       await repository.deleteSubSkill(id);
-      _ref.invalidate(subSkillsProvider(skillId));
+      ref.invalidate(subSkillsProvider(skillId));
     } catch (e) {
       rethrow;
     }
@@ -126,13 +126,13 @@ class SkillsNotifier extends StateNotifier<AsyncValue<List<Skill>>> {
     int progress,
   ) async {
     try {
-      final repository = await _ref.read(skillRepositoryProvider.future);
+      final repository = await ref.read(skillRepositoryProvider.future);
       final subSkills = await repository.getSubSkills(skillId);
       final subSkill = subSkills.firstWhere((s) => s.id == subSkillId);
       await repository.updateSubSkill(
         subSkill.copyWith(progressPercent: progress),
       );
-      _ref.invalidate(subSkillsProvider(skillId));
+      ref.invalidate(subSkillsProvider(skillId));
       await loadSkills();
     } catch (e) {
       rethrow;

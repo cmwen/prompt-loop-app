@@ -14,11 +14,9 @@ final llmServiceProvider = Provider<LlmService?>((ref) {
 
 /// Provider for the copy-paste workflow state.
 final copyPasteWorkflowProvider =
-    StateNotifierProvider<CopyPasteWorkflowNotifier, CopyPasteWorkflowState>((
-      ref,
-    ) {
-      return CopyPasteWorkflowNotifier();
-    });
+    NotifierProvider<CopyPasteWorkflowNotifier, CopyPasteWorkflowState>(
+      CopyPasteWorkflowNotifier.new,
+    );
 
 /// Provider to check if BYOK is configured (deprecated).
 final isByokConfiguredProvider = FutureProvider<bool>((ref) async {
@@ -26,8 +24,9 @@ final isByokConfiguredProvider = FutureProvider<bool>((ref) async {
 });
 
 /// Notifier for the copy-paste workflow state.
-class CopyPasteWorkflowNotifier extends StateNotifier<CopyPasteWorkflowState> {
-  CopyPasteWorkflowNotifier() : super(const CopyPasteWorkflowState.initial());
+class CopyPasteWorkflowNotifier extends Notifier<CopyPasteWorkflowState> {
+  @override
+  CopyPasteWorkflowState build() => const CopyPasteWorkflowState.initial();
 
   void setPromptReady(String prompt) {
     state = state.copyWith(

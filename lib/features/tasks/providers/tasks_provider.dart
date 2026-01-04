@@ -3,10 +3,9 @@ import 'package:prompt_loop/data/providers/repository_providers.dart';
 import 'package:prompt_loop/domain/entities/task.dart';
 
 /// Provider for all tasks.
-final tasksProvider =
-    StateNotifierProvider<TasksNotifier, AsyncValue<List<Task>>>((ref) {
-      return TasksNotifier(ref);
-    });
+final tasksProvider = NotifierProvider<TasksNotifier, AsyncValue<List<Task>>>(
+  TasksNotifier.new,
+);
 
 /// Provider for tasks by skill.
 final tasksBySkillProvider = FutureProvider.family<List<Task>, int>((
@@ -83,17 +82,17 @@ final upcomingTasksProvider = FutureProvider<List<Task>>((ref) async {
 });
 
 /// Tasks state notifier.
-class TasksNotifier extends StateNotifier<AsyncValue<List<Task>>> {
-  final Ref _ref;
-
-  TasksNotifier(this._ref) : super(const AsyncValue.loading()) {
+class TasksNotifier extends Notifier<AsyncValue<List<Task>>> {
+  @override
+  AsyncValue<List<Task>> build() {
     loadTasks();
+    return const AsyncValue.loading();
   }
 
   Future<void> loadTasks() async {
     try {
       state = const AsyncValue.loading();
-      final repository = await _ref.read(taskRepositoryProvider.future);
+      final repository = await ref.read(taskRepositoryProvider.future);
       final tasks = await repository.getAllTasks();
       state = AsyncValue.data(tasks);
     } catch (e, st) {
@@ -103,7 +102,7 @@ class TasksNotifier extends StateNotifier<AsyncValue<List<Task>>> {
 
   Future<int> createTask(Task task) async {
     try {
-      final repository = await _ref.read(taskRepositoryProvider.future);
+      final repository = await ref.read(taskRepositoryProvider.future);
       final id = await repository.createTask(task);
       await loadTasks();
       _invalidateRelatedProviders(task);
@@ -115,7 +114,7 @@ class TasksNotifier extends StateNotifier<AsyncValue<List<Task>>> {
 
   Future<void> updateTask(Task task) async {
     try {
-      final repository = await _ref.read(taskRepositoryProvider.future);
+      final repository = await ref.read(taskRepositoryProvider.future);
       await repository.updateTask(task);
       await loadTasks();
       _invalidateRelatedProviders(task);
@@ -126,7 +125,7 @@ class TasksNotifier extends StateNotifier<AsyncValue<List<Task>>> {
 
   Future<void> deleteTask(int id) async {
     try {
-      final repository = await _ref.read(taskRepositoryProvider.future);
+      final repository = await ref.read(taskRepositoryProvider.future);
       await repository.deleteTask(id);
       await loadTasks();
     } catch (e) {
@@ -136,10 +135,10 @@ class TasksNotifier extends StateNotifier<AsyncValue<List<Task>>> {
 
   Future<void> completeTask(int id) async {
     try {
-      final repository = await _ref.read(taskRepositoryProvider.future);
+      final repository = await ref.read(taskRepositoryProvider.future);
       await repository.completeTask(id);
       await loadTasks();
-      _ref.invalidate(todaysTasksProvider);
+      ref.invalidate(todaysTasksProvider);
     } catch (e) {
       rethrow;
     }
@@ -147,24 +146,24 @@ class TasksNotifier extends StateNotifier<AsyncValue<List<Task>>> {
 
   Future<void> uncompleteTask(int id) async {
     try {
-      final repository = await _ref.read(taskRepositoryProvider.future);
+      final repository = await ref.read(taskRepositoryProvider.future);
       final task = await repository.getTaskById(id);
       if (task != null) {
         await repository.updateTask(task.copyWith(isCompleted: false));
       }
       await loadTasks();
-      _ref.invalidate(todaysTasksProvider);
+      ref.invalidate(todaysTasksProvider);
     } catch (e) {
       rethrow;
     }
   }
 
   void _invalidateRelatedProviders(Task task) {
-    _ref.invalidate(tasksBySkillProvider(task.skillId));
+    ref.invalidate(tasksBySkillProvider(task.skillId));
     if (task.subSkillId != null) {
-      _ref.invalidate(tasksBySubSkillProvider(task.subSkillId!));
+      ref.invalidate(tasksBySubSkillProvider(task.subSkillId!));
     }
-    _ref.invalidate(todaysTasksProvider);
-    _ref.invalidate(upcomingTasksProvider);
+    ref.invalidate(todaysTasksProvider);
+    ref.invalidate(upcomingTasksProvider);
   }
 }
