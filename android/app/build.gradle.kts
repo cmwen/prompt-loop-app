@@ -37,7 +37,7 @@ android {
     namespace = "com.cmwen.prompt_loop"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
-    buildToolsVersion = "35.0.0"
+    buildToolsVersion = "34.0.0"
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
