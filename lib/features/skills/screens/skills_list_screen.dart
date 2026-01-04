@@ -97,7 +97,7 @@ class SkillsListScreen extends ConsumerWidget {
                                 },
                               ),
                             ),
-                            error: (_, __) => SkillCard(
+                            error: (_, _) => SkillCard(
                               name: skill.name,
                               level: skill.currentLevel.displayName,
                               progress: 0.0,

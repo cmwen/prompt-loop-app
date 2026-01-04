@@ -94,7 +94,7 @@ final routerProvider = Provider<GoRouter>((ref) {
           // While loading, stay on splash or go to splash if not there
           return isSplash ? null : AppPaths.splash;
         },
-        error: (_, __) {
+        error: (_, _) {
           // On error, go to onboarding to be safe
           return isSplash ? AppPaths.onboarding : null;
         },

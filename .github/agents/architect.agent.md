@@ -9,7 +9,8 @@ tools:
   - fetch
   - githubRepo
   - codebase
-  - terminal
+  - runInTerminal
+  - readFile
 handoffs:
   - label: Implement Architecture
     agent: flutter-developer

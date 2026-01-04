@@ -66,7 +66,7 @@ class HomeScreen extends ConsumerWidget {
                       );
                     },
                     loading: () => const SizedBox.shrink(),
-                    error: (_, __) => const SizedBox.shrink(),
+                    error: (_, _) => const SizedBox.shrink(),
                   ),
                 ],
               ),
@@ -183,7 +183,7 @@ class HomeScreen extends ConsumerWidget {
                                       );
                                     },
                                   ),
-                                  error: (_, __) => SkillCard(
+                                  error: (_, _) => SkillCard(
                                     name: skill.name,
                                     level: skill.currentLevel.displayName,
                                     progress: 0.0,
@@ -342,11 +342,11 @@ class _PurposeReminderCard extends ConsumerWidget {
             );
           },
           loading: () => const SizedBox.shrink(),
-          error: (_, __) => const SizedBox.shrink(),
+          error: (_, _) => const SizedBox.shrink(),
         );
       },
       loading: () => const SizedBox.shrink(),
-      error: (_, __) => const SizedBox.shrink(),
+      error: (_, _) => const SizedBox.shrink(),
     );
   }
 }
@@ -377,7 +377,7 @@ class _TodaysStatsCard extends StatelessWidget {
                       decoration: BoxDecoration(
                         color: Theme.of(
                           context,
-                        ).colorScheme.primary.withOpacity(0.1),
+                        ).colorScheme.primary.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: Icon(
@@ -398,7 +398,7 @@ class _TodaysStatsCard extends StatelessWidget {
                     ),
                   ),
                   loading: () => const Text('--'),
-                  error: (_, __) => const Text('--'),
+                  error: (_, _) => const Text('--'),
                 ),
                 const SizedBox(height: 4),
                 Text(
@@ -445,7 +445,7 @@ class _TodaysStatsCard extends StatelessWidget {
                     );
                   },
                   loading: () => const Text('--'),
-                  error: (_, __) => const Text('--'),
+                  error: (_, _) => const Text('--'),
                 ),
                 const SizedBox(height: 4),
                 Text(

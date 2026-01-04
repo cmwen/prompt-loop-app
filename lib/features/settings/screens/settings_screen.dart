@@ -9,7 +9,7 @@ import 'package:path_provider/path_provider.dart';
 import 'dart:io';
 import 'package:prompt_loop/core/router/app_router.dart';
 import 'package:prompt_loop/domain/entities/app_settings.dart';
-import 'package:prompt_loop/data/services/byok_llm_service.dart';
+import 'package:prompt_loop/data/services/ollama_llm_service.dart';
 import 'package:prompt_loop/features/settings/providers/settings_provider.dart';
 import 'package:prompt_loop/features/skills/providers/skills_provider.dart';
 import 'package:prompt_loop/features/tasks/providers/tasks_provider.dart';
@@ -60,130 +60,60 @@ class SettingsScreen extends ConsumerWidget {
                         ),
                         const SizedBox(height: 12),
                         ...LlmMode.values.map(
-                          (mode) => RadioListTile<LlmMode>(
-                            title: Text(
-                              mode == LlmMode.copyPaste
-                                  ? 'Copy-Paste'
-                                  : 'Bring Your Own Key',
+                          (mode) => SizedBox(
+                            child: RadioListTile<LlmMode>(
+                              // ignore: deprecated_member_use
+                              title: Text(mode.displayName),
+                              subtitle: Text(
+                                mode == LlmMode.copyPaste
+                                    ? 'Copy prompts to ChatGPT, Claude, etc.'
+                                    : 'Use local Ollama server for AI integration',
+                              ),
+                              value: mode,
+                              // ignore: deprecated_member_use
+                              onChanged: (value) {
+                                if (value != null) {
+                                  ref
+                                      .read(settingsProvider.notifier)
+                                      .setLlmMode(value);
+                                }
+                              },
                             ),
-                            subtitle: Text(
-                              mode == LlmMode.copyPaste
-                                  ? 'Copy prompts to ChatGPT, Claude, etc.'
-                                  : 'Use your own API key for direct integration',
-                            ),
-                            value: mode,
-                            groupValue: settingsData.llmMode,
-                            onChanged: (value) {
-                              if (value != null) {
-                                ref
-                                    .read(settingsProvider.notifier)
-                                    .setLlmMode(value);
-                              }
-                            },
                           ),
                         ),
                       ],
                     ),
                   ),
 
-                  // API Key section (only if BYOK mode)
-                  if (settingsData.llmMode == LlmMode.byok) ...[
+                  // Ollama Configuration section (only if Ollama mode)
+                  if (settingsData.llmMode == LlmMode.ollama) ...[
                     const SizedBox(height: 12),
-                    AppCard(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            children: [
-                              Expanded(
-                                child: Text(
-                                  'API Key',
-                                  style: Theme.of(context).textTheme.titleSmall,
-                                ),
-                              ),
-                              TextButton(
-                                onPressed: () =>
-                                    _showApiKeyDialog(context, ref),
-                                child: const Text('Configure'),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 4),
-                          FutureBuilder<String?>(
-                            future: ref
-                                .read(settingsProvider.notifier)
-                                .getApiKey(),
-                            builder: (context, snapshot) {
-                              if (snapshot.hasData && snapshot.data != null) {
-                                return Row(
-                                  children: [
-                                    const Icon(
-                                      Icons.check_circle,
-                                      color: AppColors.success,
-                                      size: 16,
-                                    ),
-                                    const SizedBox(width: 4),
-                                    Text(
-                                      'API key configured',
-                                      style: Theme.of(context)
-                                          .textTheme
-                                          .bodySmall
-                                          ?.copyWith(color: AppColors.success),
-                                    ),
-                                  ],
-                                );
-                              }
-                              return Row(
-                                children: [
-                                  const Icon(
-                                    Icons.warning,
-                                    color: AppColors.warning,
-                                    size: 16,
-                                  ),
-                                  const SizedBox(width: 4),
-                                  Text(
-                                    'No API key configured',
-                                    style: Theme.of(context).textTheme.bodySmall
-                                        ?.copyWith(color: AppColors.warning),
-                                  ),
-                                ],
-                              );
-                            },
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    AppCard(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'LLM Provider',
-                            style: Theme.of(context).textTheme.titleSmall,
-                          ),
-                          const SizedBox(height: 8),
-                          DropdownButton<LlmProvider>(
-                            value: settingsData.llmProvider,
-                            isExpanded: true,
-                            onChanged: (value) {
-                              if (value != null) {
-                                ref
-                                    .read(settingsProvider.notifier)
-                                    .setLlmProvider(value);
-                              }
-                            },
-                            items: LlmProvider.values
-                                .map(
-                                  (provider) => DropdownMenuItem(
-                                    value: provider,
-                                    child: Text(provider.name.toUpperCase()),
-                                  ),
-                                )
-                                .toList(),
-                          ),
-                        ],
-                      ),
+                    _OllamaConfigCard(
+                      baseUrl: settingsData.ollamaBaseUrl,
+                      defaultModel: settingsData.ollamaDefaultModel,
+                      onBaseUrlChanged: (value) {
+                        if (value.isNotEmpty) {
+                          ref
+                              .read(settingsProvider.notifier)
+                              .setOllamaBaseUrl(value);
+                        }
+                      },
+                      onModelChanged: (value) {
+                        ref
+                            .read(settingsProvider.notifier)
+                            .setOllamaDefaultModel(
+                              value?.isEmpty ?? true ? null : value,
+                            );
+                      },
+                      onTestConnection: () async {
+                        await _testOllamaConnection(
+                          context,
+                          ref,
+                          settingsData.ollamaBaseUrl,
+                        );
+                        // Refresh models after connection test
+                        // This will trigger a rebuild of the card
+                      },
                     ),
                   ],
                   const SizedBox(height: 24),
@@ -211,18 +141,21 @@ class SettingsScreen extends ConsumerWidget {
                         ),
                         const SizedBox(height: 12),
                         ...AppThemeMode.values.map(
-                          (mode) => RadioListTile<AppThemeMode>(
-                            title: Text(mode.displayName),
-                            subtitle: Text(mode.description),
-                            value: mode,
-                            groupValue: settingsData.themeMode,
-                            onChanged: (value) {
-                              if (value != null) {
-                                ref
-                                    .read(settingsProvider.notifier)
-                                    .setThemeMode(value);
-                              }
-                            },
+                          (mode) => SizedBox(
+                            child: RadioListTile<AppThemeMode>(
+                              // ignore: deprecated_member_use
+                              title: Text(mode.displayName),
+                              subtitle: Text(mode.description),
+                              value: mode,
+                              // ignore: deprecated_member_use
+                              onChanged: (value) {
+                                if (value != null) {
+                                  ref
+                                      .read(settingsProvider.notifier)
+                                      .setThemeMode(value);
+                                }
+                              },
+                            ),
                           ),
                         ),
                       ],
@@ -400,157 +333,62 @@ class SettingsScreen extends ConsumerWidget {
     );
   }
 
-  void _showApiKeyDialog(BuildContext context, WidgetRef ref) {
-    final controller = TextEditingController();
-    bool isValidating = false;
-    String? validationError;
+  Future<void> _testOllamaConnection(
+    BuildContext context,
+    WidgetRef ref,
+    String baseUrl,
+  ) async {
+    if (!context.mounted) return;
 
-    showDialog(
-      context: context,
-      builder: (context) => StatefulBuilder(
-        builder: (context, setState) => AlertDialog(
-          title: const Text('Configure API Key'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text(
-                'Enter your OpenAI API key. It will be stored securely and validated.',
-              ),
-              const SizedBox(height: 16),
-              TextField(
-                controller: controller,
-                decoration: const InputDecoration(
-                  labelText: 'API Key',
-                  hintText: 'sk-...',
-                  border: OutlineInputBorder(),
-                ),
-                obscureText: true,
-                onChanged: (_) {
-                  if (validationError != null) {
-                    setState(() => validationError = null);
-                  }
-                },
-              ),
-              if (validationError != null) ...[
-                const SizedBox(height: 8),
-                Row(
-                  children: [
-                    const Icon(Icons.error, color: AppColors.error, size: 16),
-                    const SizedBox(width: 4),
-                    Expanded(
-                      child: Text(
-                        validationError!,
-                        style: Theme.of(
-                          context,
-                        ).textTheme.bodySmall?.copyWith(color: AppColors.error),
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-              if (isValidating) ...[
-                const SizedBox(height: 12),
-                const Row(
-                  children: [
-                    SizedBox(
-                      width: 16,
-                      height: 16,
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    ),
-                    SizedBox(width: 8),
-                    Text('Validating API key...'),
-                  ],
-                ),
-              ],
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: isValidating ? null : () => Navigator.pop(context),
-              child: const Text('Cancel'),
-            ),
-            TextButton(
-              onPressed: isValidating
-                  ? null
-                  : () async {
-                      await ref.read(settingsProvider.notifier).clearApiKey();
-                      if (context.mounted) Navigator.pop(context);
-                    },
-              child: const Text('Clear'),
-            ),
-            FilledButton(
-              onPressed: isValidating
-                  ? null
-                  : () async {
-                      if (controller.text.isEmpty) {
-                        setState(
-                          () => validationError = 'Please enter an API key',
-                        );
-                        return;
-                      }
+    try {
+      final service = OllamaLlmService(baseUrl: baseUrl, model: 'llama2');
 
-                      setState(() {
-                        isValidating = true;
-                        validationError = null;
-                      });
-
-                      try {
-                        // Validate the API key
-                        final settingsValue = ref.read(settingsProvider);
-                        final settings = settingsValue.value;
-                        if (settings == null) {
-                          setState(() {
-                            isValidating = false;
-                            validationError = 'Settings not loaded';
-                          });
-                          return;
-                        }
-
-                        final service = ByokLlmService(
-                          apiKey: controller.text.trim(),
-                          provider: settings.llmProvider,
-                          model: settings.llmModel,
-                        );
-
-                        final result = await service.validateApiKey();
-
-                        if (!result.isValid) {
-                          setState(() {
-                            isValidating = false;
-                            validationError =
-                                result.errorMessage ?? 'Validation failed';
-                          });
-                          return;
-                        }
-
-                        // Save if valid
-                        await ref
-                            .read(settingsProvider.notifier)
-                            .saveApiKey(controller.text.trim());
-
-                        if (context.mounted) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text('API key validated and saved!'),
-                              backgroundColor: AppColors.success,
-                            ),
-                          );
-                          Navigator.pop(context);
-                        }
-                      } catch (e) {
-                        setState(() {
-                          isValidating = false;
-                          validationError = 'Validation error: $e';
-                        });
-                      }
-                    },
-              child: const Text('Validate & Save'),
-            ),
-          ],
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Testing connection...'),
+          duration: Duration(seconds: 30),
         ),
-      ),
-    );
+      );
+
+      final isConnected = await service.testConnection();
+
+      if (!context.mounted) return;
+
+      // Remove the loading snackbar
+      ScaffoldMessenger.of(context).clearSnackBars();
+
+      if (isConnected) {
+        final models = await service.listModels();
+
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Connected! Found ${models.length} models.'),
+              backgroundColor: AppColors.success,
+            ),
+          );
+        }
+      } else {
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Connection failed. Check your Ollama server.'),
+              backgroundColor: AppColors.error,
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).clearSnackBars();
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error: $e'),
+            backgroundColor: AppColors.error,
+          ),
+        );
+      }
+    }
   }
 
   void _showTimePicker(
@@ -723,6 +561,164 @@ class SettingsScreen extends ConsumerWidget {
         ).showSnackBar(SnackBar(content: Text('Error opening link: $e')));
       }
     }
+  }
+}
+
+class _OllamaConfigCard extends ConsumerStatefulWidget {
+  final String baseUrl;
+  final String? defaultModel;
+  final Function(String) onBaseUrlChanged;
+  final Function(String?) onModelChanged;
+  final Future<void> Function() onTestConnection;
+
+  const _OllamaConfigCard({
+    required this.baseUrl,
+    required this.defaultModel,
+    required this.onBaseUrlChanged,
+    required this.onModelChanged,
+    required this.onTestConnection,
+  });
+
+  @override
+  ConsumerState<_OllamaConfigCard> createState() => _OllamaConfigCardState();
+}
+
+class _OllamaConfigCardState extends ConsumerState<_OllamaConfigCard> {
+  late TextEditingController _baseUrlController;
+  List<String> _availableModels = [];
+  bool _loadingModels = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _baseUrlController = TextEditingController(text: widget.baseUrl);
+    _loadModels();
+  }
+
+  @override
+  void didUpdateWidget(_OllamaConfigCard oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.baseUrl != widget.baseUrl) {
+      _baseUrlController.text = widget.baseUrl;
+      // Only reload if URL actually changed meaningfully
+      if (oldWidget.baseUrl.trim() != widget.baseUrl.trim()) {
+        _loadModels();
+      }
+    }
+  }
+
+  Future<void> _loadModels() async {
+    if (!mounted) return;
+
+    setState(() => _loadingModels = true);
+
+    try {
+      final service = OllamaLlmService(
+        baseUrl: widget.baseUrl,
+        model: 'llama2', // Default model for fetching models list
+      );
+      final models = await service.listModels();
+      if (mounted) {
+        setState(() {
+          _availableModels = models;
+          _loadingModels = false;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() => _loadingModels = false);
+      }
+    }
+  }
+
+  @override
+  void dispose() {
+    _baseUrlController.dispose();
+    super.dispose();
+  }
+
+  Widget _buildModelDropdown() {
+    // Build list of models, ensuring selected model is included
+    final items = <DropdownMenuItem<String?>>[
+      const DropdownMenuItem<String?>(
+        value: null,
+        child: Text('None (manual selection)'),
+      ),
+      ..._availableModels.map(
+        (model) => DropdownMenuItem<String?>(value: model, child: Text(model)),
+      ),
+    ];
+
+    // If selected model isn't in the list, add it
+    if (widget.defaultModel != null &&
+        !_availableModels.contains(widget.defaultModel)) {
+      items.add(
+        DropdownMenuItem<String?>(
+          value: widget.defaultModel,
+          child: Text('${widget.defaultModel} (unavailable)'),
+        ),
+      );
+    }
+
+    return DropdownButtonFormField<String?>(
+      decoration: const InputDecoration(
+        labelText: 'Default Model',
+        hintText: 'Select a model',
+        border: OutlineInputBorder(),
+      ),
+      initialValue: widget.defaultModel,
+      items: items,
+      onChanged: widget.onModelChanged,
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AppCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Ollama Configuration',
+            style: Theme.of(context).textTheme.titleSmall,
+          ),
+          const SizedBox(height: 16),
+          TextField(
+            decoration: const InputDecoration(
+              labelText: 'Server URL',
+              hintText: 'http://localhost:11434',
+              border: OutlineInputBorder(),
+            ),
+            controller: _baseUrlController,
+            onChanged: widget.onBaseUrlChanged,
+          ),
+          const SizedBox(height: 16),
+          _loadingModels
+              ? const Row(
+                  children: [
+                    SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    ),
+                    SizedBox(width: 12),
+                    Text('Loading models...'),
+                  ],
+                )
+              : _buildModelDropdown(),
+          const SizedBox(height: 16),
+          ElevatedButton.icon(
+            onPressed: () async {
+              await widget.onTestConnection();
+              // Reload models after connection test
+              await _loadModels();
+            },
+            icon: const Icon(Icons.wifi_tethering),
+            label: const Text('Test Connection'),
+          ),
+        ],
+      ),
+    );
   }
 }
 

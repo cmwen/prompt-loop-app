@@ -153,16 +153,19 @@ class _EditSkillScreenState extends ConsumerState<EditSkillScreen> {
               ),
               const SizedBox(height: 8),
               ...SkillLevel.values.map(
-                (level) => RadioListTile<SkillLevel>(
-                  title: Text(level.displayName),
-                  subtitle: Text(_getLevelDescription(level)),
-                  value: level,
-                  groupValue: _selectedLevel,
-                  onChanged: (value) {
-                    if (value != null) {
-                      setState(() => _selectedLevel = value);
-                    }
-                  },
+                (level) => SizedBox(
+                  child: RadioListTile<SkillLevel>(
+                    // ignore: deprecated_member_use
+                    title: Text(level.displayName),
+                    subtitle: Text(_getLevelDescription(level)),
+                    value: level,
+                    // ignore: deprecated_member_use
+                    onChanged: (value) {
+                      if (value != null) {
+                        setState(() => _selectedLevel = value);
+                      }
+                    },
+                  ),
                 ),
               ),
               const SizedBox(height: 24),
