@@ -162,7 +162,7 @@ class _PracticeSessionScreenState extends ConsumerState<PracticeSessionScreen> {
     final task = widget.taskId != null
         ? ref
               .watch(tasksProvider)
-              .valueOrNull
+              .value
               ?.firstWhere(
                 (t) => t.id == widget.taskId,
                 orElse: () => throw Exception('Task not found'),

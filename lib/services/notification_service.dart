@@ -25,13 +25,14 @@ final unreadNotificationCountProvider = FutureProvider<int>((ref) async {
 
 /// StateNotifier for managing notification read state
 final notificationStateProvider =
-    StateNotifierProvider<NotificationStateNotifier, Set<String>>((ref) {
-      return NotificationStateNotifier();
-    });
+    NotifierProvider<NotificationStateNotifier, Set<String>>(
+      NotificationStateNotifier.new,
+    );
 
 /// Notification state notifier to track read notifications
-class NotificationStateNotifier extends StateNotifier<Set<String>> {
-  NotificationStateNotifier() : super({});
+class NotificationStateNotifier extends Notifier<Set<String>> {
+  @override
+  Set<String> build() => {};
 
   void markAsRead(String notificationId) {
     state = {...state, notificationId};

@@ -4,9 +4,9 @@ import 'package:prompt_loop/domain/entities/app_settings.dart';
 
 /// Current app settings state.
 final settingsProvider =
-    StateNotifierProvider<SettingsNotifier, AsyncValue<AppSettings>>((ref) {
-      return SettingsNotifier(ref);
-    });
+    NotifierProvider<SettingsNotifier, AsyncValue<AppSettings>>(
+      SettingsNotifier.new,
+    );
 
 /// Whether onboarding has been completed.
 final onboardingCompletedProvider = Provider<AsyncValue<bool>>((ref) {
@@ -29,16 +29,16 @@ final llmModeProvider = Provider<AsyncValue<LlmMode>>((ref) {
 });
 
 /// Settings state notifier for managing app settings.
-class SettingsNotifier extends StateNotifier<AsyncValue<AppSettings>> {
-  final Ref _ref;
-
-  SettingsNotifier(this._ref) : super(const AsyncValue.loading()) {
+class SettingsNotifier extends Notifier<AsyncValue<AppSettings>> {
+  @override
+  AsyncValue<AppSettings> build() {
     _loadSettings();
+    return const AsyncValue.loading();
   }
 
   Future<void> _loadSettings() async {
     try {
-      final repository = await _ref.read(settingsRepositoryProvider.future);
+      final repository = await ref.read(settingsRepositoryProvider.future);
       final settings = await repository.loadSettings();
       state = AsyncValue.data(settings);
     } catch (e, st) {
@@ -53,7 +53,7 @@ class SettingsNotifier extends StateNotifier<AsyncValue<AppSettings>> {
 
   Future<void> updateSettings(AppSettings settings) async {
     try {
-      final repository = await _ref.read(settingsRepositoryProvider.future);
+      final repository = await ref.read(settingsRepositoryProvider.future);
       final settingsMap = {
         'llm_mode': settings.llmMode.dbValue,
         'llm_provider': settings.llmProvider.name,
@@ -74,7 +74,7 @@ class SettingsNotifier extends StateNotifier<AsyncValue<AppSettings>> {
 
   Future<void> completeOnboarding() async {
     try {
-      final repository = await _ref.read(settingsRepositoryProvider.future);
+      final repository = await ref.read(settingsRepositoryProvider.future);
       await repository.completeOnboarding();
       await _loadSettings();
     } catch (e, st) {
@@ -84,7 +84,7 @@ class SettingsNotifier extends StateNotifier<AsyncValue<AppSettings>> {
 
   Future<void> resetOnboarding() async {
     try {
-      final repository = await _ref.read(settingsRepositoryProvider.future);
+      final repository = await ref.read(settingsRepositoryProvider.future);
       await repository.resetOnboarding();
       await _loadSettings();
     } catch (e, st) {
@@ -93,21 +93,21 @@ class SettingsNotifier extends StateNotifier<AsyncValue<AppSettings>> {
   }
 
   Future<void> setLlmMode(LlmMode mode) async {
-    final current = state.valueOrNull;
+    final current = state.value;
     if (current != null) {
       await updateSettings(current.copyWith(llmMode: mode));
     }
   }
 
   Future<void> setLlmProvider(LlmProvider provider) async {
-    final current = state.valueOrNull;
+    final current = state.value;
     if (current != null) {
       await updateSettings(current.copyWith(llmProvider: provider));
     }
   }
 
   Future<void> setDarkMode(bool isDark) async {
-    final current = state.valueOrNull;
+    final current = state.value;
     if (current != null) {
       await updateSettings(
         current.copyWith(
@@ -118,21 +118,21 @@ class SettingsNotifier extends StateNotifier<AsyncValue<AppSettings>> {
   }
 
   Future<void> setThemeMode(AppThemeMode mode) async {
-    final current = state.valueOrNull;
+    final current = state.value;
     if (current != null) {
       await updateSettings(current.copyWith(themeMode: mode));
     }
   }
 
   Future<void> setNotificationsEnabled(bool enabled) async {
-    final current = state.valueOrNull;
+    final current = state.value;
     if (current != null) {
       await updateSettings(current.copyWith(notificationsEnabled: enabled));
     }
   }
 
   Future<void> setDailyReminderTime(String? time) async {
-    final current = state.valueOrNull;
+    final current = state.value;
     if (current != null) {
       await updateSettings(current.copyWith(dailyReminderTime: time));
     }
@@ -140,7 +140,7 @@ class SettingsNotifier extends StateNotifier<AsyncValue<AppSettings>> {
 
   Future<void> saveApiKey(String apiKey) async {
     try {
-      final repository = await _ref.read(settingsRepositoryProvider.future);
+      final repository = await ref.read(settingsRepositoryProvider.future);
       await repository.saveSetting('llm_api_key', apiKey);
     } catch (e) {
       rethrow;
@@ -149,7 +149,7 @@ class SettingsNotifier extends StateNotifier<AsyncValue<AppSettings>> {
 
   Future<String?> getApiKey() async {
     try {
-      final repository = await _ref.read(settingsRepositoryProvider.future);
+      final repository = await ref.read(settingsRepositoryProvider.future);
       return await repository.getSetting('llm_api_key');
     } catch (e) {
       return null;
@@ -158,7 +158,7 @@ class SettingsNotifier extends StateNotifier<AsyncValue<AppSettings>> {
 
   Future<void> clearApiKey() async {
     try {
-      final repository = await _ref.read(settingsRepositoryProvider.future);
+      final repository = await ref.read(settingsRepositoryProvider.future);
       await repository.saveSetting('llm_api_key', '');
     } catch (e) {
       rethrow;

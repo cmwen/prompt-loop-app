@@ -203,7 +203,7 @@ class _CopyPasteWorkflowScreenState
 
     try {
       // Get skill data
-      final skills = ref.read(skillsProvider).valueOrNull ?? [];
+      final skills = ref.read(skillsProvider).value ?? [];
       final skill = skills.firstWhere(
         (s) => s.id == _selectedSkillId,
         orElse: () => throw Exception('Skill not found'),
