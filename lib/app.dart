@@ -27,7 +27,7 @@ class PromptLoopApp extends ConsumerWidget {
         }
       },
       loading: () => ThemeMode.system,
-      error: (_, __) => ThemeMode.system,
+      error: (_, _) => ThemeMode.system,
     );
 
     return MaterialApp.router(

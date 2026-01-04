@@ -47,7 +47,7 @@ class ProgressScreen extends ConsumerWidget {
                                 data: (d) =>
                                     '${d.inHours}h ${d.inMinutes % 60}m',
                                 loading: () => '--',
-                                error: (_, __) => '--',
+                                error: (_, _) => '--',
                               ),
                             ),
                           ),
@@ -59,7 +59,7 @@ class ProgressScreen extends ConsumerWidget {
                               value: todaysSessions.when(
                                 data: (s) => '${s.length}',
                                 loading: () => '--',
-                                error: (_, __) => '--',
+                                error: (_, _) => '--',
                               ),
                             ),
                           ),
@@ -146,7 +146,7 @@ class ProgressScreen extends ConsumerWidget {
                                               child:
                                                   CircularProgressIndicator(),
                                             ),
-                                            error: (_, __) =>
+                                            error: (_, _) =>
                                                 CircularProgressWithLabel(
                                                   value: 0.0,
                                                   size: 50,
@@ -281,7 +281,7 @@ class _SkillStreakInfo extends ConsumerWidget {
         );
       },
       loading: () => const SizedBox.shrink(),
-      error: (_, __) => const SizedBox.shrink(),
+      error: (_, _) => const SizedBox.shrink(),
     );
   }
 }

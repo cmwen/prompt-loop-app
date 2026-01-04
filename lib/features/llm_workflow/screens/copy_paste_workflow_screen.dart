@@ -7,7 +7,7 @@ import 'package:prompt_loop/core/router/app_router.dart';
 import 'package:prompt_loop/core/theme/app_colors.dart';
 import 'package:prompt_loop/core/constants/llm_constants.dart';
 import 'package:prompt_loop/data/services/copy_paste_llm_service.dart';
-import 'package:prompt_loop/data/services/byok_llm_service.dart';
+import 'package:prompt_loop/data/services/ollama_llm_service.dart';
 import 'package:prompt_loop/domain/services/llm_service.dart';
 import 'package:prompt_loop/domain/entities/task.dart';
 import 'package:prompt_loop/domain/entities/skill.dart';
@@ -39,8 +39,8 @@ class _CopyPasteWorkflowScreenState
   bool _isPromptCopied = false;
   bool _isProcessing = false;
   String? _errorMessage;
-  bool _isByokMode = false;
-  String? _apiKey;
+  bool _isOllamaMode = false;
+  OllamaLlmService? _ollamaService;
 
   // For skill analysis
   final _skillNameController = TextEditingController();
@@ -51,6 +51,9 @@ class _CopyPasteWorkflowScreenState
   int? _selectedSkillId;
   int? _selectedSubSkillId;
 
+  // For struggle analysis
+  final _struggleController = TextEditingController();
+
   @override
   void initState() {
     super.initState();
@@ -59,21 +62,26 @@ class _CopyPasteWorkflowScreenState
       setState(() {}); // Rebuild to update button enabled state
     });
 
-    // Check if BYOK is available
-    _checkByokMode();
+    // Check if Ollama is available
+    _checkOllamaMode();
   }
 
-  Future<void> _checkByokMode() async {
+  Future<void> _checkOllamaMode() async {
     final settingsValue = ref.read(settingsProvider);
-    final apiKey = await ref.read(settingsProvider.notifier).getApiKey();
 
     settingsValue.whenData((settings) {
       setState(() {
-        _isByokMode =
-            settings.llmMode == LlmMode.byok &&
-            apiKey != null &&
-            apiKey.isNotEmpty;
-        _apiKey = apiKey;
+        _isOllamaMode =
+            settings.llmMode == LlmMode.ollama &&
+            settings.ollamaDefaultModel != null &&
+            settings.ollamaDefaultModel!.isNotEmpty;
+
+        if (_isOllamaMode) {
+          _ollamaService = OllamaLlmService(
+            baseUrl: settings.ollamaBaseUrl,
+            model: settings.ollamaDefaultModel!,
+          );
+        }
       });
     });
   }
@@ -84,6 +92,7 @@ class _CopyPasteWorkflowScreenState
     _skillNameController.dispose();
     _currentLevelController.dispose();
     _goalsController.dispose();
+    _struggleController.dispose();
     super.dispose();
   }
 
@@ -104,9 +113,9 @@ class _CopyPasteWorkflowScreenState
       _errorMessage = null;
     });
 
-    // If BYOK mode is active, process directly instead of copy-paste
-    if (_isByokMode && _apiKey != null) {
-      _processWithByok();
+    // If Ollama mode is active, process directly instead of copy-paste
+    if (_isOllamaMode && _ollamaService != null) {
+      _processWithOllama();
       return;
     }
 
@@ -123,44 +132,40 @@ class _CopyPasteWorkflowScreenState
     }
   }
 
-  Future<void> _processWithByok() async {
+  Future<void> _processWithOllama() async {
     setState(() {
       _isProcessing = true;
       _errorMessage = null;
     });
 
     try {
-      final settingsValue = ref.read(settingsProvider);
-      final settings = settingsValue.value;
-      if (settings == null) {
-        throw Exception('Settings not loaded');
+      if (_ollamaService == null) {
+        throw Exception('Ollama service not initialized');
       }
-
-      final service = ByokLlmService(
-        apiKey: _apiKey!,
-        provider: settings.llmProvider,
-        model: settings.llmModel,
-      );
 
       switch (widget.workflowType) {
         case CopyPasteWorkflowType.skillAnalysis:
-          await _processSkillAnalysisWithByok(service);
+          await _processSkillAnalysisWithOllama(_ollamaService!);
           break;
         case CopyPasteWorkflowType.taskGeneration:
-          await _processTaskGenerationWithByok(service);
+          await _processTaskGenerationWithOllama(_ollamaService!);
           break;
         case CopyPasteWorkflowType.struggleAnalysis:
-          await _processStruggleAnalysisWithByok(service);
+          await _processStruggleAnalysisWithOllama(_ollamaService!);
           break;
       }
 
       if (mounted) {
+        final message =
+            widget.workflowType == CopyPasteWorkflowType.taskGeneration
+            ? 'Tasks generated successfully!'
+            : 'Successfully generated with AI!';
+
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Successfully generated with AI!'),
-            backgroundColor: AppColors.success,
-          ),
+          SnackBar(content: Text(message), backgroundColor: AppColors.success),
         );
+
+        // Navigate back to see the results
         if (context.canPop()) {
           context.pop();
         } else {
@@ -356,12 +361,13 @@ class _CopyPasteWorkflowScreenState
   }
 
   void _generateStrugglePrompt() {
-    // Generate prompt for struggle analysis
+    // Generate prompt for struggle analysis using user's input
     setState(() {
       _currentPrompt = PromptTemplates.wiseFeedback(
-        skillName:
-            'your skill', // User will provide context in their description
-        struggleDescription: '[Describe your struggle here]',
+        skillName: 'your skill',
+        struggleDescription: _struggleController.text.trim().isEmpty
+            ? '[Describe your struggle here]'
+            : _struggleController.text.trim(),
         taskTitle: 'your current task',
       );
     });
@@ -603,9 +609,9 @@ class _CopyPasteWorkflowScreenState
     }
   }
 
-  // -- BYOK Processing Methods --
+  // -- Ollama Processing Methods --
 
-  Future<void> _processSkillAnalysisWithByok(ByokLlmService service) async {
+  Future<void> _processSkillAnalysisWithOllama(OllamaLlmService service) async {
     final request = SkillAnalysisRequest(
       skillDescription: _skillNameController.text.trim(),
       currentLevel: _currentLevelController.text.trim().isEmpty
@@ -677,7 +683,9 @@ class _CopyPasteWorkflowScreenState
     }
   }
 
-  Future<void> _processTaskGenerationWithByok(ByokLlmService service) async {
+  Future<void> _processTaskGenerationWithOllama(
+    OllamaLlmService service,
+  ) async {
     if (_selectedSkillId == null) {
       throw Exception('No skill selected');
     }
@@ -742,7 +750,9 @@ class _CopyPasteWorkflowScreenState
     }
   }
 
-  Future<void> _processStruggleAnalysisWithByok(ByokLlmService service) async {
+  Future<void> _processStruggleAnalysisWithOllama(
+    OllamaLlmService service,
+  ) async {
     // For now, show a message that this will be implemented
     if (mounted) {
       showDialog(
@@ -813,12 +823,14 @@ class _CopyPasteWorkflowScreenState
       onPopInvokedWithResult: (didPop, result) async {
         if (didPop) return;
         if (await _onWillPop()) {
-          if (mounted) {
-            if (context.canPop()) {
-              context.pop();
-            } else {
-              context.go(AppPaths.home);
-            }
+          if (!mounted) return;
+          // ignore: use_build_context_synchronously
+          if (Navigator.canPop(context)) {
+            // ignore: use_build_context_synchronously
+            Navigator.pop(context);
+          } else {
+            // ignore: use_build_context_synchronously
+            GoRouter.of(context).go(AppPaths.home);
           }
         }
       },
@@ -835,8 +847,8 @@ class _CopyPasteWorkflowScreenState
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // BYOK Mode Banner
-              if (_isByokMode) ...[
+              // Ollama Mode Banner
+              if (_isOllamaMode) ...[
                 Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
@@ -853,7 +865,7 @@ class _CopyPasteWorkflowScreenState
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              'Direct AI Mode Active',
+                              'Ollama Mode Active',
                               style: Theme.of(context).textTheme.titleSmall
                                   ?.copyWith(
                                     color: AppColors.success,
@@ -862,7 +874,7 @@ class _CopyPasteWorkflowScreenState
                             ),
                             const SizedBox(height: 2),
                             Text(
-                              'Using your API key - No copy/paste needed!',
+                              'Using local Ollama - No copy/paste needed!',
                               style: Theme.of(context).textTheme.bodySmall,
                             ),
                           ],
@@ -1112,11 +1124,24 @@ class _CopyPasteWorkflowScreenState
         SizedBox(
           width: double.infinity,
           child: FilledButton.icon(
-            onPressed: _skillNameController.text.trim().isEmpty
+            onPressed: _skillNameController.text.trim().isEmpty || _isProcessing
                 ? null
                 : _generatePrompt,
-            icon: Icon(_isByokMode ? Icons.auto_awesome : Icons.copy),
-            label: Text(_isByokMode ? 'Generate with AI' : 'Generate Prompt'),
+            icon: _isProcessing
+                ? const SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: Colors.white,
+                    ),
+                  )
+                : Icon(_isOllamaMode ? Icons.auto_awesome : Icons.copy),
+            label: Text(
+              _isProcessing
+                  ? 'Analyzing...'
+                  : (_isOllamaMode ? 'Analyze with AI' : 'Generate Prompt'),
+            ),
           ),
         ),
       ],
@@ -1230,11 +1255,27 @@ class _CopyPasteWorkflowScreenState
                 const SizedBox(height: 16),
                 SizedBox(
                   width: double.infinity,
-                  child: FilledButton(
-                    onPressed: _selectedSkillId == null
+                  child: FilledButton.icon(
+                    onPressed: _selectedSkillId == null || _isProcessing
                         ? null
                         : _generatePrompt,
-                    child: const Text('Generate Prompt'),
+                    icon: _isProcessing
+                        ? const SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: Colors.white,
+                            ),
+                          )
+                        : Icon(_isOllamaMode ? Icons.auto_awesome : Icons.copy),
+                    label: Text(
+                      _isProcessing
+                          ? 'Generating...'
+                          : (_isOllamaMode
+                                ? 'Generate Tasks with AI'
+                                : 'Generate Prompt'),
+                    ),
                   ),
                 ),
               ],
@@ -1253,6 +1294,7 @@ class _CopyPasteWorkflowScreenState
         const Text('Describe what you\'re struggling with:'),
         const SizedBox(height: 12),
         TextField(
+          controller: _struggleController,
           decoration: const InputDecoration(
             labelText: 'Your struggle',
             hintText: 'What specific challenge are you facing?',
@@ -1260,14 +1302,32 @@ class _CopyPasteWorkflowScreenState
           ),
           maxLines: 3,
           textCapitalization: TextCapitalization.sentences,
+          onChanged: (_) => setState(() {}),
         ),
         const SizedBox(height: 16),
         SizedBox(
           width: double.infinity,
           child: FilledButton.icon(
-            onPressed: _generatePrompt,
-            icon: Icon(_isByokMode ? Icons.auto_awesome : Icons.copy),
-            label: Text(_isByokMode ? 'Generate with AI' : 'Generate Prompt'),
+            onPressed: _struggleController.text.trim().isEmpty || _isProcessing
+                ? null
+                : _generatePrompt,
+            icon: _isProcessing
+                ? const SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: Colors.white,
+                    ),
+                  )
+                : Icon(_isOllamaMode ? Icons.auto_awesome : Icons.copy),
+            label: Text(
+              _isProcessing
+                  ? 'Getting Feedback...'
+                  : (_isOllamaMode
+                        ? 'Get Feedback with AI'
+                        : 'Generate Prompt'),
+            ),
           ),
         ),
       ],

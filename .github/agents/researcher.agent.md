@@ -9,10 +9,11 @@ tools:
   - usages
   - context7/*
   - codebase
-  - terminal
+  - runInTerminal
+  - readFile
 handoffs:
   - label: Share Findings with Designer
-    agent: ux-designer
+    agent: experience-designer
     prompt: Based on the research findings above, help us design the user experience.
     send: false
   - label: Review Architecture Impact

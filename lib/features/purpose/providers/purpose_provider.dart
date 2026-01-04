@@ -34,7 +34,7 @@ final purposeStatsProvider = FutureProvider<PurposeStats>((ref) async {
       );
     },
     loading: () => const PurposeStats(totalCount: 0, categoryCount: {}),
-    error: (_, __) => const PurposeStats(totalCount: 0, categoryCount: {}),
+    error: (_, _) => const PurposeStats(totalCount: 0, categoryCount: {}),
   );
 });
 

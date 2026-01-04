@@ -3,14 +3,14 @@ import 'package:equatable/equatable.dart';
 /// LLM mode selection
 enum LlmMode {
   copyPaste,
-  byok;
+  ollama;
 
   String get displayName {
     switch (this) {
       case LlmMode.copyPaste:
         return 'Copy-Paste';
-      case LlmMode.byok:
-        return 'Bring Your Own Key';
+      case LlmMode.ollama:
+        return 'Ollama';
     }
   }
 
@@ -18,15 +18,15 @@ enum LlmMode {
     switch (this) {
       case LlmMode.copyPaste:
         return 'copy_paste';
-      case LlmMode.byok:
-        return 'byok';
+      case LlmMode.ollama:
+        return 'ollama';
     }
   }
 
   static LlmMode fromString(String value) {
     switch (value) {
-      case 'byok':
-        return LlmMode.byok;
+      case 'ollama':
+        return LlmMode.ollama;
       case 'copy_paste':
       default:
         return LlmMode.copyPaste;
@@ -107,6 +107,10 @@ class AppSettings extends Equatable {
   final bool streakRecoveryEnabled;
   final bool onboardingCompleted;
 
+  // Ollama-specific settings
+  final String ollamaBaseUrl;
+  final String? ollamaDefaultModel;
+
   const AppSettings({
     this.llmMode = LlmMode.copyPaste,
     this.llmProvider = LlmProvider.openai,
@@ -117,6 +121,8 @@ class AppSettings extends Equatable {
     this.showPurposeReminder = true,
     this.streakRecoveryEnabled = true,
     this.onboardingCompleted = false,
+    this.ollamaBaseUrl = 'http://localhost:11434',
+    this.ollamaDefaultModel,
   });
 
   bool get isDarkMode => themeMode == AppThemeMode.dark;
@@ -132,6 +138,8 @@ class AppSettings extends Equatable {
     bool? showPurposeReminder,
     bool? streakRecoveryEnabled,
     bool? onboardingCompleted,
+    String? ollamaBaseUrl,
+    String? ollamaDefaultModel,
   }) {
     return AppSettings(
       llmMode: llmMode ?? this.llmMode,
@@ -144,6 +152,8 @@ class AppSettings extends Equatable {
       streakRecoveryEnabled:
           streakRecoveryEnabled ?? this.streakRecoveryEnabled,
       onboardingCompleted: onboardingCompleted ?? this.onboardingCompleted,
+      ollamaBaseUrl: ollamaBaseUrl ?? this.ollamaBaseUrl,
+      ollamaDefaultModel: ollamaDefaultModel ?? this.ollamaDefaultModel,
     );
   }
 
@@ -158,5 +168,7 @@ class AppSettings extends Equatable {
     showPurposeReminder,
     streakRecoveryEnabled,
     onboardingCompleted,
+    ollamaBaseUrl,
+    ollamaDefaultModel,
   ];
 }

@@ -190,7 +190,7 @@ class StreakIndicator extends StatelessWidget {
               : Icons.local_fire_department_outlined,
           color: isActiveToday
               ? AppColors.warning
-              : Theme.of(context).colorScheme.onSurface.withOpacity(0.4),
+              : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.4),
           size: 20,
         ),
         const SizedBox(width: 4),
@@ -200,7 +200,9 @@ class StreakIndicator extends StatelessWidget {
             fontWeight: FontWeight.w600,
             color: isActiveToday
                 ? AppColors.warning
-                : Theme.of(context).colorScheme.onSurface.withOpacity(0.4),
+                : Theme.of(
+                    context,
+                  ).colorScheme.onSurface.withValues(alpha: 0.4),
           ),
         ),
         if (bestStreak > currentStreak) ...[

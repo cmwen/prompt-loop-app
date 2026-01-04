@@ -64,6 +64,8 @@ class SettingsNotifier extends StateNotifier<AsyncValue<AppSettings>> {
         'show_purpose_reminder': settings.showPurposeReminder.toString(),
         'streak_recovery_enabled': settings.streakRecoveryEnabled.toString(),
         'onboarding_completed': settings.onboardingCompleted.toString(),
+        'ollama_base_url': settings.ollamaBaseUrl,
+        'ollama_default_model': settings.ollamaDefaultModel ?? '',
       };
       await repository.saveSettings(settingsMap);
       state = AsyncValue.data(settings);
@@ -162,6 +164,20 @@ class SettingsNotifier extends StateNotifier<AsyncValue<AppSettings>> {
       await repository.saveSetting('llm_api_key', '');
     } catch (e) {
       rethrow;
+    }
+  }
+
+  Future<void> setOllamaBaseUrl(String url) async {
+    final current = state.valueOrNull;
+    if (current != null) {
+      await updateSettings(current.copyWith(ollamaBaseUrl: url));
+    }
+  }
+
+  Future<void> setOllamaDefaultModel(String? model) async {
+    final current = state.valueOrNull;
+    if (current != null) {
+      await updateSettings(current.copyWith(ollamaDefaultModel: model));
     }
   }
 }

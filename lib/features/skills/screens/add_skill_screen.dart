@@ -135,14 +135,19 @@ class _AddSkillScreenState extends ConsumerState<AddSkillScreen> {
               const SizedBox(height: 12),
 
               ...SkillLevel.values.map(
-                (level) => RadioListTile<SkillLevel>(
-                  title: Text(level.displayName),
-                  subtitle: Text(_getLevelDescription(level)),
-                  value: level,
-                  groupValue: _selectedLevel,
-                  onChanged: (value) {
-                    setState(() => _selectedLevel = value!);
-                  },
+                (level) => SizedBox(
+                  child: RadioListTile<SkillLevel>(
+                    // ignore: deprecated_member_use
+                    title: Text(level.displayName),
+                    subtitle: Text(_getLevelDescription(level)),
+                    value: level,
+                    // ignore: deprecated_member_use
+                    onChanged: (value) {
+                      if (value != null) {
+                        setState(() => _selectedLevel = value);
+                      }
+                    },
+                  ),
                 ),
               ),
 

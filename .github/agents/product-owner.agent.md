@@ -9,14 +9,15 @@ tools:
   - usages
   - context7/*
   - codebase
-  - terminal
+  - runInTerminal
+  - readFile
 handoffs:
   - label: Research Feasibility
     agent: researcher
     prompt: Please research the technical feasibility and dependencies for the requirements outlined above.
     send: false
   - label: Design UX
-    agent: ux-designer
+    agent: experience-designer
     prompt: Based on the product requirements above, please design the user experience.
     send: false
   - label: Document Requirements

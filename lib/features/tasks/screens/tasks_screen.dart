@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:prompt_loop/core/router/app_router.dart';
+import 'package:prompt_loop/domain/entities/app_settings.dart';
+import 'package:prompt_loop/features/settings/providers/settings_provider.dart';
 import 'package:prompt_loop/features/tasks/providers/tasks_provider.dart';
 import 'package:prompt_loop/shared/widgets/app_card.dart';
 import 'package:prompt_loop/shared/widgets/empty_state.dart';
@@ -15,6 +17,8 @@ class TasksScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final todaysTasks = ref.watch(todaysTasksProvider);
     final upcomingTasks = ref.watch(upcomingTasksProvider);
+    final settings = ref.watch(settingsProvider).valueOrNull;
+    final isOllamaMode = settings?.llmMode == LlmMode.ollama;
 
     return DefaultTabController(
       length: 2,
@@ -146,7 +150,7 @@ class TasksScreen extends ConsumerWidget {
             );
           },
           icon: const Icon(Icons.auto_awesome),
-          label: const Text('Generate Tasks'),
+          label: Text(isOllamaMode ? 'Generate with AI' : 'Generate Tasks'),
         ),
       ),
     );
