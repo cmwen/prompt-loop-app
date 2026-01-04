@@ -349,9 +349,65 @@ flutter pub get
 Check `android/settings.gradle.kts` has correct Kotlin version:
 ```kotlin
 plugins {
-    id("org.jetbrains.kotlin.android") version "1.9.22" apply false
+    id("org.jetbrains.kotlin.android") version "2.3.0" apply false
 }
 ```
+
+### "java.lang.IllegalArgumentException: 25.0.1" during Kotlin compilation
+
+**Cause:** Java 25 is too new and not yet fully supported by Kotlin 2.3.0.
+
+**Fix:** Use Java 17 (the recommended version for Android development):
+```bash
+# macOS/Linux with Homebrew
+brew install openjdk@17
+export JAVA_HOME="/home/linuxbrew/.linuxbrew/opt/openjdk@17"
+export PATH="$JAVA_HOME/bin:$PATH"
+
+# Verify
+java -version  # Should show 17.x.x
+
+# Add to your ~/.zshrc or ~/.bashrc to make permanent
+echo 'export JAVA_HOME="/home/linuxbrew/.linuxbrew/opt/openjdk@17"' >> ~/.bashrc
+echo 'export PATH="$JAVA_HOME/bin:$PATH"' >> ~/.bashrc
+```
+
+### "Installed Build Tools revision X.X.X is corrupted" on WSL
+
+**Cause:** Windows Android SDK accessed through WSL has compatibility issues with .exe and .dll files.
+
+**Solutions:**
+
+**Option 1: Install native Linux Android SDK (recommended)**
+```bash
+# Download Android Command Line Tools for Linux
+# https://developer.android.com/studio#command-line-tools-only
+
+# Install to ~/Android/Sdk
+mkdir -p ~/Android/Sdk/cmdline-tools
+cd ~/Android/Sdk/cmdline-tools
+wget https://dl.google.com/android/repository/commandlinetools-linux-XXXXX_latest.zip
+unzip commandlinetools-linux-XXXXX_latest.zip
+mv cmdline-tools latest
+
+# Install build tools
+~/Android/Sdk/cmdline-tools/latest/bin/sdkmanager "build-tools;36.1.0"
+~/Android/Sdk/cmdline-tools/latest/bin/sdkmanager "platform-tools"
+~/Android/Sdk/cmdline-tools/latest/bin/sdkmanager "platforms;android-36"
+
+# Update Flutter SDK path
+flutter config --android-sdk ~/Android/Sdk
+```
+
+**Option 2: Build on Windows directly (not in WSL)**
+```bash
+# Open Windows Terminal (not WSL)
+cd C:\path\to\your\project
+flutter build apk --release
+```
+
+**Option 3: Use CI/CD for builds**
+The GitHub Actions workflow (`.github/workflows/build.yml`) already handles builds correctly with proper Java 17 and Linux environment.
 
 ---
 
