@@ -54,7 +54,7 @@ jobs:
     
     # Cache pub dependencies for faster builds
     - name: Cache Flutter packages
-      uses: actions/cache@v4
+      uses: actions/cache@v5
       with:
         path: |
           ~/.pub-cache
@@ -120,7 +120,7 @@ jobs:
            build/artifacts/${APP_NAME}-${VERSION}-${RELEASE_TYPE}.aab
     
     - name: Upload build artifacts
-      uses: actions/upload-artifact@v5
+      uses: actions/upload-artifact@v6
       with:
         name: ${{ inputs.release_type }}-${{ inputs.version_name }}
         path: build/artifacts/*
@@ -175,7 +175,7 @@ jobs:
     
     - name: Upload signing credentials
       if: steps.signing.outputs.is_auto_generated == 'true'
-      uses: actions/upload-artifact@v5
+      uses: actions/upload-artifact@v6
       with:
         name: signing-credentials-${{ inputs.version_name }}
         path: build/signing-credentials/*
