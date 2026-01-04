@@ -3,10 +3,9 @@ import 'package:prompt_loop/data/providers/repository_providers.dart';
 import 'package:prompt_loop/domain/entities/task.dart';
 
 /// Provider for all tasks.
-final tasksProvider =
-    NotifierProvider<TasksNotifier, AsyncValue<List<Task>>>(
-      TasksNotifier.new,
-    );
+final tasksProvider = NotifierProvider<TasksNotifier, AsyncValue<List<Task>>>(
+  TasksNotifier.new,
+);
 
 /// Provider for tasks by skill.
 final tasksBySkillProvider = FutureProvider.family<List<Task>, int>((
