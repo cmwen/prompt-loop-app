@@ -8,7 +8,7 @@ tools:
   - fetch
   - githubRepo
   - codebase
-  - terminal
+  - readFile
 handoffs:
   - label: Review Architecture
     agent: architect

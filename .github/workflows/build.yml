@@ -77,9 +77,9 @@ jobs:
           git push
         fi
     
-    # Report linter issues but only fail on errors (not warnings/info)
+    # Report linter issues but only fail on errors (not warnings)
     - name: Analyze code
-      run: flutter analyze --no-fatal-infos --no-fatal-warnings
+      run: flutter analyze
     
     - name: Run tests with coverage
       run: flutter test --coverage --concurrency=$(nproc)

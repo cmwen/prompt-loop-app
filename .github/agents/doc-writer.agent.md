@@ -9,7 +9,8 @@ tools:
   - fetch
   - githubRepo
   - codebase
-  - terminal
+  - runInTerminal
+  - readFile
 ---
 
 # Doc Writer Agent
