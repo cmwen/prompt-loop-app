@@ -168,14 +168,14 @@ class SettingsNotifier extends Notifier<AsyncValue<AppSettings>> {
   }
 
   Future<void> setOllamaBaseUrl(String url) async {
-    final current = state.valueOrNull;
+    final current = state.value;
     if (current != null) {
       await updateSettings(current.copyWith(ollamaBaseUrl: url));
     }
   }
 
   Future<void> setOllamaDefaultModel(String? model) async {
-    final current = state.valueOrNull;
+    final current = state.value;
     if (current != null) {
       await updateSettings(current.copyWith(ollamaDefaultModel: model));
     }

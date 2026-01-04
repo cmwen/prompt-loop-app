@@ -17,7 +17,7 @@ class TasksScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final todaysTasks = ref.watch(todaysTasksProvider);
     final upcomingTasks = ref.watch(upcomingTasksProvider);
-    final settings = ref.watch(settingsProvider).valueOrNull;
+    final settings = ref.watch(settingsProvider).value;
     final isOllamaMode = settings?.llmMode == LlmMode.ollama;
 
     return DefaultTabController(
