@@ -26,8 +26,8 @@ final unreadNotificationCountProvider = FutureProvider<int>((ref) async {
 /// StateNotifier for managing notification read state
 final notificationStateProvider =
     NotifierProvider<NotificationStateNotifier, Set<String>>(
-  NotificationStateNotifier.new,
-);
+      NotificationStateNotifier.new,
+    );
 
 /// Notification state notifier to track read notifications
 class NotificationStateNotifier extends Notifier<Set<String>> {
@@ -38,6 +38,7 @@ class NotificationStateNotifier extends Notifier<Set<String>> {
   Set<String> build() => _localState;
 
   // Safe getter/setter that prefer the provider-managed state when available
+  @override
   Set<String> get state {
     try {
       return super.state;
@@ -46,6 +47,7 @@ class NotificationStateNotifier extends Notifier<Set<String>> {
     }
   }
 
+  @override
   set state(Set<String> value) {
     _localState = value;
     try {
