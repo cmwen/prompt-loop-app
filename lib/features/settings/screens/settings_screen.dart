@@ -9,7 +9,6 @@ import 'package:path_provider/path_provider.dart';
 import 'dart:io';
 import 'package:prompt_loop/core/router/app_router.dart';
 import 'package:prompt_loop/domain/entities/app_settings.dart';
-import 'package:prompt_loop/data/services/byok_llm_service.dart';
 import 'package:prompt_loop/data/services/ollama_llm_service.dart';
 import 'package:prompt_loop/features/settings/providers/settings_provider.dart';
 import 'package:prompt_loop/features/skills/providers/skills_provider.dart';
@@ -86,62 +85,32 @@ class SettingsScreen extends ConsumerWidget {
                   // Ollama Configuration section (only if Ollama mode)
                   if (settingsData.llmMode == LlmMode.ollama) ...[
                     const SizedBox(height: 12),
-                    AppCard(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Ollama Configuration',
-                            style: Theme.of(context).textTheme.titleSmall,
-                          ),
-                          const SizedBox(height: 16),
-                          TextField(
-                            decoration: const InputDecoration(
-                              labelText: 'Server URL',
-                              hintText: 'http://localhost:11434',
-                              border: OutlineInputBorder(),
-                            ),
-                            controller: TextEditingController(
-                              text: settingsData.ollamaBaseUrl,
-                            ),
-                            onChanged: (value) {
-                              if (value.isNotEmpty) {
-                                ref
-                                    .read(settingsProvider.notifier)
-                                    .setOllamaBaseUrl(value);
-                              }
-                            },
-                          ),
-                          const SizedBox(height: 16),
-                          TextField(
-                            decoration: const InputDecoration(
-                              labelText: 'Default Model',
-                              hintText: 'llama3.2, qwen2.5, etc.',
-                              border: OutlineInputBorder(),
-                            ),
-                            controller: TextEditingController(
-                              text: settingsData.ollamaDefaultModel ?? '',
-                            ),
-                            onChanged: (value) {
-                              ref
-                                  .read(settingsProvider.notifier)
-                                  .setOllamaDefaultModel(
-                                    value.isEmpty ? null : value,
-                                  );
-                            },
-                          ),
-                          const SizedBox(height: 16),
-                          ElevatedButton.icon(
-                            onPressed: () => _testOllamaConnection(
-                              context,
-                              ref,
-                              settingsData.ollamaBaseUrl,
-                            ),
-                            icon: const Icon(Icons.wifi_tethering),
-                            label: const Text('Test Connection'),
-                          ),
-                        ],
-                      ),
+                    _OllamaConfigCard(
+                      baseUrl: settingsData.ollamaBaseUrl,
+                      defaultModel: settingsData.ollamaDefaultModel,
+                      onBaseUrlChanged: (value) {
+                        if (value.isNotEmpty) {
+                          ref
+                              .read(settingsProvider.notifier)
+                              .setOllamaBaseUrl(value);
+                        }
+                      },
+                      onModelChanged: (value) {
+                        ref
+                            .read(settingsProvider.notifier)
+                            .setOllamaDefaultModel(
+                              value?.isEmpty ?? true ? null : value,
+                            );
+                      },
+                      onTestConnection: () async {
+                        await _testOllamaConnection(
+                          context,
+                          ref,
+                          settingsData.ollamaBaseUrl,
+                        );
+                        // Refresh models after connection test
+                        // This will trigger a rebuild of the card
+                      },
                     ),
                   ],
                   const SizedBox(height: 24),
@@ -363,44 +332,46 @@ class SettingsScreen extends ConsumerWidget {
     WidgetRef ref,
     String baseUrl,
   ) async {
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (context) => const AlertDialog(
-        content: Row(
-          children: [
-            CircularProgressIndicator(),
-            SizedBox(width: 16),
-            Text('Testing connection...'),
-          ],
-        ),
-      ),
-    );
+    if (!context.mounted) return;
 
     try {
-      final service = OllamaLlmService(baseUrl: baseUrl, model: 'test');
+      final service = OllamaLlmService(
+        baseUrl: baseUrl,
+        model: 'llama2',
+      );
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Testing connection...'),
+          duration: Duration(seconds: 30),
+        ),
+      );
 
       final isConnected = await service.testConnection();
 
-      if (context.mounted) {
-        Navigator.pop(context); // Close loading dialog
+      if (!context.mounted) return;
 
-        if (isConnected) {
-          // Get available models
-          final models = await service.listModels();
+      // Remove the loading snackbar
+      ScaffoldMessenger.of(context).clearSnackBars();
 
+      if (isConnected) {
+        final models = await service.listModels();
+
+        if (context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(
-                'Connected successfully! Found ${models.length} models.',
+                'Connected! Found ${models.length} models.',
               ),
               backgroundColor: AppColors.success,
             ),
           );
-        } else {
+        }
+      } else {
+        if (context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
-              content: Text('Connection failed. Make sure Ollama is running.'),
+              content: Text('Connection failed. Check your Ollama server.'),
               backgroundColor: AppColors.error,
             ),
           );
@@ -408,168 +379,15 @@ class SettingsScreen extends ConsumerWidget {
       }
     } catch (e) {
       if (context.mounted) {
-        Navigator.pop(context); // Close loading dialog
+        ScaffoldMessenger.of(context).clearSnackBars();
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Connection error: $e'),
+            content: Text('Error: $e'),
             backgroundColor: AppColors.error,
           ),
         );
       }
     }
-  }
-
-  void _showApiKeyDialog(BuildContext context, WidgetRef ref) {
-    final controller = TextEditingController();
-    bool isValidating = false;
-    String? validationError;
-
-    showDialog(
-      context: context,
-      builder: (context) => StatefulBuilder(
-        builder: (context, setState) => AlertDialog(
-          title: const Text('Configure API Key'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text(
-                'Enter your OpenAI API key. It will be stored securely and validated.',
-              ),
-              const SizedBox(height: 16),
-              TextField(
-                controller: controller,
-                decoration: const InputDecoration(
-                  labelText: 'API Key',
-                  hintText: 'sk-...',
-                  border: OutlineInputBorder(),
-                ),
-                obscureText: true,
-                onChanged: (_) {
-                  if (validationError != null) {
-                    setState(() => validationError = null);
-                  }
-                },
-              ),
-              if (validationError != null) ...[
-                const SizedBox(height: 8),
-                Row(
-                  children: [
-                    const Icon(Icons.error, color: AppColors.error, size: 16),
-                    const SizedBox(width: 4),
-                    Expanded(
-                      child: Text(
-                        validationError!,
-                        style: Theme.of(
-                          context,
-                        ).textTheme.bodySmall?.copyWith(color: AppColors.error),
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-              if (isValidating) ...[
-                const SizedBox(height: 12),
-                const Row(
-                  children: [
-                    SizedBox(
-                      width: 16,
-                      height: 16,
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    ),
-                    SizedBox(width: 8),
-                    Text('Validating API key...'),
-                  ],
-                ),
-              ],
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: isValidating ? null : () => Navigator.pop(context),
-              child: const Text('Cancel'),
-            ),
-            TextButton(
-              onPressed: isValidating
-                  ? null
-                  : () async {
-                      await ref.read(settingsProvider.notifier).clearApiKey();
-                      if (context.mounted) Navigator.pop(context);
-                    },
-              child: const Text('Clear'),
-            ),
-            FilledButton(
-              onPressed: isValidating
-                  ? null
-                  : () async {
-                      if (controller.text.isEmpty) {
-                        setState(
-                          () => validationError = 'Please enter an API key',
-                        );
-                        return;
-                      }
-
-                      setState(() {
-                        isValidating = true;
-                        validationError = null;
-                      });
-
-                      try {
-                        // Validate the API key
-                        final settingsValue = ref.read(settingsProvider);
-                        final settings = settingsValue.value;
-                        if (settings == null) {
-                          setState(() {
-                            isValidating = false;
-                            validationError = 'Settings not loaded';
-                          });
-                          return;
-                        }
-
-                        final service = ByokLlmService(
-                          apiKey: controller.text.trim(),
-                          provider: settings.llmProvider,
-                          model: settings.llmModel,
-                        );
-
-                        final result = await service.validateApiKey();
-
-                        if (!result.isValid) {
-                          setState(() {
-                            isValidating = false;
-                            validationError =
-                                result.errorMessage ?? 'Validation failed';
-                          });
-                          return;
-                        }
-
-                        // Save if valid
-                        await ref
-                            .read(settingsProvider.notifier)
-                            .saveApiKey(controller.text.trim());
-
-                        if (context.mounted) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text('API key validated and saved!'),
-                              backgroundColor: AppColors.success,
-                            ),
-                          );
-                          Navigator.pop(context);
-                        }
-                      } catch (e) {
-                        setState(() {
-                          isValidating = false;
-                          validationError = 'Validation error: $e';
-                        });
-                      }
-                    },
-              child: const Text('Validate & Save'),
-            ),
-          ],
-        ),
-      ),
-    );
   }
 
   void _showTimePicker(
@@ -742,6 +560,167 @@ class SettingsScreen extends ConsumerWidget {
         ).showSnackBar(SnackBar(content: Text('Error opening link: $e')));
       }
     }
+  }
+}
+
+class _OllamaConfigCard extends ConsumerStatefulWidget {
+  final String baseUrl;
+  final String? defaultModel;
+  final Function(String) onBaseUrlChanged;
+  final Function(String?) onModelChanged;
+  final Future<void> Function() onTestConnection;
+
+  const _OllamaConfigCard({
+    required this.baseUrl,
+    required this.defaultModel,
+    required this.onBaseUrlChanged,
+    required this.onModelChanged,
+    required this.onTestConnection,
+  });
+
+  @override
+  ConsumerState<_OllamaConfigCard> createState() => _OllamaConfigCardState();
+}
+
+class _OllamaConfigCardState extends ConsumerState<_OllamaConfigCard> {
+  late TextEditingController _baseUrlController;
+  List<String> _availableModels = [];
+  bool _loadingModels = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _baseUrlController = TextEditingController(text: widget.baseUrl);
+    _loadModels();
+  }
+
+  @override
+  void didUpdateWidget(_OllamaConfigCard oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.baseUrl != widget.baseUrl) {
+      _baseUrlController.text = widget.baseUrl;
+      // Only reload if URL actually changed meaningfully
+      if (oldWidget.baseUrl.trim() != widget.baseUrl.trim()) {
+        _loadModels();
+      }
+    }
+  }
+
+  Future<void> _loadModels() async {
+    if (!mounted) return;
+
+    setState(() => _loadingModels = true);
+
+    try {
+      final service = OllamaLlmService(
+        baseUrl: widget.baseUrl,
+        model: 'llama2', // Default model for fetching models list
+      );
+      final models = await service.listModels();
+      if (mounted) {
+        setState(() {
+          _availableModels = models;
+          _loadingModels = false;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() => _loadingModels = false);
+      }
+    }
+  }
+
+  @override
+  void dispose() {
+    _baseUrlController.dispose();
+    super.dispose();
+  }
+
+  Widget _buildModelDropdown() {
+    // Build list of models, ensuring selected model is included
+    final items = <DropdownMenuItem<String?>>[
+      const DropdownMenuItem<String?>(
+        value: null,
+        child: Text('None (manual selection)'),
+      ),
+      ..._availableModels.map(
+        (model) => DropdownMenuItem<String?>(
+          value: model,
+          child: Text(model),
+        ),
+      ),
+    ];
+
+    // If selected model isn't in the list, add it
+    if (widget.defaultModel != null &&
+        !_availableModels.contains(widget.defaultModel)) {
+      items.add(
+        DropdownMenuItem<String?>(
+          value: widget.defaultModel,
+          child: Text('${widget.defaultModel} (unavailable)'),
+        ),
+      );
+    }
+
+    return DropdownButtonFormField<String?>(
+      decoration: const InputDecoration(
+        labelText: 'Default Model',
+        hintText: 'Select a model',
+        border: OutlineInputBorder(),
+      ),
+      value: widget.defaultModel,
+      items: items,
+      onChanged: widget.onModelChanged,
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AppCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Ollama Configuration',
+            style: Theme.of(context).textTheme.titleSmall,
+          ),
+          const SizedBox(height: 16),
+          TextField(
+            decoration: const InputDecoration(
+              labelText: 'Server URL',
+              hintText: 'http://localhost:11434',
+              border: OutlineInputBorder(),
+            ),
+            controller: _baseUrlController,
+            onChanged: widget.onBaseUrlChanged,
+          ),
+          const SizedBox(height: 16),
+          _loadingModels
+              ? const Row(
+                  children: [
+                    SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    ),
+                    SizedBox(width: 12),
+                    Text('Loading models...'),
+                  ],
+                )
+              : _buildModelDropdown(),
+          const SizedBox(height: 16),
+          ElevatedButton.icon(
+            onPressed: () async {
+              await widget.onTestConnection();
+              // Reload models after connection test
+              await _loadModels();
+            },
+            icon: const Icon(Icons.wifi_tethering),
+            label: const Text('Test Connection'),
+          ),
+        ],
+      ),
+    );
   }
 }
 

@@ -50,6 +50,9 @@ class _CopyPasteWorkflowScreenState
   // Selected skill and sub-skill for task generation
   int? _selectedSkillId;
   int? _selectedSubSkillId;
+  
+  // For struggle analysis
+  final _struggleController = TextEditingController();
 
   @override
   void initState() {
@@ -89,6 +92,7 @@ class _CopyPasteWorkflowScreenState
     _skillNameController.dispose();
     _currentLevelController.dispose();
     _goalsController.dispose();
+    _struggleController.dispose();
     super.dispose();
   }
 
@@ -152,12 +156,18 @@ class _CopyPasteWorkflowScreenState
       }
 
       if (mounted) {
+        final message = widget.workflowType == CopyPasteWorkflowType.taskGeneration
+            ? 'Tasks generated successfully!'
+            : 'Successfully generated with AI!';
+        
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Successfully generated with AI!'),
+          SnackBar(
+            content: Text(message),
             backgroundColor: AppColors.success,
           ),
         );
+        
+        // Navigate back to see the results
         if (context.canPop()) {
           context.pop();
         } else {
@@ -353,12 +363,13 @@ class _CopyPasteWorkflowScreenState
   }
 
   void _generateStrugglePrompt() {
-    // Generate prompt for struggle analysis
+    // Generate prompt for struggle analysis using user's input
     setState(() {
       _currentPrompt = PromptTemplates.wiseFeedback(
-        skillName:
-            'your skill', // User will provide context in their description
-        struggleDescription: '[Describe your struggle here]',
+        skillName: 'your skill',
+        struggleDescription: _struggleController.text.trim().isEmpty
+            ? '[Describe your struggle here]'
+            : _struggleController.text.trim(),
         taskTitle: 'your current task',
       );
     });
@@ -1113,11 +1124,24 @@ class _CopyPasteWorkflowScreenState
         SizedBox(
           width: double.infinity,
           child: FilledButton.icon(
-            onPressed: _skillNameController.text.trim().isEmpty
+            onPressed: _skillNameController.text.trim().isEmpty || _isProcessing
                 ? null
                 : _generatePrompt,
-            icon: Icon(_isOllamaMode ? Icons.auto_awesome : Icons.copy),
-            label: Text(_isOllamaMode ? 'Generate with AI' : 'Generate Prompt'),
+            icon: _isProcessing
+                ? const SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: Colors.white,
+                    ),
+                  )
+                : Icon(_isOllamaMode ? Icons.auto_awesome : Icons.copy),
+            label: Text(
+              _isProcessing
+                  ? 'Analyzing...'
+                  : (_isOllamaMode ? 'Analyze with AI' : 'Generate Prompt'),
+            ),
           ),
         ),
       ],
@@ -1231,11 +1255,27 @@ class _CopyPasteWorkflowScreenState
                 const SizedBox(height: 16),
                 SizedBox(
                   width: double.infinity,
-                  child: FilledButton(
-                    onPressed: _selectedSkillId == null
+                  child: FilledButton.icon(
+                    onPressed: _selectedSkillId == null || _isProcessing
                         ? null
                         : _generatePrompt,
-                    child: const Text('Generate Prompt'),
+                    icon: _isProcessing
+                        ? const SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: Colors.white,
+                            ),
+                          )
+                        : Icon(_isOllamaMode ? Icons.auto_awesome : Icons.copy),
+                    label: Text(
+                      _isProcessing
+                          ? 'Generating...'
+                          : (_isOllamaMode
+                              ? 'Generate Tasks with AI'
+                              : 'Generate Prompt'),
+                    ),
                   ),
                 ),
               ],
@@ -1254,6 +1294,7 @@ class _CopyPasteWorkflowScreenState
         const Text('Describe what you\'re struggling with:'),
         const SizedBox(height: 12),
         TextField(
+          controller: _struggleController,
           decoration: const InputDecoration(
             labelText: 'Your struggle',
             hintText: 'What specific challenge are you facing?',
@@ -1261,14 +1302,30 @@ class _CopyPasteWorkflowScreenState
           ),
           maxLines: 3,
           textCapitalization: TextCapitalization.sentences,
+          onChanged: (_) => setState(() {}),
         ),
         const SizedBox(height: 16),
         SizedBox(
           width: double.infinity,
           child: FilledButton.icon(
-            onPressed: _generatePrompt,
-            icon: Icon(_isOllamaMode ? Icons.auto_awesome : Icons.copy),
-            label: Text(_isOllamaMode ? 'Generate with AI' : 'Generate Prompt'),
+            onPressed: _struggleController.text.trim().isEmpty || _isProcessing
+                ? null
+                : _generatePrompt,
+            icon: _isProcessing
+                ? const SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: Colors.white,
+                    ),
+                  )
+                : Icon(_isOllamaMode ? Icons.auto_awesome : Icons.copy),
+            label: Text(
+              _isProcessing
+                  ? 'Getting Feedback...'
+                  : (_isOllamaMode ? 'Get Feedback with AI' : 'Generate Prompt'),
+            ),
           ),
         ),
       ],
