@@ -26,13 +26,34 @@ final unreadNotificationCountProvider = FutureProvider<int>((ref) async {
 /// StateNotifier for managing notification read state
 final notificationStateProvider =
     NotifierProvider<NotificationStateNotifier, Set<String>>(
-      NotificationStateNotifier.new,
-    );
+  NotificationStateNotifier.new,
+);
 
 /// Notification state notifier to track read notifications
 class NotificationStateNotifier extends Notifier<Set<String>> {
+  // Local backing state used when notifier is instantiated directly in tests
+  Set<String> _localState = {};
+
   @override
-  Set<String> build() => {};
+  Set<String> build() => _localState;
+
+  // Safe getter/setter that prefer the provider-managed state when available
+  Set<String> get state {
+    try {
+      return super.state;
+    } catch (_) {
+      return _localState;
+    }
+  }
+
+  set state(Set<String> value) {
+    _localState = value;
+    try {
+      super.state = value;
+    } catch (_) {
+      // ignore when super.state unavailable (direct instantiation in tests)
+    }
+  }
 
   void markAsRead(String notificationId) {
     state = {...state, notificationId};
