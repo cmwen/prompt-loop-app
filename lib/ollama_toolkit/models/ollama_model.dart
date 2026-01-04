@@ -309,8 +309,15 @@ class ModelRegistry {
       supportsThinking: false,
       contextWindow: 131072,
       modelFamily: 'gemma',
-      aliases: ['gemma3:270m', 'gemma3:1b', 'gemma3:4b', 'gemma3:12b', 'gemma3:27b'],
-      description: 'Gemma 3 - efficient family from Google DeepMind with vision variants',
+      aliases: [
+        'gemma3:270m',
+        'gemma3:1b',
+        'gemma3:4b',
+        'gemma3:12b',
+        'gemma3:27b',
+      ],
+      description:
+          'Gemma 3 - efficient family from Google DeepMind with vision variants',
       useCases: ['multimodal', 'edge deployment', 'tool calling'],
     ),
     'qwen3': ModelCapabilities(
@@ -319,7 +326,15 @@ class ModelRegistry {
       supportsThinking: true,
       contextWindow: 131072,
       modelFamily: 'qwen',
-      aliases: ['qwen3:0.6b', 'qwen3:1.7b', 'qwen3:4b', 'qwen3:8b', 'qwen3:14b', 'qwen3:30b', 'qwen3:235b'],
+      aliases: [
+        'qwen3:0.6b',
+        'qwen3:1.7b',
+        'qwen3:4b',
+        'qwen3:8b',
+        'qwen3:14b',
+        'qwen3:30b',
+        'qwen3:235b',
+      ],
       description: 'Qwen 3 - latest Qwen series with dense and MoE variants',
       useCases: ['long-context tasks', 'tool calling', 'reasoning'],
     ),
@@ -330,7 +345,8 @@ class ModelRegistry {
       contextWindow: 131072,
       modelFamily: 'ministral',
       aliases: ['ministral-3:3b', 'ministral-3:8b', 'ministral-3:14b'],
-      description: 'Ministral 3 - edge-focused family with vision and tool support (listed on Ollama)',
+      description:
+          'Ministral 3 - edge-focused family with vision and tool support (listed on Ollama)',
       useCases: ['edge deployment', 'multimodal', 'tool calling'],
     ),
   };

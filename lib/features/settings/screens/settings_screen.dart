@@ -10,6 +10,7 @@ import 'dart:io';
 import 'package:prompt_loop/core/router/app_router.dart';
 import 'package:prompt_loop/domain/entities/app_settings.dart';
 import 'package:prompt_loop/data/services/byok_llm_service.dart';
+import 'package:prompt_loop/data/services/ollama_llm_service.dart';
 import 'package:prompt_loop/features/settings/providers/settings_provider.dart';
 import 'package:prompt_loop/features/skills/providers/skills_provider.dart';
 import 'package:prompt_loop/features/tasks/providers/tasks_provider.dart';
@@ -61,15 +62,11 @@ class SettingsScreen extends ConsumerWidget {
                         const SizedBox(height: 12),
                         ...LlmMode.values.map(
                           (mode) => RadioListTile<LlmMode>(
-                            title: Text(
-                              mode == LlmMode.copyPaste
-                                  ? 'Copy-Paste'
-                                  : 'Bring Your Own Key',
-                            ),
+                            title: Text(mode.displayName),
                             subtitle: Text(
                               mode == LlmMode.copyPaste
                                   ? 'Copy prompts to ChatGPT, Claude, etc.'
-                                  : 'Use your own API key for direct integration',
+                                  : 'Use local Ollama server for AI integration',
                             ),
                             value: mode,
                             groupValue: settingsData.llmMode,
@@ -86,101 +83,62 @@ class SettingsScreen extends ConsumerWidget {
                     ),
                   ),
 
-                  // API Key section (only if BYOK mode)
-                  if (settingsData.llmMode == LlmMode.byok) ...[
-                    const SizedBox(height: 12),
-                    AppCard(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            children: [
-                              Expanded(
-                                child: Text(
-                                  'API Key',
-                                  style: Theme.of(context).textTheme.titleSmall,
-                                ),
-                              ),
-                              TextButton(
-                                onPressed: () =>
-                                    _showApiKeyDialog(context, ref),
-                                child: const Text('Configure'),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 4),
-                          FutureBuilder<String?>(
-                            future: ref
-                                .read(settingsProvider.notifier)
-                                .getApiKey(),
-                            builder: (context, snapshot) {
-                              if (snapshot.hasData && snapshot.data != null) {
-                                return Row(
-                                  children: [
-                                    const Icon(
-                                      Icons.check_circle,
-                                      color: AppColors.success,
-                                      size: 16,
-                                    ),
-                                    const SizedBox(width: 4),
-                                    Text(
-                                      'API key configured',
-                                      style: Theme.of(context)
-                                          .textTheme
-                                          .bodySmall
-                                          ?.copyWith(color: AppColors.success),
-                                    ),
-                                  ],
-                                );
-                              }
-                              return Row(
-                                children: [
-                                  const Icon(
-                                    Icons.warning,
-                                    color: AppColors.warning,
-                                    size: 16,
-                                  ),
-                                  const SizedBox(width: 4),
-                                  Text(
-                                    'No API key configured',
-                                    style: Theme.of(context).textTheme.bodySmall
-                                        ?.copyWith(color: AppColors.warning),
-                                  ),
-                                ],
-                              );
-                            },
-                          ),
-                        ],
-                      ),
-                    ),
+                  // Ollama Configuration section (only if Ollama mode)
+                  if (settingsData.llmMode == LlmMode.ollama) ...[
                     const SizedBox(height: 12),
                     AppCard(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'LLM Provider',
+                            'Ollama Configuration',
                             style: Theme.of(context).textTheme.titleSmall,
                           ),
-                          const SizedBox(height: 8),
-                          DropdownButton<LlmProvider>(
-                            value: settingsData.llmProvider,
-                            isExpanded: true,
+                          const SizedBox(height: 16),
+                          TextField(
+                            decoration: const InputDecoration(
+                              labelText: 'Server URL',
+                              hintText: 'http://localhost:11434',
+                              border: OutlineInputBorder(),
+                            ),
+                            controller: TextEditingController(
+                              text: settingsData.ollamaBaseUrl,
+                            ),
                             onChanged: (value) {
-                              if (value != null) {
+                              if (value.isNotEmpty) {
                                 ref
                                     .read(settingsProvider.notifier)
-                                    .setLlmProvider(value);
+                                    .setOllamaBaseUrl(value);
                               }
                             },
-                            items: LlmProvider.values
-                                .map(
-                                  (provider) => DropdownMenuItem(
-                                    value: provider,
-                                    child: Text(provider.name.toUpperCase()),
-                                  ),
-                                )
-                                .toList(),
+                          ),
+                          const SizedBox(height: 16),
+                          TextField(
+                            decoration: const InputDecoration(
+                              labelText: 'Default Model',
+                              hintText: 'llama3.2, qwen2.5, etc.',
+                              border: OutlineInputBorder(),
+                            ),
+                            controller: TextEditingController(
+                              text: settingsData.ollamaDefaultModel ?? '',
+                            ),
+                            onChanged: (value) {
+                              ref
+                                  .read(settingsProvider.notifier)
+                                  .setOllamaDefaultModel(
+                                    value.isEmpty ? null : value,
+                                  );
+                            },
+                          ),
+                          const SizedBox(height: 16),
+                          ElevatedButton.icon(
+                            onPressed: () => _testOllamaConnection(
+                              context,
+                              ref,
+                              settingsData.ollamaBaseUrl,
+                            ),
+                            icon: const Icon(Icons.wifi_tethering),
+                            label: const Text('Test Connection'),
                           ),
                         ],
                       ),
@@ -398,6 +356,67 @@ class SettingsScreen extends ConsumerWidget {
         ],
       ),
     );
+  }
+
+  Future<void> _testOllamaConnection(
+    BuildContext context,
+    WidgetRef ref,
+    String baseUrl,
+  ) async {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => const AlertDialog(
+        content: Row(
+          children: [
+            CircularProgressIndicator(),
+            SizedBox(width: 16),
+            Text('Testing connection...'),
+          ],
+        ),
+      ),
+    );
+
+    try {
+      final service = OllamaLlmService(baseUrl: baseUrl, model: 'test');
+
+      final isConnected = await service.testConnection();
+
+      if (context.mounted) {
+        Navigator.pop(context); // Close loading dialog
+
+        if (isConnected) {
+          // Get available models
+          final models = await service.listModels();
+
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                'Connected successfully! Found ${models.length} models.',
+              ),
+              backgroundColor: AppColors.success,
+            ),
+          );
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Connection failed. Make sure Ollama is running.'),
+              backgroundColor: AppColors.error,
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      if (context.mounted) {
+        Navigator.pop(context); // Close loading dialog
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Connection error: $e'),
+            backgroundColor: AppColors.error,
+          ),
+        );
+      }
+    }
   }
 
   void _showApiKeyDialog(BuildContext context, WidgetRef ref) {

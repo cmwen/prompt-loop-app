@@ -41,6 +41,11 @@ class SettingsRepositoryImpl implements SettingsRepository {
       streakRecoveryEnabled:
           settingsMap['streak_recovery_enabled']?.toLowerCase() != 'false',
       onboardingCompleted: onboardingCompleted,
+      ollamaBaseUrl: settingsMap['ollama_base_url'] ?? 'http://localhost:11434',
+      ollamaDefaultModel:
+          settingsMap['ollama_default_model']?.isNotEmpty == true
+          ? settingsMap['ollama_default_model']
+          : null,
     );
   }
 

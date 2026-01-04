@@ -1,6 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:prompt_loop/data/services/copy_paste_llm_service.dart';
-import 'package:prompt_loop/data/services/byok_llm_service.dart';
+import 'package:prompt_loop/data/services/ollama_llm_service.dart';
 import 'package:prompt_loop/domain/entities/app_settings.dart';
 import 'package:prompt_loop/domain/services/llm_service.dart';
 import 'package:prompt_loop/features/settings/providers/settings_provider.dart';
@@ -20,19 +20,9 @@ final copyPasteWorkflowProvider =
       return CopyPasteWorkflowNotifier();
     });
 
-/// Provider to check if BYOK is configured.
+/// Provider to check if BYOK is configured (deprecated).
 final isByokConfiguredProvider = FutureProvider<bool>((ref) async {
-  final settings = ref.watch(settingsProvider);
-  return settings.when(
-    data: (s) async {
-      if (s.llmMode != LlmMode.byok) return false;
-      final notifier = ref.read(settingsProvider.notifier);
-      final apiKey = await notifier.getApiKey();
-      return apiKey != null && apiKey.isNotEmpty;
-    },
-    loading: () => false,
-    error: (_, __) => false,
-  );
+  return false; // BYOK is no longer supported
 });
 
 /// Notifier for the copy-paste workflow state.
@@ -96,26 +86,33 @@ class CopyPasteWorkflowNotifier extends StateNotifier<CopyPasteWorkflowState> {
   }
 }
 
-/// Provider for creating a BYOK service instance.
-final byokServiceProvider = FutureProvider<ByokLlmService?>((ref) async {
+/// Provider for creating an Ollama service instance.
+final ollamaServiceProvider = FutureProvider<OllamaLlmService?>((ref) async {
   final settings = ref.watch(settingsProvider);
 
   return settings.when(
     data: (s) async {
-      if (s.llmMode != LlmMode.byok) return null;
+      if (s.llmMode != LlmMode.ollama) return null;
 
-      final notifier = ref.read(settingsProvider.notifier);
-      final apiKey = await notifier.getApiKey();
+      final model = s.ollamaDefaultModel;
+      if (model == null || model.isEmpty) return null;
 
-      if (apiKey == null || apiKey.isEmpty) return null;
-
-      return ByokLlmService(
-        apiKey: apiKey,
-        provider: s.llmProvider,
-        model: s.llmModel,
-      );
+      return OllamaLlmService(baseUrl: s.ollamaBaseUrl, model: model);
     },
     loading: () => null,
     error: (_, __) => null,
+  );
+});
+
+/// Provider to check if Ollama is configured.
+final isOllamaConfiguredProvider = FutureProvider<bool>((ref) async {
+  final settings = ref.watch(settingsProvider);
+  return settings.when(
+    data: (s) =>
+        s.llmMode == LlmMode.ollama &&
+        s.ollamaDefaultModel != null &&
+        s.ollamaDefaultModel!.isNotEmpty,
+    loading: () => false,
+    error: (_, __) => false,
   );
 });

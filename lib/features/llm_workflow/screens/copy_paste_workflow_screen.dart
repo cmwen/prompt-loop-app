@@ -7,7 +7,7 @@ import 'package:prompt_loop/core/router/app_router.dart';
 import 'package:prompt_loop/core/theme/app_colors.dart';
 import 'package:prompt_loop/core/constants/llm_constants.dart';
 import 'package:prompt_loop/data/services/copy_paste_llm_service.dart';
-import 'package:prompt_loop/data/services/byok_llm_service.dart';
+import 'package:prompt_loop/data/services/ollama_llm_service.dart';
 import 'package:prompt_loop/domain/services/llm_service.dart';
 import 'package:prompt_loop/domain/entities/task.dart';
 import 'package:prompt_loop/domain/entities/skill.dart';
@@ -39,8 +39,8 @@ class _CopyPasteWorkflowScreenState
   bool _isPromptCopied = false;
   bool _isProcessing = false;
   String? _errorMessage;
-  bool _isByokMode = false;
-  String? _apiKey;
+  bool _isOllamaMode = false;
+  OllamaLlmService? _ollamaService;
 
   // For skill analysis
   final _skillNameController = TextEditingController();
@@ -59,21 +59,26 @@ class _CopyPasteWorkflowScreenState
       setState(() {}); // Rebuild to update button enabled state
     });
 
-    // Check if BYOK is available
-    _checkByokMode();
+    // Check if Ollama is available
+    _checkOllamaMode();
   }
 
-  Future<void> _checkByokMode() async {
+  Future<void> _checkOllamaMode() async {
     final settingsValue = ref.read(settingsProvider);
-    final apiKey = await ref.read(settingsProvider.notifier).getApiKey();
 
     settingsValue.whenData((settings) {
       setState(() {
-        _isByokMode =
-            settings.llmMode == LlmMode.byok &&
-            apiKey != null &&
-            apiKey.isNotEmpty;
-        _apiKey = apiKey;
+        _isOllamaMode =
+            settings.llmMode == LlmMode.ollama &&
+            settings.ollamaDefaultModel != null &&
+            settings.ollamaDefaultModel!.isNotEmpty;
+
+        if (_isOllamaMode) {
+          _ollamaService = OllamaLlmService(
+            baseUrl: settings.ollamaBaseUrl,
+            model: settings.ollamaDefaultModel!,
+          );
+        }
       });
     });
   }
@@ -104,9 +109,9 @@ class _CopyPasteWorkflowScreenState
       _errorMessage = null;
     });
 
-    // If BYOK mode is active, process directly instead of copy-paste
-    if (_isByokMode && _apiKey != null) {
-      _processWithByok();
+    // If Ollama mode is active, process directly instead of copy-paste
+    if (_isOllamaMode && _ollamaService != null) {
+      _processWithOllama();
       return;
     }
 
@@ -123,34 +128,26 @@ class _CopyPasteWorkflowScreenState
     }
   }
 
-  Future<void> _processWithByok() async {
+  Future<void> _processWithOllama() async {
     setState(() {
       _isProcessing = true;
       _errorMessage = null;
     });
 
     try {
-      final settingsValue = ref.read(settingsProvider);
-      final settings = settingsValue.value;
-      if (settings == null) {
-        throw Exception('Settings not loaded');
+      if (_ollamaService == null) {
+        throw Exception('Ollama service not initialized');
       }
-
-      final service = ByokLlmService(
-        apiKey: _apiKey!,
-        provider: settings.llmProvider,
-        model: settings.llmModel,
-      );
 
       switch (widget.workflowType) {
         case CopyPasteWorkflowType.skillAnalysis:
-          await _processSkillAnalysisWithByok(service);
+          await _processSkillAnalysisWithOllama(_ollamaService!);
           break;
         case CopyPasteWorkflowType.taskGeneration:
-          await _processTaskGenerationWithByok(service);
+          await _processTaskGenerationWithOllama(_ollamaService!);
           break;
         case CopyPasteWorkflowType.struggleAnalysis:
-          await _processStruggleAnalysisWithByok(service);
+          await _processStruggleAnalysisWithOllama(_ollamaService!);
           break;
       }
 
@@ -603,9 +600,9 @@ class _CopyPasteWorkflowScreenState
     }
   }
 
-  // -- BYOK Processing Methods --
+  // -- Ollama Processing Methods --
 
-  Future<void> _processSkillAnalysisWithByok(ByokLlmService service) async {
+  Future<void> _processSkillAnalysisWithOllama(OllamaLlmService service) async {
     final request = SkillAnalysisRequest(
       skillDescription: _skillNameController.text.trim(),
       currentLevel: _currentLevelController.text.trim().isEmpty
@@ -677,7 +674,9 @@ class _CopyPasteWorkflowScreenState
     }
   }
 
-  Future<void> _processTaskGenerationWithByok(ByokLlmService service) async {
+  Future<void> _processTaskGenerationWithOllama(
+    OllamaLlmService service,
+  ) async {
     if (_selectedSkillId == null) {
       throw Exception('No skill selected');
     }
@@ -742,7 +741,9 @@ class _CopyPasteWorkflowScreenState
     }
   }
 
-  Future<void> _processStruggleAnalysisWithByok(ByokLlmService service) async {
+  Future<void> _processStruggleAnalysisWithOllama(
+    OllamaLlmService service,
+  ) async {
     // For now, show a message that this will be implemented
     if (mounted) {
       showDialog(
@@ -835,8 +836,8 @@ class _CopyPasteWorkflowScreenState
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // BYOK Mode Banner
-              if (_isByokMode) ...[
+              // Ollama Mode Banner
+              if (_isOllamaMode) ...[
                 Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
@@ -853,7 +854,7 @@ class _CopyPasteWorkflowScreenState
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              'Direct AI Mode Active',
+                              'Ollama Mode Active',
                               style: Theme.of(context).textTheme.titleSmall
                                   ?.copyWith(
                                     color: AppColors.success,
@@ -862,7 +863,7 @@ class _CopyPasteWorkflowScreenState
                             ),
                             const SizedBox(height: 2),
                             Text(
-                              'Using your API key - No copy/paste needed!',
+                              'Using local Ollama - No copy/paste needed!',
                               style: Theme.of(context).textTheme.bodySmall,
                             ),
                           ],
@@ -1115,8 +1116,8 @@ class _CopyPasteWorkflowScreenState
             onPressed: _skillNameController.text.trim().isEmpty
                 ? null
                 : _generatePrompt,
-            icon: Icon(_isByokMode ? Icons.auto_awesome : Icons.copy),
-            label: Text(_isByokMode ? 'Generate with AI' : 'Generate Prompt'),
+            icon: Icon(_isOllamaMode ? Icons.auto_awesome : Icons.copy),
+            label: Text(_isOllamaMode ? 'Generate with AI' : 'Generate Prompt'),
           ),
         ),
       ],
@@ -1266,8 +1267,8 @@ class _CopyPasteWorkflowScreenState
           width: double.infinity,
           child: FilledButton.icon(
             onPressed: _generatePrompt,
-            icon: Icon(_isByokMode ? Icons.auto_awesome : Icons.copy),
-            label: Text(_isByokMode ? 'Generate with AI' : 'Generate Prompt'),
+            icon: Icon(_isOllamaMode ? Icons.auto_awesome : Icons.copy),
+            label: Text(_isOllamaMode ? 'Generate with AI' : 'Generate Prompt'),
           ),
         ),
       ],
