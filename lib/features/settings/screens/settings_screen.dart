@@ -60,22 +60,25 @@ class SettingsScreen extends ConsumerWidget {
                         ),
                         const SizedBox(height: 12),
                         ...LlmMode.values.map(
-                          (mode) => RadioListTile<LlmMode>(
-                            title: Text(mode.displayName),
-                            subtitle: Text(
-                              mode == LlmMode.copyPaste
-                                  ? 'Copy prompts to ChatGPT, Claude, etc.'
-                                  : 'Use local Ollama server for AI integration',
+                          (mode) => SizedBox(
+                            child: RadioListTile<LlmMode>(
+                              // ignore: deprecated_member_use
+                              title: Text(mode.displayName),
+                              subtitle: Text(
+                                mode == LlmMode.copyPaste
+                                    ? 'Copy prompts to ChatGPT, Claude, etc.'
+                                    : 'Use local Ollama server for AI integration',
+                              ),
+                              value: mode,
+                              // ignore: deprecated_member_use
+                              onChanged: (value) {
+                                if (value != null) {
+                                  ref
+                                      .read(settingsProvider.notifier)
+                                      .setLlmMode(value);
+                                }
+                              },
                             ),
-                            value: mode,
-                            groupValue: settingsData.llmMode,
-                            onChanged: (value) {
-                              if (value != null) {
-                                ref
-                                    .read(settingsProvider.notifier)
-                                    .setLlmMode(value);
-                              }
-                            },
                           ),
                         ),
                       ],
@@ -138,18 +141,21 @@ class SettingsScreen extends ConsumerWidget {
                         ),
                         const SizedBox(height: 12),
                         ...AppThemeMode.values.map(
-                          (mode) => RadioListTile<AppThemeMode>(
-                            title: Text(mode.displayName),
-                            subtitle: Text(mode.description),
-                            value: mode,
-                            groupValue: settingsData.themeMode,
-                            onChanged: (value) {
-                              if (value != null) {
-                                ref
-                                    .read(settingsProvider.notifier)
-                                    .setThemeMode(value);
-                              }
-                            },
+                          (mode) => SizedBox(
+                            child: RadioListTile<AppThemeMode>(
+                              // ignore: deprecated_member_use
+                              title: Text(mode.displayName),
+                              subtitle: Text(mode.description),
+                              value: mode,
+                              // ignore: deprecated_member_use
+                              onChanged: (value) {
+                                if (value != null) {
+                                  ref
+                                      .read(settingsProvider.notifier)
+                                      .setThemeMode(value);
+                                }
+                              },
+                            ),
                           ),
                         ),
                       ],

@@ -127,7 +127,7 @@ class SkillDetailScreen extends ConsumerWidget {
                                       height: 60,
                                       child: CircularProgressIndicator(),
                                     ),
-                                    error: (_, __) => CircularProgressWithLabel(
+                                    error: (_, _) => CircularProgressWithLabel(
                                       value: 0.0,
                                       size: 60,
                                     ),
@@ -156,7 +156,7 @@ class SkillDetailScreen extends ConsumerWidget {
                                         isActiveToday: s.practicedToday,
                                       ),
                                       loading: () => const SizedBox.shrink(),
-                                      error: (_, __) => const SizedBox.shrink(),
+                                      error: (_, _) => const SizedBox.shrink(),
                                     ),
                                   ],
                                 ),
@@ -271,7 +271,7 @@ class SkillDetailScreen extends ConsumerWidget {
                         );
                       },
                       loading: () => const SizedBox.shrink(),
-                      error: (_, __) => const SizedBox.shrink(),
+                      error: (_, _) => const SizedBox.shrink(),
                     ),
                     const SizedBox(height: 24),
 

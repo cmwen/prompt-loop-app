@@ -823,12 +823,14 @@ class _CopyPasteWorkflowScreenState
       onPopInvokedWithResult: (didPop, result) async {
         if (didPop) return;
         if (await _onWillPop()) {
-          if (mounted) {
-            if (context.canPop()) {
-              context.pop();
-            } else {
-              context.go(AppPaths.home);
-            }
+          if (!mounted) return;
+          // ignore: use_build_context_synchronously
+          if (Navigator.canPop(context)) {
+            // ignore: use_build_context_synchronously
+            Navigator.pop(context);
+          } else {
+            // ignore: use_build_context_synchronously
+            GoRouter.of(context).go(AppPaths.home);
           }
         }
       },

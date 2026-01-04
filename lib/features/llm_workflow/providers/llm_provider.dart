@@ -100,7 +100,7 @@ final ollamaServiceProvider = FutureProvider<OllamaLlmService?>((ref) async {
       return OllamaLlmService(baseUrl: s.ollamaBaseUrl, model: model);
     },
     loading: () => null,
-    error: (_, __) => null,
+    error: (_, _) => null,
   );
 });
 
@@ -113,6 +113,6 @@ final isOllamaConfiguredProvider = FutureProvider<bool>((ref) async {
         s.ollamaDefaultModel != null &&
         s.ollamaDefaultModel!.isNotEmpty,
     loading: () => false,
-    error: (_, __) => false,
+    error: (_, _) => false,
   );
 });
