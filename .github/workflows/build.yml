@@ -79,10 +79,10 @@ jobs:
     
     # Report linter issues but only fail on errors (not warnings)
     - name: Analyze code
-      run: flutter analyze || true
+      run: flutter analyze --no-fatal-infos --no-fatal-warnings
     
     - name: Run tests with coverage
-      run: flutter test --coverage --concurrency=$(nproc) || true
+      run: flutter test --coverage --concurrency=$(nproc)
     
     - name: Build APK
       run: flutter build apk --release
