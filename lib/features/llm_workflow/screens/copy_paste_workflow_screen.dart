@@ -50,7 +50,7 @@ class _CopyPasteWorkflowScreenState
   // Selected skill and sub-skill for task generation
   int? _selectedSkillId;
   int? _selectedSubSkillId;
-  
+
   // For struggle analysis
   final _struggleController = TextEditingController();
 
@@ -156,17 +156,15 @@ class _CopyPasteWorkflowScreenState
       }
 
       if (mounted) {
-        final message = widget.workflowType == CopyPasteWorkflowType.taskGeneration
+        final message =
+            widget.workflowType == CopyPasteWorkflowType.taskGeneration
             ? 'Tasks generated successfully!'
             : 'Successfully generated with AI!';
-        
+
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(message),
-            backgroundColor: AppColors.success,
-          ),
+          SnackBar(content: Text(message), backgroundColor: AppColors.success),
         );
-        
+
         // Navigate back to see the results
         if (context.canPop()) {
           context.pop();
@@ -1273,8 +1271,8 @@ class _CopyPasteWorkflowScreenState
                       _isProcessing
                           ? 'Generating...'
                           : (_isOllamaMode
-                              ? 'Generate Tasks with AI'
-                              : 'Generate Prompt'),
+                                ? 'Generate Tasks with AI'
+                                : 'Generate Prompt'),
                     ),
                   ),
                 ),
@@ -1324,7 +1322,9 @@ class _CopyPasteWorkflowScreenState
             label: Text(
               _isProcessing
                   ? 'Getting Feedback...'
-                  : (_isOllamaMode ? 'Get Feedback with AI' : 'Generate Prompt'),
+                  : (_isOllamaMode
+                        ? 'Get Feedback with AI'
+                        : 'Generate Prompt'),
             ),
           ),
         ),

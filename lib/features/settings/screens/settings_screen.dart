@@ -335,10 +335,7 @@ class SettingsScreen extends ConsumerWidget {
     if (!context.mounted) return;
 
     try {
-      final service = OllamaLlmService(
-        baseUrl: baseUrl,
-        model: 'llama2',
-      );
+      final service = OllamaLlmService(baseUrl: baseUrl, model: 'llama2');
 
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -360,9 +357,7 @@ class SettingsScreen extends ConsumerWidget {
         if (context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text(
-                'Connected! Found ${models.length} models.',
-              ),
+              content: Text('Connected! Found ${models.length} models.'),
               backgroundColor: AppColors.success,
             ),
           );
@@ -644,10 +639,7 @@ class _OllamaConfigCardState extends ConsumerState<_OllamaConfigCard> {
         child: Text('None (manual selection)'),
       ),
       ..._availableModels.map(
-        (model) => DropdownMenuItem<String?>(
-          value: model,
-          child: Text(model),
-        ),
+        (model) => DropdownMenuItem<String?>(value: model, child: Text(model)),
       ),
     ];
 
@@ -668,7 +660,7 @@ class _OllamaConfigCardState extends ConsumerState<_OllamaConfigCard> {
         hintText: 'Select a model',
         border: OutlineInputBorder(),
       ),
-      value: widget.defaultModel,
+      initialValue: widget.defaultModel,
       items: items,
       onChanged: widget.onModelChanged,
     );
