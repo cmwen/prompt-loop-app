@@ -40,8 +40,10 @@ source ~/.zshrc
 # Check current version
 java -version
 
-# macOS - set Java 17
+# macOS - install and set Java 17
+brew install openjdk@17
 export JAVA_HOME=$(/usr/libexec/java_home -v 17)
+# Add to ~/.zshrc or ~/.bashrc for persistence
 
 # Linux - set Java 17
 sudo update-alternatives --config java
@@ -133,6 +135,37 @@ android {
     ...
 }
 ```
+
+### ❌ Kotlin compilation error: "java.lang.IllegalArgumentException" with Java version
+
+**Cause:** Using Java 25 with Kotlin 2.3.x which doesn't support it yet.
+
+**Fix:**
+**Option 1: Use Java 17 (Recommended)**
+```bash
+# macOS
+brew install openjdk@17
+export JAVA_HOME=$(/usr/libexec/java_home -v 17)
+java -version  # Should show 17.x.x
+
+# Linux
+sudo apt-get install openjdk-17-jdk
+sudo update-alternatives --config java  # Select Java 17
+
+# Verify and rebuild
+flutter clean
+flutter build apk
+```
+
+**Option 2: Wait for Kotlin 2.4.0+ support**
+- Kotlin 2.4.0 is expected to support Java 25
+- This project uses Kotlin 2.3.20 for optimal compatibility
+
+**Why Java 17?**
+- Android development standard
+- Guaranteed Kotlin compatibility
+- Matches CI/CD environment
+- Required by this project's build configuration
 
 ### ❌ Build takes forever (>10 minutes)
 
