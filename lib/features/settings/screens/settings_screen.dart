@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -70,6 +71,7 @@ class SettingsScreen extends ConsumerWidget {
                                     : 'Use local Ollama server for AI integration',
                               ),
                               value: mode,
+                              groupValue: settingsData.llmMode,
                               // ignore: deprecated_member_use
                               onChanged: (value) {
                                 if (value != null) {
@@ -147,6 +149,7 @@ class SettingsScreen extends ConsumerWidget {
                               title: Text(mode.displayName),
                               subtitle: Text(mode.description),
                               value: mode,
+                              groupValue: settingsData.themeMode,
                               // ignore: deprecated_member_use
                               onChanged: (value) {
                                 if (value != null) {
@@ -587,6 +590,7 @@ class _OllamaConfigCardState extends ConsumerState<_OllamaConfigCard> {
   late TextEditingController _baseUrlController;
   List<String> _availableModels = [];
   bool _loadingModels = false;
+  Timer? _debounceTimer;
 
   @override
   void initState() {
@@ -634,6 +638,7 @@ class _OllamaConfigCardState extends ConsumerState<_OllamaConfigCard> {
   @override
   void dispose() {
     _baseUrlController.dispose();
+    _debounceTimer?.cancel();
     super.dispose();
   }
 
@@ -690,7 +695,14 @@ class _OllamaConfigCardState extends ConsumerState<_OllamaConfigCard> {
               border: OutlineInputBorder(),
             ),
             controller: _baseUrlController,
-            onChanged: widget.onBaseUrlChanged,
+            onChanged: (value) {
+              // Cancel previous timer
+              _debounceTimer?.cancel();
+              // Debounce the callback - wait 500ms after user stops typing
+              _debounceTimer = Timer(const Duration(milliseconds: 500), () {
+                widget.onBaseUrlChanged(value);
+              });
+            },
           ),
           const SizedBox(height: 16),
           _loadingModels
