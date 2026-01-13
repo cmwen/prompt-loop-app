@@ -17,8 +17,8 @@ dependencies:
   shimmer: ^3.0.0
 
   # State Management
-  flutter_riverpod: ^3.0.3
-  riverpod_annotation: ^3.0.3
+  flutter_riverpod: ^3.1.0
+  riverpod_annotation: ^4.0.0
 
   # Navigation
   go_router: ^17.0.1
@@ -37,7 +37,7 @@ dependencies:
   intl: ^0.20.1
   uuid: ^4.5.1
   collection: ^1.19.1
-  equatable: ^2.0.7
+  equatable: ^2.0.8
   json_annotation: ^4.9.0
   
   # LLM Integration
@@ -45,8 +45,8 @@ dependencies:
   langchain_openai: ^0.8.0+1
   langchain_google: ^0.7.0+1
   langchain_anthropic: ^0.3.0+1
-  googleai_dart: ^2.0.0
-  openai_dart: ^0.6.0+1
+  googleai_dart: ^3.0.0
+  openai_dart: ^0.6.2
   anthropic_sdk_dart: ^0.3.1
   
   # HTTP
@@ -69,7 +69,7 @@ dev_dependencies:
 
   # Code Generation
   build_runner: ^2.10.4
-  riverpod_generator: ^3.0.3
+  riverpod_generator: ^4.0.0+1
   json_serializable: ^6.11.2
 
   # Testing
