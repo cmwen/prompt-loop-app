@@ -109,10 +109,10 @@ packages:
     dependency: "direct dev"
     description:
       name: build_runner
-      sha256: "110c56ef29b5eb367b4d17fc79375fa8c18a6cd7acd92c05bb3986c17a079057"
+      sha256: ac78098de97893812b7aff1154f29008fa2464cad9e8e7044d39bc905dad4fbc
       url: "https://pub.dev"
     source: hosted
-    version: "2.10.4"
+    version: "2.11.0"
   built_collection:
     dependency: transitive
     description:
@@ -253,10 +253,10 @@ packages:
     dependency: "direct main"
     description:
       name: equatable
-      sha256: "567c64b3cb4cf82397aac55f4f0cbd3ca20d77c6c03bedbc4ceaddc08904aef7"
+      sha256: "3e0141505477fd8ad55d6eb4e7776d3fe8430be8e497ccb1521370c3f21a3e2b"
       url: "https://pub.dev"
     source: hosted
-    version: "2.0.7"
+    version: "2.0.8"
   fake_async:
     dependency: transitive
     description:
@@ -428,10 +428,10 @@ packages:
     dependency: "direct main"
     description:
       name: go_router
-      sha256: eff94d2a6fc79fa8b811dde79c7549808c2346037ee107a1121b4a644c745f2a
+      sha256: "7974313e217a7771557add6ff2238acb63f635317c35fa590d348fb238f00896"
       url: "https://pub.dev"
     source: hosted
-    version: "17.0.1"
+    version: "17.1.0"
   google_identity_services_web:
     dependency: transitive
     description:
@@ -444,10 +444,10 @@ packages:
     dependency: "direct main"
     description:
       name: googleai_dart
-      sha256: "42699e85e0b0974dbd83a78150157c0c4175eb4e97f3c4fe1fa9e2f94cbcd5f0"
+      sha256: "22f8bb5e621067f4c9cd2f88db240bbd7f1ea54b960c55c348104c74794a97a7"
       url: "https://pub.dev"
     source: hosted
-    version: "2.0.0"
+    version: "3.0.0"
   googleapis:
     dependency: transitive
     description:
@@ -572,10 +572,10 @@ packages:
     dependency: "direct main"
     description:
       name: langchain_google
-      sha256: "8cb41cf745f4908e7e851fea9f7fa2ba038dbeee04f3c4b28374323d3e2409fd"
+      sha256: "37e4917c42361149b41fe883e7ff9b0fc136ec7b2c6e4545c6d886e22656ec94"
       url: "https://pub.dev"
     source: hosted
-    version: "0.7.1"
+    version: "0.7.1+2"
   langchain_openai:
     dependency: "direct main"
     description:
@@ -692,10 +692,10 @@ packages:
     dependency: "direct main"
     description:
       name: openai_dart
-      sha256: "0c392263f5aeadf93c9bef0ce9f4781f4ce45de4e4b84858d5508148dfbfd637"
+      sha256: "037605a210cb3b1d8ac72b11a4ace26f25ee9267aaf981d2af1d7f0524adcbf5"
       url: "https://pub.dev"
     source: hosted
-    version: "0.6.1"
+    version: "0.6.2"
   package_config:
     dependency: transitive
     description:
