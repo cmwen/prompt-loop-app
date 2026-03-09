@@ -13,11 +13,11 @@ dependencies:
 
   # UI
   cupertino_icons: ^1.0.8
-  flutter_svg: ^2.0.10+1
+  flutter_svg: ^2.2.4
   shimmer: ^3.0.0
 
   # State Management
-  flutter_riverpod: ^3.2.1
+  flutter_riverpod: ^3.3.1
   riverpod_annotation: ^4.0.2
 
   # Navigation
@@ -45,7 +45,7 @@ dependencies:
   langchain_openai: ^0.8.0+1
   langchain_google: ^0.7.0+1
   langchain_anthropic: ^0.3.0+1
-  googleai_dart: ^3.0.0
+  googleai_dart: ^3.3.1
   openai_dart: ^0.6.2
   anthropic_sdk_dart: ^0.3.1
   
@@ -68,7 +68,7 @@ dev_dependencies:
     sdk: flutter
 
   # Code Generation
-  build_runner: ^2.11.1
+  build_runner: ^2.12.2
   riverpod_generator: ^4.0.3
   json_serializable: ^6.11.4
 
