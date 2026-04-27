@@ -17,8 +17,8 @@ dependencies:
   shimmer: ^3.0.0
 
   # State Management
-  flutter_riverpod: ^3.2.1
-  riverpod_annotation: ^4.0.2
+  flutter_riverpod: ^3.0.3
+  riverpod_annotation: ^3.0.3
 
   # Navigation
   go_router: ^17.1.0
@@ -38,7 +38,7 @@ dependencies:
   uuid: ^4.5.3
   collection: ^1.19.1
   equatable: ^2.0.8
-  json_annotation: ^4.11.0
+  json_annotation: ^4.9.0
   
   # LLM Integration
   langchain: ^0.8.0+1
@@ -69,8 +69,8 @@ dev_dependencies:
 
   # Code Generation
   build_runner: ^2.11.1
-  riverpod_generator: ^4.0.3
-  json_serializable: ^6.11.4
+  riverpod_generator: ^3.0.3
+  json_serializable: ^6.10.0
 
   # Testing
   mocktail: ^1.0.4
