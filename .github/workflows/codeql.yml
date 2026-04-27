@@ -75,11 +75,11 @@ jobs:
         languages: ${{ matrix.language }}
         build-mode: ${{ matrix.build-mode }}
 
-    # Build the Android project to enable CodeQL analysis of Kotlin code
+    # Force a fresh Android build so CodeQL can observe Kotlin/Java compilation.
     - name: Build Android for CodeQL analysis
       if: matrix.language == 'java-kotlin'
       working-directory: android
-      run: ./gradlew assembleDebug --no-daemon
+      run: ./gradlew clean assembleDebug --no-build-cache --rerun-tasks --no-daemon
 
     - name: Perform CodeQL Analysis
       uses: github/codeql-action/analyze@v4
