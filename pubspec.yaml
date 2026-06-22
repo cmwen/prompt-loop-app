@@ -53,11 +53,11 @@ dependencies:
   http: ^1.6.0
 
   # Sharing
-  share_plus: ^12.0.2
+  share_plus: ^13.1.0
   receive_sharing_intent: ^1.8.1
   
   # App Info
-  package_info_plus: ^9.0.1
+  package_info_plus: ^10.1.0
   
   # URL Launcher
   url_launcher: ^6.3.1
