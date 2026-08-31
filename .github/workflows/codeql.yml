@@ -36,7 +36,7 @@ jobs:
     # Java/Kotlin specific setup
     - name: Setup Java
       if: matrix.language == 'java-kotlin'
-      uses: actions/setup-java@v5
+      uses: actions/setup-java@v6
       with:
         distribution: 'temurin'
         java-version: '17'
@@ -56,7 +56,7 @@ jobs:
 
     - name: Cache Flutter packages
       if: matrix.language == 'java-kotlin'
-      uses: actions/cache@v5
+      uses: actions/cache@v6
       with:
         path: |
           ~/.pub-cache
