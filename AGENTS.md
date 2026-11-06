@@ -474,3 +474,5 @@ flutter build apk --analyze-size
 ## Dependency build maintenance
 
 CI pins Flutter 3.44.9 (Dart 3.12). Keep the Flutter version aligned across build, release, prerelease, CodeQL, and Copilot setup workflows. Recent shared_preferences/image_picker require Dart 3.11; sqflite requires Dart 3.12. Diagnose the first failing step before changing package versions. Validate Dependabot updates with pub get, formatting, analyze, tests, and a debug APK build; do not merge on missing checks. Regenerate generated sources when required by this repository.
+
+Keep receive_sharing_intent at 1.8.1 while this app uses the Flutter 3.44 / AGP 8 toolchain. Version 1.9.0 requires Android SDK 37 and AGP 9.2.1; migrate the SDK, Gradle and Kotlin together before lifting the pin.

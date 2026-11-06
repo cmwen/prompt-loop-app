@@ -54,7 +54,7 @@ dependencies:
 
   # Sharing
   share_plus: ^13.3.0
-  receive_sharing_intent: ^1.9.0
+  receive_sharing_intent: 1.8.1 # 1.9 requires Android SDK 37 / AGP 9.2.1
   
   # App Info
   package_info_plus: ^10.2.1
