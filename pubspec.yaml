@@ -41,13 +41,13 @@ dependencies:
   json_annotation: ^4.12.0
   
   # LLM Integration
-  langchain: ^0.9.0
-  langchain_openai: ^0.9.0
-  langchain_google: ^0.8.0
-  langchain_anthropic: ^0.4.0
-  googleai_dart: ^12.0.2
-  openai_dart: ^8.1.0
-  anthropic_sdk_dart: ^7.0.0
+  langchain: ^0.8.0+1
+  langchain_openai: ^0.8.0+1
+  langchain_google: ^0.7.0+1
+  langchain_anthropic: ^0.3.0+1
+  googleai_dart: ^3.6.0
+  openai_dart: ^0.6.2
+  anthropic_sdk_dart: ^0.3.1
   
   # HTTP
   http: ^1.6.0
@@ -68,7 +68,7 @@ dev_dependencies:
     sdk: flutter
 
   # Code Generation
-  build_runner: ^2.16.1
+  build_runner: ^2.15.1
   riverpod_generator: ^4.0.4
   json_serializable: ^6.14.1
 

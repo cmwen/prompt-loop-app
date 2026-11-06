@@ -3,6 +3,8 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:googleai_dart/googleai_dart.dart' as google_ai;
+import 'package:openai_dart/openai_dart.dart' as openai_client;
+import 'package:anthropic_sdk_dart/anthropic_sdk_dart.dart' as anthropic_client;
 import 'package:langchain/langchain.dart';
 import 'package:langchain_anthropic/langchain_anthropic.dart';
 import 'package:langchain_google/langchain_google.dart';
@@ -160,10 +162,10 @@ class ByokLlmService implements LlmService {
         'Rate limited. Please try again later.',
       );
     } on google_ai.ApiException catch (e) {
+      return _handleApiError(e.statusCode, e.message);
+    } on openai_client.OpenAIClientException catch (e) {
       return _handleApiError(e.code, e.message);
-    } on openai.OpenAIClientException catch (e) {
-      return _handleApiError(e.code, e.message);
-    } on anthropic.AnthropicClientException catch (e) {
+    } on anthropic_client.AnthropicClientException catch (e) {
       return _handleApiError(e.code, e.message);
     } on google_ai.TimeoutException {
       return const ApiKeyValidationResult.failure(
